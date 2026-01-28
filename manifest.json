@@ -13,7 +13,7 @@
         "changelog": "Initial release with automatic sync and scheduled task",
         "targetAbi": "10.11.0.0",
         "sourceUrl": "https://github.com/Atilil/jellyfin-plugins/releases/download/watchsync-1.0.0.0/watchsync-1.0.0.0.zip",
-        "checksum": "",
+        "checksum": "6B9BBE0078031FE51874511BF4692205",
         "timestamp": "2025-01-27T00:00:00Z"
       }
     ]
