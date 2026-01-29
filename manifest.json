@@ -25,6 +25,7 @@
     "description": "JellyTag automatically adds quality resolution badges to your media posters and thumbnails. Badges are visible on all clients including web, mobile, TV, and Kodi. Supports configurable badge position, size, and per-image-type settings.",
     "owner": "Atilili",
     "category": "General",
+    "imageUrl": "https://raw.githubusercontent.com/Atilil/jellyfin-plugins/main/Jellytag/Jellyfin.Plugin.JellyTag/JellyTag.png",
     "versions": [
       {
         "version": "1.0.0.0",
