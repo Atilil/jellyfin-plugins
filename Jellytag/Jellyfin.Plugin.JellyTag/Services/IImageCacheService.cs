@@ -33,4 +33,10 @@ public interface IImageCacheService
     /// </summary>
     /// <param name="itemId">The item ID.</param>
     void InvalidateCache(Guid itemId);
+
+    /// <summary>
+    /// Gets cache statistics.
+    /// </summary>
+    /// <returns>A tuple of (FileCount, TotalSizeBytes, OldestEntry, NewestEntry).</returns>
+    (int FileCount, long TotalSizeBytes, DateTime? OldestEntry, DateTime? NewestEntry) GetCacheStats();
 }

@@ -158,6 +158,38 @@ public class ImageCacheService : IImageCacheService
         }
     }
 
+    /// <inheritdoc />
+    public (int FileCount, long TotalSizeBytes, DateTime? OldestEntry, DateTime? NewestEntry) GetCacheStats()
+    {
+        try
+        {
+            if (!Directory.Exists(_cachePath))
+            {
+                return (0, 0, null, null);
+            }
+
+            var jpgFiles = Directory.GetFiles(_cachePath, "*.jpg");
+            var webpFiles = Directory.GetFiles(_cachePath, "*.webp");
+            var allFiles = jpgFiles.Concat(webpFiles).Select(f => new FileInfo(f)).ToArray();
+
+            if (allFiles.Length == 0)
+            {
+                return (0, 0, null, null);
+            }
+
+            var totalSize = allFiles.Sum(f => f.Length);
+            var oldest = allFiles.Min(f => f.LastWriteTimeUtc);
+            var newest = allFiles.Max(f => f.LastWriteTimeUtc);
+
+            return (allFiles.Length, totalSize, oldest, newest);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to get cache stats");
+            return (0, 0, null, null);
+        }
+    }
+
     private string GenerateCacheKey(Guid itemId, string badgeKey, string imageTag)
     {
         var config = Plugin.Instance?.Configuration;

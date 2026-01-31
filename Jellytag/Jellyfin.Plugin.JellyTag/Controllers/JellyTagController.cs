@@ -44,6 +44,23 @@ public partial class JellyTagController : ControllerBase
     }
 
     /// <summary>
+    /// Gets cache statistics.
+    /// </summary>
+    [HttpGet("CacheStats")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public IActionResult GetCacheStats()
+    {
+        var stats = _cacheService.GetCacheStats();
+        return Ok(new
+        {
+            FileCount = stats.FileCount,
+            TotalSizeMB = Math.Round(stats.TotalSizeBytes / (1024.0 * 1024.0), 2),
+            OldestEntry = stats.OldestEntry,
+            NewestEntry = stats.NewestEntry
+        });
+    }
+
+    /// <summary>
     /// Gets the plugin status.
     /// </summary>
     [HttpGet("Status")]

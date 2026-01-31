@@ -814,6 +814,7 @@
                             <button id="ClearCache" type="button" is="emby-button" class="raised button-warning">
                                 <span>Clear Image Cache</span>
                             </button>
+                            <div id="CacheStatsInfo" class="fieldDescription" style="margin-top:.5em;"></div>
                             <div class="fieldDescription">Clear all cached images with badges. Use after changing settings.</div>
                         </div>
                     </div>
@@ -891,6 +892,24 @@
                 var obs = new MutationObserver(toggle);
                 obs.observe(selectEl, { attributes: true, attributeFilter: ['data-value'] });
                 toggle();
+            }
+
+            function loadCacheStats() {
+                ApiClient.ajax({
+                    type: 'GET',
+                    url: ApiClient.getUrl('JellyTag/CacheStats')
+                }).then(function (result) {
+                    var stats = JSON.parse(result);
+                    var el = document.querySelector('#CacheStatsInfo');
+                    if (stats.FileCount > 0) {
+                        var oldest = stats.OldestEntry ? new Date(stats.OldestEntry).toLocaleString() : 'N/A';
+                        el.textContent = stats.FileCount + ' files | ' + stats.TotalSizeMB + ' MB | oldest: ' + oldest;
+                    } else {
+                        el.textContent = 'Cache is empty.';
+                    }
+                }).catch(function() {
+                    document.querySelector('#CacheStatsInfo').textContent = '';
+                });
             }
 
             function loadCustomBadges() {
@@ -1035,6 +1054,7 @@
                     });
 
                     loadCustomBadges();
+                    loadCacheStats();
                 });
 
             document.querySelector('#JellyTagConfigForm')
@@ -1175,6 +1195,7 @@
                         }).then(function () {
                             Dashboard.hideLoadingMsg();
                             Dashboard.alert('Cache cleared successfully.');
+                            loadCacheStats();
                         }).catch(function () {
                             Dashboard.hideLoadingMsg();
                             Dashboard.alert('Failed to clear cache.');
