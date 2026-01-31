@@ -19,8 +19,8 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
 
     private const int MinBadgeSizePercent = 5;
     private const int MaxBadgeSizePercent = 50;
-    private const int MinBadgeMargin = 0;
-    private const int MaxBadgeMargin = 100;
+    private const float MinBadgeMarginPercent = 0f;
+    private const float MaxBadgeMarginPercent = 20f;
 
     private static readonly Dictionary<string, string> BadgeDisplayText = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -106,8 +106,8 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
 
         var videoBadgeSizePercent = Math.Clamp(settings.BadgeSizePercent, MinBadgeSizePercent, MaxBadgeSizePercent);
         var audioBadgeSizePercent = Math.Clamp(settings.AudioBadgeSizePercent > 0 ? settings.AudioBadgeSizePercent : settings.BadgeSizePercent, MinBadgeSizePercent, MaxBadgeSizePercent);
-        var badgeMargin = Math.Clamp(settings.BadgeMargin, MinBadgeMargin, MaxBadgeMargin);
-        var badgeGap = Math.Max(0, settings.BadgeGap);
+        var marginPercent = Math.Clamp(settings.BadgeMarginPercent, MinBadgeMarginPercent, MaxBadgeMarginPercent);
+        var gapPercent = Math.Max(0f, settings.BadgeGapPercent);
         var jpegQuality = Math.Clamp(config.JpegQuality, 50, 100);
 
         using var image = SKBitmap.Decode(originalImage);
@@ -218,15 +218,22 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 languageSourceBitmaps.Reverse();
             }
 
+            // Calculate margin in pixels from percentage of image width
+            var badgeMargin = (int)(image.Width * marginPercent / 100f);
+
+            // Calculate gap: percentage of average badge height per group
+            int ComputeGap(List<SKSizeI> sizes) =>
+                sizes.Count > 0 ? (int)(sizes.Average(s => s.Height) * gapPercent / 100f) : 0;
+
             // Calculate stacking positions
             var videoPositions = videoSizes.Count > 0
-                ? CalculateStackedPositions(image.Width, image.Height, videoSizes, videoPosition, badgeMargin, badgeGap, videoLayout)
+                ? CalculateStackedPositions(image.Width, image.Height, videoSizes, videoPosition, badgeMargin, ComputeGap(videoSizes), videoLayout)
                 : new List<SKPointI>();
             var audioPositions = audioSizes.Count > 0
-                ? CalculateStackedPositions(image.Width, image.Height, audioSizes, audioPosition, badgeMargin, badgeGap, audioLayout)
+                ? CalculateStackedPositions(image.Width, image.Height, audioSizes, audioPosition, badgeMargin, ComputeGap(audioSizes), audioLayout)
                 : new List<SKPointI>();
             var languagePositions = languageSizes.Count > 0
-                ? CalculateStackedPositions(image.Width, image.Height, languageSizes, languagePosition, badgeMargin, badgeGap, languageLayout)
+                ? CalculateStackedPositions(image.Width, image.Height, languageSizes, languagePosition, badgeMargin, ComputeGap(languageSizes), languageLayout)
                 : new List<SKPointI>();
 
             // Draw badges onto image

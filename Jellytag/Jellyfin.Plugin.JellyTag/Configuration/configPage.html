@@ -290,11 +290,11 @@
                                     <div class="fieldDescription">Audio badge width as % of image width.</div>
                                 </div>
                                 <div class="inputContainer">
-                                    <label class="inputLabel inputLabelUnfocused" for="PosterMargin">Margin (px)</label>
-                                    <input id="PosterMargin" type="number" min="0" max="100" step="1" is="emby-input" />
+                                    <label class="inputLabel inputLabelUnfocused" for="PosterMargin">Margin (%)</label>
+                                    <input id="PosterMargin" type="number" min="0" max="20" step="0.5" is="emby-input" />
                                 </div>
                                 <div class="inputContainer">
-                                    <label class="inputLabel inputLabelUnfocused" for="PosterGap">Gap between badges (px)</label>
+                                    <label class="inputLabel inputLabelUnfocused" for="PosterGap">Gap between badges (%)</label>
                                     <input id="PosterGap" type="number" min="0" max="50" step="1" is="emby-input" />
                                     <div class="fieldDescription">Spacing between stacked badges.</div>
                                 </div>
@@ -411,11 +411,11 @@
                                     <input id="ThumbAudioSize" type="number" min="5" max="50" step="1" is="emby-input" />
                                 </div>
                                 <div class="inputContainer">
-                                    <label class="inputLabel inputLabelUnfocused" for="ThumbMargin">Margin (px)</label>
-                                    <input id="ThumbMargin" type="number" min="0" max="100" step="1" is="emby-input" />
+                                    <label class="inputLabel inputLabelUnfocused" for="ThumbMargin">Margin (%)</label>
+                                    <input id="ThumbMargin" type="number" min="0" max="20" step="0.5" is="emby-input" />
                                 </div>
                                 <div class="inputContainer">
-                                    <label class="inputLabel inputLabelUnfocused" for="ThumbGap">Gap between badges (px)</label>
+                                    <label class="inputLabel inputLabelUnfocused" for="ThumbGap">Gap between badges (%)</label>
                                     <input id="ThumbGap" type="number" min="0" max="50" step="1" is="emby-input" />
                                 </div>
                                 <details class="jellytag-sub">
@@ -531,11 +531,11 @@
                                     <input id="BackdropAudioSize" type="number" min="5" max="50" step="1" is="emby-input" />
                                 </div>
                                 <div class="inputContainer">
-                                    <label class="inputLabel inputLabelUnfocused" for="BackdropMargin">Margin (px)</label>
-                                    <input id="BackdropMargin" type="number" min="0" max="100" step="1" is="emby-input" />
+                                    <label class="inputLabel inputLabelUnfocused" for="BackdropMargin">Margin (%)</label>
+                                    <input id="BackdropMargin" type="number" min="0" max="20" step="0.5" is="emby-input" />
                                 </div>
                                 <div class="inputContainer">
-                                    <label class="inputLabel inputLabelUnfocused" for="BackdropGap">Gap between badges (px)</label>
+                                    <label class="inputLabel inputLabelUnfocused" for="BackdropGap">Gap between badges (%)</label>
                                     <input id="BackdropGap" type="number" min="0" max="50" step="1" is="emby-input" />
                                 </div>
                                 <details class="jellytag-sub">
@@ -758,8 +758,8 @@
                         document.querySelector('#PosterBadgeStyle').value = config.PosterSettings.BadgeStyle;
                         document.querySelector('#PosterSize').value = config.PosterSettings.BadgeSizePercent;
                         document.querySelector('#PosterAudioSize').value = config.PosterSettings.AudioBadgeSizePercent;
-                        document.querySelector('#PosterMargin').value = config.PosterSettings.BadgeMargin;
-                        document.querySelector('#PosterGap').value = config.PosterSettings.BadgeGap;
+                        document.querySelector('#PosterMargin').value = config.PosterSettings.BadgeMarginPercent;
+                        document.querySelector('#PosterGap').value = config.PosterSettings.BadgeGapPercent;
                         document.querySelector('#PosterTextBgColor').value = config.PosterSettings.TextBadgeBgColor || '#000000';
                         document.querySelector('#PosterTextBgOpacity').value = config.PosterSettings.TextBadgeBgOpacity;
                         document.querySelector('#PosterTextColor').value = config.PosterSettings.TextBadgeTextColor || '#FFFFFF';
@@ -777,8 +777,8 @@
                         document.querySelector('#ThumbBadgeStyle').value = config.ThumbnailSettings.BadgeStyle;
                         document.querySelector('#ThumbSize').value = config.ThumbnailSettings.BadgeSizePercent;
                         document.querySelector('#ThumbAudioSize').value = config.ThumbnailSettings.AudioBadgeSizePercent;
-                        document.querySelector('#ThumbMargin').value = config.ThumbnailSettings.BadgeMargin;
-                        document.querySelector('#ThumbGap').value = config.ThumbnailSettings.BadgeGap;
+                        document.querySelector('#ThumbMargin').value = config.ThumbnailSettings.BadgeMarginPercent;
+                        document.querySelector('#ThumbGap').value = config.ThumbnailSettings.BadgeGapPercent;
                         document.querySelector('#ThumbTextBgColor').value = config.ThumbnailSettings.TextBadgeBgColor || '#000000';
                         document.querySelector('#ThumbTextBgOpacity').value = config.ThumbnailSettings.TextBadgeBgOpacity;
                         document.querySelector('#ThumbTextColor').value = config.ThumbnailSettings.TextBadgeTextColor || '#FFFFFF';
@@ -796,8 +796,8 @@
                         document.querySelector('#BackdropBadgeStyle').value = config.BackdropSettings.BadgeStyle;
                         document.querySelector('#BackdropSize').value = config.BackdropSettings.BadgeSizePercent;
                         document.querySelector('#BackdropAudioSize').value = config.BackdropSettings.AudioBadgeSizePercent;
-                        document.querySelector('#BackdropMargin').value = config.BackdropSettings.BadgeMargin;
-                        document.querySelector('#BackdropGap').value = config.BackdropSettings.BadgeGap;
+                        document.querySelector('#BackdropMargin').value = config.BackdropSettings.BadgeMarginPercent;
+                        document.querySelector('#BackdropGap').value = config.BackdropSettings.BadgeGapPercent;
                         document.querySelector('#BackdropTextBgColor').value = config.BackdropSettings.TextBadgeBgColor || '#000000';
                         document.querySelector('#BackdropTextBgOpacity').value = config.BackdropSettings.TextBadgeBgOpacity;
                         document.querySelector('#BackdropTextColor').value = config.BackdropSettings.TextBadgeTextColor || '#FFFFFF';
@@ -861,8 +861,8 @@
                             BadgeStyle: document.querySelector('#PosterBadgeStyle').value,
                             BadgeSizePercent: parseInt(document.querySelector('#PosterSize').value, 10),
                             AudioBadgeSizePercent: parseInt(document.querySelector('#PosterAudioSize').value, 10),
-                            BadgeMargin: parseInt(document.querySelector('#PosterMargin').value, 10),
-                            BadgeGap: parseInt(document.querySelector('#PosterGap').value, 10),
+                            BadgeMarginPercent: parseFloat(document.querySelector('#PosterMargin').value),
+                            BadgeGapPercent: parseFloat(document.querySelector('#PosterGap').value),
                             TextBadgeBgColor: document.querySelector('#PosterTextBgColor').value,
                             TextBadgeBgOpacity: parseInt(document.querySelector('#PosterTextBgOpacity').value, 10),
                             TextBadgeTextColor: document.querySelector('#PosterTextColor').value,
@@ -880,8 +880,8 @@
                             BadgeStyle: document.querySelector('#ThumbBadgeStyle').value,
                             BadgeSizePercent: parseInt(document.querySelector('#ThumbSize').value, 10),
                             AudioBadgeSizePercent: parseInt(document.querySelector('#ThumbAudioSize').value, 10),
-                            BadgeMargin: parseInt(document.querySelector('#ThumbMargin').value, 10),
-                            BadgeGap: parseInt(document.querySelector('#ThumbGap').value, 10),
+                            BadgeMarginPercent: parseFloat(document.querySelector('#ThumbMargin').value),
+                            BadgeGapPercent: parseFloat(document.querySelector('#ThumbGap').value),
                             TextBadgeBgColor: document.querySelector('#ThumbTextBgColor').value,
                             TextBadgeBgOpacity: parseInt(document.querySelector('#ThumbTextBgOpacity').value, 10),
                             TextBadgeTextColor: document.querySelector('#ThumbTextColor').value,
@@ -899,8 +899,8 @@
                             BadgeStyle: document.querySelector('#BackdropBadgeStyle').value,
                             BadgeSizePercent: parseInt(document.querySelector('#BackdropSize').value, 10),
                             AudioBadgeSizePercent: parseInt(document.querySelector('#BackdropAudioSize').value, 10),
-                            BadgeMargin: parseInt(document.querySelector('#BackdropMargin').value, 10),
-                            BadgeGap: parseInt(document.querySelector('#BackdropGap').value, 10),
+                            BadgeMarginPercent: parseFloat(document.querySelector('#BackdropMargin').value),
+                            BadgeGapPercent: parseFloat(document.querySelector('#BackdropGap').value),
                             TextBadgeBgColor: document.querySelector('#BackdropTextBgColor').value,
                             TextBadgeBgOpacity: parseInt(document.querySelector('#BackdropTextBgOpacity').value, 10),
                             TextBadgeTextColor: document.querySelector('#BackdropTextColor').value,

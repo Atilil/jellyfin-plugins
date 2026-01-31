@@ -118,14 +118,14 @@ public class ImageTypeSettings
     public int AudioBadgeSizePercent { get; set; }
 
     /// <summary>
-    /// Gets or sets the badge margin from image edge in pixels.
+    /// Gets or sets the badge margin from image edge as a percentage of image width.
     /// </summary>
-    public int BadgeMargin { get; set; }
+    public float BadgeMarginPercent { get; set; }
 
     /// <summary>
-    /// Gets or sets the gap between stacked badges in pixels.
+    /// Gets or sets the gap between stacked badges as a percentage of badge height.
     /// </summary>
-    public int BadgeGap { get; set; }
+    public float BadgeGapPercent { get; set; }
 
     /// <summary>
     /// Gets or sets the badge position.
@@ -229,8 +229,8 @@ public class PluginConfiguration : BasePluginConfiguration
             BadgeSizePercent = 15,
             AudioBadgeSizePercent = 12,
             LanguageBadgeSizePercent = 10,
-            BadgeMargin = 10,
-            BadgeGap = 2,
+            BadgeMarginPercent = 2.0f,
+            BadgeGapPercent = 10.0f,
             BadgePosition = BadgePosition.TopLeft,
             BadgeLayout = BadgeLayout.Vertical,
             BadgeStyle = BadgeStyle.Image,
@@ -246,8 +246,8 @@ public class PluginConfiguration : BasePluginConfiguration
             BadgeSizePercent = 10,
             AudioBadgeSizePercent = 8,
             LanguageBadgeSizePercent = 10,
-            BadgeMargin = 5,
-            BadgeGap = 2,
+            BadgeMarginPercent = 1.0f,
+            BadgeGapPercent = 10.0f,
             BadgePosition = BadgePosition.TopRight,
             BadgeLayout = BadgeLayout.Horizontal,
             BadgeStyle = BadgeStyle.Image,
@@ -263,8 +263,8 @@ public class PluginConfiguration : BasePluginConfiguration
             BadgeSizePercent = 8,
             AudioBadgeSizePercent = 6,
             LanguageBadgeSizePercent = 10,
-            BadgeMargin = 15,
-            BadgeGap = 2,
+            BadgeMarginPercent = 2.5f,
+            BadgeGapPercent = 10.0f,
             BadgePosition = BadgePosition.BottomRight,
             BadgeLayout = BadgeLayout.Horizontal,
             BadgeStyle = BadgeStyle.Image,
