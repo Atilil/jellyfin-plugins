@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.JellyTag.Services;
@@ -16,7 +17,6 @@ public class ImageCacheService : IImageCacheService
     /// <summary>
     /// Initializes a new instance of the <see cref="ImageCacheService"/> class.
     /// </summary>
-    /// <param name="logger">The logger.</param>
     public ImageCacheService(ILogger<ImageCacheService> logger)
     {
         _logger = logger;
@@ -25,9 +25,9 @@ public class ImageCacheService : IImageCacheService
     }
 
     /// <inheritdoc />
-    public Task<Stream?> GetCachedImageAsync(Guid itemId, VideoQuality quality, string imageTag)
+    public Task<Stream?> GetCachedImageAsync(Guid itemId, string badgeKey, string imageTag)
     {
-        var cacheKey = GenerateCacheKey(itemId, quality, imageTag);
+        var cacheKey = GenerateCacheKey(itemId, badgeKey, imageTag);
         var cacheFilePath = GetCachePath(cacheKey);
 
         if (!File.Exists(cacheFilePath))
@@ -35,7 +35,6 @@ public class ImageCacheService : IImageCacheService
             return Task.FromResult<Stream?>(null);
         }
 
-        // Check if cache is expired
         var config = Plugin.Instance?.Configuration;
         var cacheHours = config?.CacheDurationHours ?? 24;
         var fileInfo = new FileInfo(cacheFilePath);
@@ -61,9 +60,9 @@ public class ImageCacheService : IImageCacheService
     }
 
     /// <inheritdoc />
-    public async Task CacheImageAsync(Guid itemId, VideoQuality quality, string imageTag, Stream imageStream)
+    public async Task CacheImageAsync(Guid itemId, string badgeKey, string imageTag, Stream imageStream)
     {
-        var cacheKey = GenerateCacheKey(itemId, quality, imageTag);
+        var cacheKey = GenerateCacheKey(itemId, badgeKey, imageTag);
         var cachePath = GetCachePath(cacheKey);
         var tempPath = cachePath + ".tmp";
 
@@ -71,13 +70,11 @@ public class ImageCacheService : IImageCacheService
         {
             EnsureCacheDirectoryExists();
 
-            // Write to temporary file first to avoid partial reads
             using (var fileStream = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true))
             {
                 await imageStream.CopyToAsync(fileStream).ConfigureAwait(false);
             }
 
-            // Atomic rename to final path
             File.Move(tempPath, cachePath, overwrite: true);
 
             _logger.LogDebug("Cached image for item {ItemId} at {Path}", itemId, cachePath);
@@ -86,7 +83,6 @@ public class ImageCacheService : IImageCacheService
         {
             _logger.LogWarning(ex, "Failed to cache image for item {ItemId}", itemId);
 
-            // Clean up temp file if it exists
             try
             {
                 if (File.Exists(tempPath))
@@ -159,18 +155,16 @@ public class ImageCacheService : IImageCacheService
         }
     }
 
-    private string GenerateCacheKey(Guid itemId, VideoQuality quality, string imageTag)
+    private string GenerateCacheKey(Guid itemId, string badgeKey, string imageTag)
     {
         var config = Plugin.Instance?.Configuration;
-        // Include all config values that affect the output image
-        var configHash = $"{config?.PosterSettings?.BadgePosition}_{config?.PosterSettings?.BadgeSizePercent}_{config?.PosterSettings?.BadgeMargin}_{config?.ThumbnailSettings?.BadgePosition}_{config?.ThumbnailSettings?.BadgeSizePercent}_{config?.ThumbnailSettings?.BadgeMargin}_{config?.BackdropSettings?.BadgePosition}_{config?.BackdropSettings?.BadgeSizePercent}_{config?.BackdropSettings?.BadgeMargin}_{config?.JpegQuality}";
-        var input = $"{itemId}_{quality}_{imageTag}_{configHash}";
+        var configJson = config != null ? JsonSerializer.Serialize(config) : string.Empty;
+        var input = $"{itemId}_{badgeKey}_{imageTag}_{configJson}";
 
-        using var sha = SHA256.Create();
-        var hashBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
+        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(input));
         var hash = Convert.ToHexString(hashBytes)[..16];
 
-        return $"{itemId}_{quality}_{hash}";
+        return $"{itemId}_{hash}";
     }
 
     private string GetCachePath(string cacheKey)

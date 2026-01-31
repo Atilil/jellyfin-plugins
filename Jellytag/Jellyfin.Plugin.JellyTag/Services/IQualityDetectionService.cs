@@ -20,4 +20,11 @@ public interface IQualityDetectionService
     /// <param name="item">The base item.</param>
     /// <returns>The detected video quality.</returns>
     VideoQuality GetQualityFromItem(BaseItem item);
+
+    /// <summary>
+    /// Detects all applicable badges for an item (resolution, HDR, audio, etc.).
+    /// </summary>
+    /// <param name="item">The base item.</param>
+    /// <returns>A list of detected badges.</returns>
+    List<BadgeInfo> DetectAllBadges(BaseItem item);
 }

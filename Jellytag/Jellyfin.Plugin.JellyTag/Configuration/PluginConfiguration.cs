@@ -29,6 +29,59 @@ public enum BadgePosition
 }
 
 /// <summary>
+/// Badge rendering style.
+/// </summary>
+public enum BadgeStyle
+{
+    /// <summary>
+    /// Render badges as PNG images.
+    /// </summary>
+    Image,
+
+    /// <summary>
+    /// Render badges as text with a semi-transparent background.
+    /// </summary>
+    Text
+}
+
+/// <summary>
+/// Language badge display mode.
+/// </summary>
+public enum LanguageBadgeMode
+{
+    /// <summary>
+    /// Do not show language badges.
+    /// </summary>
+    None,
+
+    /// <summary>
+    /// Show badge only for the default audio track language.
+    /// </summary>
+    DefaultOnly,
+
+    /// <summary>
+    /// Show badges for all distinct audio track languages.
+    /// </summary>
+    All
+}
+
+/// <summary>
+/// Badge layout direction for stacking multiple badges.
+/// </summary>
+public enum BadgeLayout
+{
+    /// <summary>
+    /// Badges are arranged horizontally.
+    /// </summary>
+    Horizontal,
+
+    /// <summary>
+    /// Badges are arranged vertically.
+    /// </summary>
+    Vertical
+}
+
+/// <summary>
 /// Settings for a specific image type (poster, thumbnail, backdrop).
 /// </summary>
 public class ImageTypeSettings
@@ -39,19 +92,84 @@ public class ImageTypeSettings
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// Gets or sets the badge size as a percentage of the image width.
+    /// Gets or sets the video badge size (resolution/HDR) as a percentage of the image width.
     /// </summary>
     public int BadgeSizePercent { get; set; }
 
     /// <summary>
-    /// Gets or sets the badge margin in pixels.
+    /// Gets or sets the audio badge size as a percentage of the image width.
+    /// </summary>
+    public int AudioBadgeSizePercent { get; set; }
+
+    /// <summary>
+    /// Gets or sets the badge margin from image edge in pixels.
     /// </summary>
     public int BadgeMargin { get; set; }
+
+    /// <summary>
+    /// Gets or sets the gap between stacked badges in pixels.
+    /// </summary>
+    public int BadgeGap { get; set; }
 
     /// <summary>
     /// Gets or sets the badge position.
     /// </summary>
     public BadgePosition BadgePosition { get; set; }
+
+    /// <summary>
+    /// Gets or sets the badge layout direction (horizontal or vertical stacking).
+    /// </summary>
+    public BadgeLayout BadgeLayout { get; set; }
+
+    /// <summary>
+    /// Gets or sets the badge rendering style (image or text).
+    /// </summary>
+    public BadgeStyle BadgeStyle { get; set; }
+
+    /// <summary>
+    /// Gets or sets the audio badge position. When null, uses the same position as video badges.
+    /// </summary>
+    public BadgePosition? AudioBadgePosition { get; set; }
+
+    /// <summary>
+    /// Gets or sets the audio badge layout direction. When null, uses the same layout as video badges.
+    /// </summary>
+    public BadgeLayout? AudioBadgeLayout { get; set; }
+
+    /// <summary>
+    /// Gets or sets the text badge background color as a hex string (e.g. "#000000").
+    /// </summary>
+    public string TextBadgeBgColor { get; set; } = "#000000";
+
+    /// <summary>
+    /// Gets or sets the text badge background opacity (0-255).
+    /// </summary>
+    public int TextBadgeBgOpacity { get; set; }
+
+    /// <summary>
+    /// Gets or sets the text badge text color as a hex string (e.g. "#FFFFFF").
+    /// </summary>
+    public string TextBadgeTextColor { get; set; } = "#FFFFFF";
+
+    /// <summary>
+    /// Gets or sets the text badge corner radius as a percentage of badge height (0-50).
+    /// </summary>
+    public int TextBadgeCornerRadius { get; set; }
+
+    /// <summary>
+    /// Gets or sets the language badge position. When null, uses the same position as audio badges.
+    /// </summary>
+    public BadgePosition? LanguageBadgePosition { get; set; }
+
+    /// <summary>
+    /// Gets or sets the language badge layout direction. When null, uses the same layout as audio badges.
+    /// </summary>
+    public BadgeLayout? LanguageBadgeLayout { get; set; }
+
+    /// <summary>
+    /// Gets or sets the language badge size as a percentage of the image width.
+    /// </summary>
+    public int LanguageBadgeSizePercent { get; set; }
 }
 
 /// <summary>
@@ -66,33 +184,78 @@ public class PluginConfiguration : BasePluginConfiguration
     {
         Enabled = true;
 
+        // Resolution badges
         Show4K = true;
         Show1080p = true;
         Show720p = false;
         ShowSD = false;
 
+        // HDR badges
+        ShowHdr10 = true;
+        ShowHdr10Plus = true;
+        ShowDolbyVision = true;
+        ShowHlg = false;
+
+        // Audio badges
+        ShowDolbyAtmos = true;
+        ShowDtsX = true;
+        ShowTrueHD = true;
+        ShowDtsHdMa = true;
+        ShowChannelBadge = false;
+
+        // Language badges
+        LanguageBadgeMode = LanguageBadgeMode.None;
+        ShowSubtitleIndicator = true;
+
         PosterSettings = new ImageTypeSettings
         {
             Enabled = true,
             BadgeSizePercent = 15,
+            AudioBadgeSizePercent = 12,
+            LanguageBadgeSizePercent = 10,
             BadgeMargin = 10,
-            BadgePosition = BadgePosition.TopLeft
+            BadgeGap = 2,
+            BadgePosition = BadgePosition.TopLeft,
+            BadgeLayout = BadgeLayout.Vertical,
+            BadgeStyle = BadgeStyle.Image,
+            TextBadgeBgColor = "#000000",
+            TextBadgeBgOpacity = 180,
+            TextBadgeTextColor = "#FFFFFF",
+            TextBadgeCornerRadius = 25
         };
 
         ThumbnailSettings = new ImageTypeSettings
         {
             Enabled = false,
             BadgeSizePercent = 10,
+            AudioBadgeSizePercent = 8,
+            LanguageBadgeSizePercent = 10,
             BadgeMargin = 5,
-            BadgePosition = BadgePosition.TopRight
+            BadgeGap = 2,
+            BadgePosition = BadgePosition.TopRight,
+            BadgeLayout = BadgeLayout.Horizontal,
+            BadgeStyle = BadgeStyle.Image,
+            TextBadgeBgColor = "#000000",
+            TextBadgeBgOpacity = 180,
+            TextBadgeTextColor = "#FFFFFF",
+            TextBadgeCornerRadius = 25
         };
 
         BackdropSettings = new ImageTypeSettings
         {
             Enabled = false,
             BadgeSizePercent = 8,
+            AudioBadgeSizePercent = 6,
+            LanguageBadgeSizePercent = 10,
             BadgeMargin = 15,
-            BadgePosition = BadgePosition.BottomRight
+            BadgeGap = 2,
+            BadgePosition = BadgePosition.BottomRight,
+            BadgeLayout = BadgeLayout.Horizontal,
+            BadgeStyle = BadgeStyle.Image,
+            TextBadgeBgColor = "#000000",
+            TextBadgeBgOpacity = 180,
+            TextBadgeTextColor = "#FFFFFF",
+            TextBadgeCornerRadius = 25
         };
 
         CacheDurationHours = 24;
@@ -103,6 +266,8 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets a value indicating whether the plugin is enabled.
     /// </summary>
     public bool Enabled { get; set; }
+
+    // Resolution badges
 
     /// <summary>
     /// Gets or sets a value indicating whether to show 4K badges.
@@ -123,6 +288,65 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets a value indicating whether to show SD badges.
     /// </summary>
     public bool ShowSD { get; set; }
+
+    // HDR badges
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show HDR10 badges.
+    /// </summary>
+    public bool ShowHdr10 { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show HDR10+ badges.
+    /// </summary>
+    public bool ShowHdr10Plus { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show Dolby Vision badges.
+    /// </summary>
+    public bool ShowDolbyVision { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show HLG badges.
+    /// </summary>
+    public bool ShowHlg { get; set; }
+
+    // Audio badges
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show Dolby Atmos badges.
+    /// </summary>
+    public bool ShowDolbyAtmos { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show DTS:X badges.
+    /// </summary>
+    public bool ShowDtsX { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show TrueHD badges.
+    /// </summary>
+    public bool ShowTrueHD { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show DTS-HD MA badges.
+    /// </summary>
+    public bool ShowDtsHdMa { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show channel layout badges (7.1/5.1/Stereo).
+    /// </summary>
+    public bool ShowChannelBadge { get; set; }
+
+    /// <summary>
+    /// Gets or sets the language badge display mode.
+    /// </summary>
+    public LanguageBadgeMode LanguageBadgeMode { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show VOSTFR indicator when default language has no audio track but subtitles exist.
+    /// </summary>
+    public bool ShowSubtitleIndicator { get; set; }
 
     /// <summary>
     /// Gets or sets the poster (Primary) image settings.
