@@ -15,6 +15,7 @@ public partial class JellyTagController : ControllerBase
 {
     private readonly IImageCacheService _cacheService;
     private readonly IImageOverlayService _overlayService;
+    private readonly IQualityDetectionService _qualityService;
 
     [GeneratedRegex(@"^[a-zA-Z0-9._-]+$")]
     private static partial Regex SafeBadgeKeyRegex();
@@ -22,10 +23,11 @@ public partial class JellyTagController : ControllerBase
     /// <summary>
     /// Initializes a new instance of the <see cref="JellyTagController"/> class.
     /// </summary>
-    public JellyTagController(IImageCacheService cacheService, IImageOverlayService overlayService)
+    public JellyTagController(IImageCacheService cacheService, IImageOverlayService overlayService, IQualityDetectionService qualityService)
     {
         _cacheService = cacheService;
         _overlayService = overlayService;
+        _qualityService = qualityService;
     }
 
     /// <summary>
@@ -37,6 +39,7 @@ public partial class JellyTagController : ControllerBase
     public IActionResult ClearCache()
     {
         _cacheService.ClearCache();
+        _qualityService.ClearBadgeCache();
         return NoContent();
     }
 

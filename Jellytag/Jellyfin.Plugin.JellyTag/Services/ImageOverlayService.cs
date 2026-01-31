@@ -489,13 +489,18 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
     private static SKBitmap TrimTransparent(SKBitmap bitmap)
     {
         int minX = bitmap.Width, minY = bitmap.Height, maxX = 0, maxY = 0;
+        var pixelBytes = bitmap.GetPixelSpan();
+        var bitmapWidth = bitmap.Width;
+        var bytesPerPixel = bitmap.BytesPerPixel;
+        // Alpha is at offset 3 for BGRA/RGBA pixel formats
+        var alphaOffset = 3;
 
         for (int y = 0; y < bitmap.Height; y++)
         {
-            for (int x = 0; x < bitmap.Width; x++)
+            var rowOffset = y * bitmapWidth * bytesPerPixel;
+            for (int x = 0; x < bitmapWidth; x++)
             {
-                var pixel = bitmap.GetPixel(x, y);
-                if (pixel.Alpha > 25)
+                if (pixelBytes[rowOffset + (x * bytesPerPixel) + alphaOffset] > 25)
                 {
                     minX = Math.Min(minX, x);
                     minY = Math.Min(minY, y);
@@ -510,12 +515,12 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             return bitmap;
         }
 
-        var width = maxX - minX + 1;
-        var height = maxY - minY + 1;
+        var trimWidth = maxX - minX + 1;
+        var trimHeight = maxY - minY + 1;
 
-        var trimmed = new SKBitmap(width, height, bitmap.ColorType, bitmap.AlphaType);
+        var trimmed = new SKBitmap(trimWidth, trimHeight, bitmap.ColorType, bitmap.AlphaType);
         using var canvas = new SKCanvas(trimmed);
-        canvas.DrawBitmap(bitmap, SKRect.Create(minX, minY, width, height), SKRect.Create(0, 0, width, height));
+        canvas.DrawBitmap(bitmap, SKRect.Create(minX, minY, trimWidth, trimHeight), SKRect.Create(0, 0, trimWidth, trimHeight));
         canvas.Flush();
 
         bitmap.Dispose();
@@ -687,24 +692,20 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             var padding = width * 0.1f;
             var availableWidth = width - (2 * padding);
 
-            // Start at 70% of height, shrink until text fits
+            // Start at 70% of height, then adjust by ratio if too wide
             var fontSize = height * 0.7f;
-            SKFont font;
-            float textWidth;
-            do
+            var font = new SKFont(SKTypeface.Default, fontSize);
+            font.Edging = SKFontEdging.SubpixelAntialias;
+            var textWidth = font.MeasureText(text);
+            if (textWidth > availableWidth && fontSize > 1f)
             {
+                fontSize *= (availableWidth / textWidth) * 0.95f;
+                fontSize = Math.Max(fontSize, 1f);
+                font.Dispose();
                 font = new SKFont(SKTypeface.Default, fontSize);
                 font.Edging = SKFontEdging.SubpixelAntialias;
                 textWidth = font.MeasureText(text);
-                if (textWidth <= availableWidth || fontSize <= 1f)
-                {
-                    break;
-                }
-
-                font.Dispose();
-                fontSize -= 1f;
             }
-            while (true);
 
             var textX = rect.MidX - (textWidth / 2f);
             var textY = rect.MidY + (fontSize / 3f);

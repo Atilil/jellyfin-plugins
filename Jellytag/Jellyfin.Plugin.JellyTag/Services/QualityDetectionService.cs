@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Jellyfin.Data.Enums;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
@@ -16,6 +17,8 @@ public class QualityDetectionService : IQualityDetectionService
 {
     private readonly ILibraryManager _libraryManager;
     private readonly ILogger<QualityDetectionService> _logger;
+    private readonly ConcurrentDictionary<Guid, (List<BadgeInfo> Badges, DateTime CachedAt)> _badgeCache = new();
+    private static readonly TimeSpan BadgeCacheTtl = TimeSpan.FromMinutes(5);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="QualityDetectionService"/> class.
@@ -115,6 +118,24 @@ public class QualityDetectionService : IQualityDetectionService
     /// <inheritdoc />
     public List<BadgeInfo> DetectAllBadges(BaseItem item)
     {
+        if (_badgeCache.TryGetValue(item.Id, out var cached) && DateTime.UtcNow - cached.CachedAt < BadgeCacheTtl)
+        {
+            return cached.Badges;
+        }
+
+        var badges = DetectAllBadgesInternal(item);
+        _badgeCache[item.Id] = (badges, DateTime.UtcNow);
+        return badges;
+    }
+
+    /// <inheritdoc />
+    public void ClearBadgeCache()
+    {
+        _badgeCache.Clear();
+    }
+
+    private List<BadgeInfo> DetectAllBadgesInternal(BaseItem item)
+    {
         var badges = new List<BadgeInfo>();
 
         if (item is Video video)
@@ -123,7 +144,6 @@ public class QualityDetectionService : IQualityDetectionService
         }
         else
         {
-            // For Series/Season/Folder: use first child
             var query = new InternalItemsQuery
             {
                 ParentId = item.Id,
@@ -133,7 +153,6 @@ public class QualityDetectionService : IQualityDetectionService
             };
             var children = _libraryManager.GetItemList(query);
 
-            // For resolution, pick the best; for HDR/audio, use the first video that has streams
             var bestResolution = VideoQuality.Unknown;
             Video? firstVideoWithStreams = null;
 

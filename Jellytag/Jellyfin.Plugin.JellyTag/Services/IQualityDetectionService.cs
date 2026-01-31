@@ -27,4 +27,9 @@ public interface IQualityDetectionService
     /// <param name="item">The base item.</param>
     /// <returns>A list of detected badges.</returns>
     List<BadgeInfo> DetectAllBadges(BaseItem item);
+
+    /// <summary>
+    /// Clears the in-memory badge detection cache.
+    /// </summary>
+    void ClearBadgeCache();
 }
