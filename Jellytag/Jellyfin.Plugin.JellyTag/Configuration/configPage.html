@@ -77,6 +77,53 @@
             .textBadgeFields.hidden {
                 display: none;
             }
+            .badge-card {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                border: 1px solid rgba(255,255,255,.15);
+                border-radius: .4em;
+                padding: .6em;
+                cursor: pointer;
+                transition: border-color .2s;
+                position: relative;
+            }
+            .badge-card:hover {
+                border-color: #00a4dc;
+            }
+            .badge-card.custom {
+                border-color: #4caf50;
+            }
+            .badge-card img {
+                width: 80px;
+                height: 80px;
+                object-fit: contain;
+            }
+            .badge-card .badge-label {
+                margin-top: .4em;
+                font-size: .85em;
+                text-align: center;
+            }
+            .badge-card .badge-reset {
+                position: absolute;
+                top: 4px;
+                right: 4px;
+                background: #c62828;
+                color: #fff;
+                border: none;
+                border-radius: 50%;
+                width: 20px;
+                height: 20px;
+                font-size: 12px;
+                line-height: 20px;
+                text-align: center;
+                cursor: pointer;
+                display: none;
+                padding: 0;
+            }
+            .badge-card.custom .badge-reset {
+                display: block;
+            }
         </style>
         <div data-role="content">
             <div class="content-primary">
@@ -780,87 +827,60 @@
                     </details>
 
                     <!-- Performance -->
-                    <div class="verticalSection">
-                        <h3 class="sectionTitle">Performance</h3>
+                    <details class="jellytag-section">
+                        <summary>&#x26A1; Performance</summary>
+                        <div class="jellytag-section-body">
 
-                        <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="CacheDurationHours">Cache Duration (hours)</label>
-                            <input id="CacheDurationHours" type="number" min="1" max="720" step="1" is="emby-input" />
-                            <div class="fieldDescription">How long to cache modified images (1-720 hours).</div>
-                        </div>
+                            <div class="inputContainer">
+                                <label class="inputLabel inputLabelUnfocused" for="CacheDurationHours">Cache Duration (hours)</label>
+                                <input id="CacheDurationHours" type="number" min="1" max="720" step="1" is="emby-input" />
+                                <div class="fieldDescription">How long to cache modified images (1-720 hours).</div>
+                            </div>
 
-                        <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="OutputFormat">Output Format</label>
-                            <select id="OutputFormat" is="emby-select">
-                                <option value="Jpeg">JPEG</option>
-                                <option value="WebP">WebP</option>
-                            </select>
-                            <div class="fieldDescription">Image format for badge overlay output.</div>
-                        </div>
+                            <div class="inputContainer">
+                                <label class="inputLabel inputLabelUnfocused" for="OutputFormat">Output Format</label>
+                                <select id="OutputFormat" is="emby-select">
+                                    <option value="Jpeg">JPEG</option>
+                                    <option value="WebP">WebP (experimental)</option>
+                                </select>
+                                <div class="fieldDescription">WebP produces smaller files but may not be supported by all clients (Streamyfin, Fladder, etc.). If images stop displaying on some clients, switch back to JPEG.</div>
+                            </div>
 
-                        <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="JpegQuality">JPEG Quality</label>
-                            <input id="JpegQuality" type="number" min="50" max="100" step="1" is="emby-input" />
-                            <div class="fieldDescription">Output image quality (50-100).</div>
-                        </div>
+                            <div id="JpegQualityContainer" class="inputContainer">
+                                <label class="inputLabel inputLabelUnfocused" for="JpegQuality">JPEG Quality</label>
+                                <input id="JpegQuality" type="number" min="50" max="100" step="1" is="emby-input" />
+                                <div class="fieldDescription">Output image quality (50-100).</div>
+                            </div>
 
-                        <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="WebPQuality">WebP Quality</label>
-                            <input id="WebPQuality" type="number" min="1" max="100" step="1" is="emby-input" />
-                            <div class="fieldDescription">WebP output quality (1-100).</div>
-                        </div>
+                            <div id="WebPQualityContainer" class="inputContainer" style="display:none;">
+                                <label class="inputLabel inputLabelUnfocused" for="WebPQuality">WebP Quality</label>
+                                <input id="WebPQuality" type="number" min="1" max="100" step="1" is="emby-input" />
+                                <div class="fieldDescription">WebP output quality (1-100).</div>
+                            </div>
 
-                        <div class="verticalSection">
-                            <button id="ClearCache" type="button" is="emby-button" class="raised button-warning">
-                                <span>Clear Image Cache</span>
-                            </button>
                             <div id="CacheStatsInfo" class="fieldDescription" style="margin-top:.5em;"></div>
-                            <div class="fieldDescription">Clear all cached images with badges. Use after changing settings.</div>
                         </div>
-                    </div>
+                    </details>
 
                     <!-- Custom Badge Upload -->
-                    <div class="verticalSection">
-                        <h3 class="sectionTitle">Custom Badge Upload</h3>
-                        <div class="fieldDescription" style="margin-bottom: 1em;">Upload custom PNG badges to override the default ones. Select a badge type and upload a PNG file.</div>
+                    <details class="jellytag-section">
+                        <summary>&#x1F3A8; Custom Badges</summary>
+                        <div class="jellytag-section-body">
+                            <div class="fieldDescription" style="margin-bottom: 1em;">Click a badge to upload a custom PNG replacement. Click the reset button to revert to the default.</div>
+                            <div id="BadgeGallery" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:12px;"></div>
+                            <input id="CustomBadgeFile" type="file" accept="image/png" style="display:none;" />
+                        </div>
+                    </details>
 
-                        <div class="inputContainer">
-                            <label class="inputLabel inputLabelUnfocused" for="CustomBadgeKey">Badge Type</label>
-                            <select id="CustomBadgeKey" is="emby-select">
-                                <option value="4k">4K</option>
-                                <option value="1080p">1080p</option>
-                                <option value="720p">720p</option>
-                                <option value="sd">SD</option>
-                                <option value="hdr10">HDR10</option>
-                                <option value="hdr10plus">HDR10+</option>
-                                <option value="dv">Dolby Vision</option>
-                                <option value="hlg">HLG</option>
-                                <option value="atmos">Dolby Atmos</option>
-                                <option value="dtsx">DTS:X</option>
-                                <option value="truehd">TrueHD</option>
-                                <option value="dtshdma">DTS-HD MA</option>
-                                <option value="5.1">5.1</option>
-                                <option value="7.1">7.1</option>
-                                <option value="stereo">Stereo</option>
-                            </select>
-                        </div>
-                        <div class="inputContainer">
-                            <input id="CustomBadgeFile" type="file" accept="image/png" />
-                        </div>
-                        <div style="display: flex; gap: 10px; margin-top: 10px;">
-                            <button id="UploadBadge" type="button" is="emby-button" class="raised button-submit">
-                                <span>Upload Badge</span>
-                            </button>
-                            <button id="ResetBadge" type="button" is="emby-button" class="raised button-warning">
-                                <span>Reset to Default</span>
-                            </button>
-                        </div>
-                        <div id="CustomBadgesList" class="fieldDescription" style="margin-top: 1em;"></div>
-                    </div>
-
-                    <div class="verticalSection">
+                    <div class="verticalSection" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:1em;">
                         <button is="emby-button" type="submit" class="raised button-submit block">
                             <span>Save</span>
+                        </button>
+                        <button id="ClearCache" type="button" is="emby-button" class="raised button-warning">
+                            <span>Clear Image Cache</span>
+                        </button>
+                        <button id="ResetAllSettings" type="button" is="emby-button" class="raised" style="background:#888;">
+                            <span>Reset All Settings to Default</span>
                         </button>
                     </div>
                 </form>
@@ -895,11 +915,11 @@
             }
 
             function loadCacheStats() {
-                ApiClient.ajax({
-                    type: 'GET',
-                    url: ApiClient.getUrl('JellyTag/CacheStats')
-                }).then(function (result) {
-                    var stats = JSON.parse(result);
+                var url = ApiClient.getUrl('JellyTag/CacheStats');
+                var token = ApiClient.accessToken();
+                var headers = {};
+                if (token) { headers['Authorization'] = 'MediaBrowser Token="' + token + '"'; }
+                fetch(url, { headers: headers }).then(function (r) { return r.json(); }).then(function (stats) {
                     var el = document.querySelector('#CacheStatsInfo');
                     if (stats.FileCount > 0) {
                         var oldest = stats.OldestEntry ? new Date(stats.OldestEntry).toLocaleString() : 'N/A';
@@ -912,18 +932,77 @@
                 });
             }
 
-            function loadCustomBadges() {
-                ApiClient.ajax({
-                    type: 'GET',
-                    url: ApiClient.getUrl('JellyTag/CustomBadges')
-                }).then(function (result) {
-                    var list = JSON.parse(result);
-                    var el = document.querySelector('#CustomBadgesList');
-                    if (list.length > 0) {
-                        el.textContent = 'Custom badges: ' + list.join(', ');
-                    } else {
-                        el.textContent = 'No custom badges uploaded.';
-                    }
+            var allBadgeKeys = [
+                { key: '4k', label: '4K' }, { key: '1080p', label: '1080p' }, { key: '720p', label: '720p' }, { key: 'sd', label: 'SD' },
+                { key: 'hdr10', label: 'HDR10' }, { key: 'hdr10plus', label: 'HDR10+' }, { key: 'dv', label: 'Dolby Vision' }, { key: 'hlg', label: 'HLG' },
+                { key: 'atmos', label: 'Atmos' }, { key: 'dtsx', label: 'DTS:X' }, { key: 'truehd', label: 'TrueHD' }, { key: 'dtshdma', label: 'DTS-HD MA' },
+                { key: '5.1', label: '5.1' }, { key: '7.1', label: '7.1' }, { key: 'stereo', label: 'Stereo' }
+            ];
+
+            function toggleOutputQuality() {
+                var fmt = document.querySelector('#OutputFormat').value;
+                document.querySelector('#JpegQualityContainer').style.display = fmt === 'Jpeg' ? '' : 'none';
+                document.querySelector('#WebPQualityContainer').style.display = fmt === 'WebP' ? '' : 'none';
+            }
+
+            function loadBadgeGallery() {
+                var url = ApiClient.getUrl('JellyTag/CustomBadges');
+                var token = ApiClient.accessToken();
+                var headers = {};
+                if (token) { headers['Authorization'] = 'MediaBrowser Token="' + token + '"'; }
+                fetch(url, { headers: headers }).then(function (r) { return r.json(); }).then(function (customList) {
+                    var gallery = document.querySelector('#BadgeGallery');
+                    gallery.innerHTML = '';
+                    allBadgeKeys.forEach(function (b) {
+                        var isCustom = customList.indexOf(b.key) >= 0;
+                        var card = document.createElement('div');
+                        card.className = 'badge-card' + (isCustom ? ' custom' : '');
+                        card.setAttribute('data-badge-key', b.key);
+
+                        var img = document.createElement('img');
+                        var previewUrl = ApiClient.getUrl('JellyTag/BadgePreview/' + b.key);
+                        var token = ApiClient.accessToken();
+                        img.src = previewUrl + '?t=' + Date.now() + (token ? '&api_key=' + token : '');
+                        img.alt = b.label;
+                        card.appendChild(img);
+
+                        var label = document.createElement('div');
+                        label.className = 'badge-label';
+                        label.textContent = b.label + (isCustom ? ' (custom)' : '');
+                        card.appendChild(label);
+
+                        if (isCustom) {
+                            var resetBtn = document.createElement('button');
+                            resetBtn.className = 'badge-reset';
+                            resetBtn.textContent = '\u00D7';
+                            resetBtn.title = 'Reset to default';
+                            resetBtn.addEventListener('click', function (ev) {
+                                ev.stopPropagation();
+                                if (confirm('Reset "' + b.label + '" badge to default?')) {
+                                    Dashboard.showLoadingMsg();
+                                    ApiClient.ajax({
+                                        type: 'DELETE',
+                                        url: ApiClient.getUrl('JellyTag/CustomBadge/' + b.key)
+                                    }).then(function () {
+                                        Dashboard.hideLoadingMsg();
+                                        loadBadgeGallery();
+                                    });
+                                }
+                            });
+                            card.appendChild(resetBtn);
+                        }
+
+                        card.addEventListener('click', function () {
+                            var fileInput = document.querySelector('#CustomBadgeFile');
+                            fileInput.setAttribute('data-target-key', b.key);
+                            fileInput.click();
+                        });
+
+                        gallery.appendChild(card);
+                    });
+                }).catch(function (err) {
+                    console.error('[JellyTag] Failed to load badge gallery:', err);
+                    document.querySelector('#BadgeGallery').textContent = 'Failed to load badges.';
                 });
             }
 
@@ -1035,15 +1114,18 @@
 
                         // Custom Badge Texts
                         var cbtInputs = document.querySelectorAll('#CustomBadgeTextsGrid input[data-badge-key]');
-                        var cbt = config.CustomBadgeTexts || {};
+                        var cbtList = config.CustomBadgeTexts || [];
+                        var cbtMap = {};
+                        cbtList.forEach(function(item) { cbtMap[item.Key] = item.Text; });
                         cbtInputs.forEach(function(el) {
-                            el.value = cbt[el.getAttribute('data-badge-key')] || '';
+                            el.value = cbtMap[el.getAttribute('data-badge-key')] || '';
                         });
 
                         document.querySelector('#CacheDurationHours').value = config.CacheDurationHours;
                         document.querySelector('#OutputFormat').value = config.OutputFormat;
                         document.querySelector('#JpegQuality').value = config.JpegQuality;
                         document.querySelector('#WebPQuality').value = config.WebPQuality;
+                        toggleOutputQuality();
 
                         // Setup badge style toggles after values are loaded
                         setupBadgeStyleToggle(document.querySelector('#PosterBadgeStyle'));
@@ -1053,8 +1135,9 @@
                         Dashboard.hideLoadingMsg();
                     });
 
-                    loadCustomBadges();
+                    loadBadgeGallery();
                     loadCacheStats();
+                    toggleOutputQuality();
                 });
 
             document.querySelector('#JellyTagConfigForm')
@@ -1166,10 +1249,10 @@
                         };
 
                         // Custom Badge Texts
-                        var saveCbt = {};
+                        var saveCbt = [];
                         document.querySelectorAll('#CustomBadgeTextsGrid input[data-badge-key]').forEach(function(el) {
                             var val = el.value.trim();
-                            if (val) { saveCbt[el.getAttribute('data-badge-key')] = val; }
+                            if (val) { saveCbt.push({ Key: el.getAttribute('data-badge-key'), Text: val }); }
                         });
                         config.CustomBadgeTexts = saveCbt;
 
@@ -1203,14 +1286,12 @@
                     }
                 });
 
-            document.querySelector('#UploadBadge')
-                .addEventListener('click', function () {
-                    var fileInput = document.querySelector('#CustomBadgeFile');
-                    var badgeKey = document.querySelector('#CustomBadgeKey').value;
-                    if (!fileInput.files || fileInput.files.length === 0) {
-                        Dashboard.alert('Please select a PNG file.');
-                        return;
-                    }
+            document.querySelector('#CustomBadgeFile')
+                .addEventListener('change', function () {
+                    var fileInput = this;
+                    var badgeKey = fileInput.getAttribute('data-target-key');
+                    if (!badgeKey || !fileInput.files || fileInput.files.length === 0) return;
+
                     var formData = new FormData();
                     formData.append('file', fileInput.files[0]);
 
@@ -1223,39 +1304,45 @@
                     }
                     xhr.onload = function () {
                         Dashboard.hideLoadingMsg();
+                        fileInput.value = '';
                         if (xhr.status === 204) {
                             Dashboard.alert('Badge uploaded successfully.');
-                            fileInput.value = '';
-                            loadCustomBadges();
+                            loadBadgeGallery();
                         } else {
                             Dashboard.alert('Failed to upload badge.');
                         }
                     };
                     xhr.onerror = function () {
                         Dashboard.hideLoadingMsg();
+                        fileInput.value = '';
                         Dashboard.alert('Failed to upload badge.');
                     };
                     xhr.send(formData);
                 });
 
-            document.querySelector('#ResetBadge')
+            document.querySelector('#ResetAllSettings')
                 .addEventListener('click', function () {
-                    var badgeKey = document.querySelector('#CustomBadgeKey').value;
-                    if (confirm('Reset "' + badgeKey + '" badge to default?')) {
+                    if (confirm('Reset ALL settings to their default values? This cannot be undone.')) {
                         Dashboard.showLoadingMsg();
                         ApiClient.ajax({
-                            type: 'DELETE',
-                            url: ApiClient.getUrl('JellyTag/CustomBadge/' + badgeKey)
+                            type: 'POST',
+                            url: ApiClient.getUrl('JellyTag/ResetConfig')
                         }).then(function () {
                             Dashboard.hideLoadingMsg();
-                            Dashboard.alert('Badge reset to default.');
-                            loadCustomBadges();
+                            Dashboard.alert('Settings reset to defaults. Reloading...');
+                            // Reload the page to pick up fresh config
+                            window.location.reload();
                         }).catch(function () {
                             Dashboard.hideLoadingMsg();
-                            Dashboard.alert('No custom badge found for this type.');
+                            Dashboard.alert('Failed to reset settings.');
                         });
                     }
                 });
+
+            // Toggle JPEG/WebP quality visibility on format change
+            var outputFmtEl = document.querySelector('#OutputFormat');
+            outputFmtEl.addEventListener('change', toggleOutputQuality);
+            outputFmtEl.addEventListener('input', toggleOutputQuality);
         </script>
     </div>
 </body>

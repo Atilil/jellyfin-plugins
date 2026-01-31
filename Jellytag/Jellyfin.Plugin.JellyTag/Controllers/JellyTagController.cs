@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Jellyfin.Plugin.JellyTag.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -258,5 +259,65 @@ public partial class JellyTagController : ControllerBase
             .ToArray();
 
         return Ok(files);
+    }
+
+    /// <summary>
+    /// Serves a badge preview image. Returns custom badge if present, otherwise embedded default.
+    /// </summary>
+    [HttpGet("BadgePreview/{badgeKey}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public IActionResult GetBadgePreview(string badgeKey)
+    {
+        if (!SafeBadgeKeyRegex().IsMatch(badgeKey))
+        {
+            return BadRequest("Invalid badge key");
+        }
+
+        // Check custom badge first
+        var dataFolder = Plugin.Instance?.DataFolderPath;
+        if (!string.IsNullOrEmpty(dataFolder))
+        {
+            var customPath = Path.Combine(dataFolder, "custom-badges", $"badge-{badgeKey}.png");
+            if (System.IO.File.Exists(customPath))
+            {
+                return PhysicalFile(customPath, "image/png");
+            }
+        }
+
+        // Fall back to embedded resource
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = assembly.GetManifestResourceNames()
+            .FirstOrDefault(r => r.EndsWith($"badge-{badgeKey}.png", StringComparison.OrdinalIgnoreCase));
+
+        if (resourceName == null)
+        {
+            return NotFound();
+        }
+
+        var stream = assembly.GetManifestResourceStream(resourceName);
+        return File(stream!, "image/png");
+    }
+
+    /// <summary>
+    /// Resets all plugin configuration to defaults.
+    /// </summary>
+    [HttpPost("ResetConfig")]
+    [Authorize(Policy = "RequiresElevation")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public IActionResult ResetConfig()
+    {
+        var plugin = Plugin.Instance;
+        if (plugin == null)
+        {
+            return BadRequest("Plugin not loaded");
+        }
+
+        plugin.UpdateConfiguration(new Configuration.PluginConfiguration());
+        _cacheService.ClearCache();
+        _qualityService.ClearBadgeCache();
+        _overlayService.ReloadBadges();
+
+        return NoContent();
     }
 }

@@ -310,7 +310,7 @@ public class PluginConfiguration : BasePluginConfiguration
             TextBadgeCornerRadius = 25
         };
 
-        CustomBadgeTexts = new Dictionary<string, string>();
+        CustomBadgeTexts = new List<BadgeTextOverride>();
 
         CacheDurationHours = 24;
         JpegQuality = 90;
@@ -432,7 +432,7 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>
     /// Gets or sets custom display text overrides per badge key.
     /// </summary>
-    public Dictionary<string, string> CustomBadgeTexts { get; set; }
+    public List<BadgeTextOverride> CustomBadgeTexts { get; set; }
 
     /// <summary>
     /// Gets or sets the cache duration in hours.
@@ -453,4 +453,20 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets the WebP quality for output images (1-100).
     /// </summary>
     public int WebPQuality { get; set; }
+}
+
+/// <summary>
+/// Represents a custom display text override for a badge.
+/// </summary>
+public class BadgeTextOverride
+{
+    /// <summary>
+    /// Gets or sets the badge key (e.g. "4k", "atmos").
+    /// </summary>
+    public string Key { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the custom display text.
+    /// </summary>
+    public string Text { get; set; } = string.Empty;
 }

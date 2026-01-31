@@ -2,7 +2,6 @@ using System.Reflection;
 using Jellyfin.Plugin.JellyTag.Configuration;
 using Microsoft.Extensions.Logging;
 using SkiaSharp;
-using Svg.Skia;
 
 namespace Jellyfin.Plugin.JellyTag.Services;
 
@@ -227,15 +226,41 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             int ComputeGap(List<SKSizeI> sizes) =>
                 sizes.Count > 0 ? (int)(sizes.Average(s => s.Height) * gapPercent / 100f) : 0;
 
-            // Calculate stacking positions
+            // Calculate vertical extent of a badge group (always height-based for stacking rows)
+            int GroupVerticalExtent(List<SKSizeI> sizes, int groupGap, BadgeLayout lay) =>
+                sizes.Count == 0 ? 0 : lay == BadgeLayout.Horizontal
+                    ? sizes.Max(s => s.Height) + groupGap
+                    : sizes.Sum(s => s.Height) + (sizes.Count - 1) * groupGap + groupGap;
+
+            // Calculate stacking positions, offsetting groups that share the same corner
+            var videoGap = ComputeGap(videoSizes);
             var videoPositions = videoSizes.Count > 0
-                ? CalculateStackedPositions(image.Width, image.Height, videoSizes, videoPosition, badgeMargin, ComputeGap(videoSizes), videoLayout)
+                ? CalculateStackedPositions(image.Width, image.Height, videoSizes, videoPosition, badgeMargin, videoGap, videoLayout)
                 : new List<SKPointI>();
+
+            // Audio: offset vertically if same corner as video
+            var audioGap = ComputeGap(audioSizes);
+            var audioPriorExtent = (audioPosition == videoPosition)
+                ? GroupVerticalExtent(videoSizes, videoGap, videoLayout) : 0;
             var audioPositions = audioSizes.Count > 0
-                ? CalculateStackedPositions(image.Width, image.Height, audioSizes, audioPosition, badgeMargin, ComputeGap(audioSizes), audioLayout)
+                ? CalculateStackedPositions(image.Width, image.Height, audioSizes, audioPosition, badgeMargin, audioGap, audioLayout, audioPriorExtent)
                 : new List<SKPointI>();
+
+            // Language: offset vertically if same corner as video and/or audio
+            var languageGap = ComputeGap(languageSizes);
+            var languagePriorExtent = 0;
+            if (languagePosition == videoPosition)
+            {
+                languagePriorExtent += GroupVerticalExtent(videoSizes, videoGap, videoLayout);
+            }
+
+            if (languagePosition == audioPosition)
+            {
+                languagePriorExtent += GroupVerticalExtent(audioSizes, audioGap, audioLayout);
+            }
+
             var languagePositions = languageSizes.Count > 0
-                ? CalculateStackedPositions(image.Width, image.Height, languageSizes, languagePosition, badgeMargin, ComputeGap(languageSizes), languageLayout)
+                ? CalculateStackedPositions(image.Width, image.Height, languageSizes, languagePosition, badgeMargin, languageGap, languageLayout, languagePriorExtent)
                 : new List<SKPointI>();
 
             // Draw badges onto image
@@ -435,7 +460,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         }
     }
 
-    private const int SvgRasterWidth = 512;
+
 
     private void LoadBadges()
     {
@@ -456,7 +481,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             }
 
             var fileName = resourceName[(assetsIdx + assetsMarker.Length)..];
-            if (fileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || fileName.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
+            if (fileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
             {
                 var baseName = Path.GetFileNameWithoutExtension(fileName);
                 badgeBaseNames.Add(baseName);
@@ -467,28 +492,8 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         {
             var pngFileName = baseName + ".png";
 
-            // Check for custom badge override first (SVG then PNG)
-            var customSvgPath = GetCustomBadgePath(baseName + ".svg");
+            // Check for custom badge override first
             var customPngPath = GetCustomBadgePath(pngFileName);
-
-            if (customSvgPath != null && File.Exists(customSvgPath))
-            {
-                try
-                {
-                    var customBadge = RasterizeSvgFile(customSvgPath);
-                    if (customBadge != null)
-                    {
-                        customBadge = TrimTransparent(customBadge);
-                        _badgeCache[pngFileName] = customBadge;
-                        _logger.LogInformation("[JellyTag] Loaded custom SVG badge override: {FileName}", baseName + ".svg");
-                        continue;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "[JellyTag] Failed to load custom SVG badge: {Path}", customSvgPath);
-                }
-            }
 
             if (customPngPath != null && File.Exists(customPngPath))
             {
@@ -499,7 +504,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                     {
                         customBadge = TrimTransparent(customBadge);
                         _badgeCache[pngFileName] = customBadge;
-                        _logger.LogInformation("[JellyTag] Loaded custom PNG badge override: {FileName}", pngFileName);
+                        _logger.LogInformation("[JellyTag] Loaded custom badge override: {FileName}", pngFileName);
                         continue;
                     }
                 }
@@ -509,34 +514,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 }
             }
 
-            // Try embedded SVG first, then PNG
-            var svgResourceName = resourceNames.FirstOrDefault(r =>
-                r.IndexOf(assetsMarker, StringComparison.OrdinalIgnoreCase) >= 0 &&
-                r.EndsWith(baseName + ".svg", StringComparison.OrdinalIgnoreCase));
-
-            if (svgResourceName != null)
-            {
-                try
-                {
-                    using var stream = assembly.GetManifestResourceStream(svgResourceName);
-                    if (stream != null)
-                    {
-                        var badge = RasterizeSvgStream(stream);
-                        if (badge != null)
-                        {
-                            badge = TrimTransparent(badge);
-                            _badgeCache[pngFileName] = badge;
-                            _logger.LogInformation("[JellyTag] Loaded SVG badge {BaseName}: {Width}x{Height}", baseName, badge.Width, badge.Height);
-                            continue;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "[JellyTag] Failed to load SVG badge: {BaseName}, trying PNG fallback", baseName);
-                }
-            }
-
+            // Load embedded PNG
             var pngResourceName = resourceNames.FirstOrDefault(r =>
                 r.IndexOf(assetsMarker, StringComparison.OrdinalIgnoreCase) >= 0 &&
                 r.EndsWith(pngFileName, StringComparison.OrdinalIgnoreCase));
@@ -567,43 +545,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         _logger.LogInformation("[JellyTag] Badge loading complete. Loaded {Count} badges", _badgeCache.Count);
     }
 
-    private static SKBitmap? RasterizeSvgFile(string filePath)
-    {
-        using var svg = new SKSvg();
-        svg.Load(filePath);
-        return RasterizeSvgPicture(svg.Picture);
-    }
-
-    private static SKBitmap? RasterizeSvgStream(Stream stream)
-    {
-        using var svg = new SKSvg();
-        svg.Load(stream);
-        return RasterizeSvgPicture(svg.Picture);
-    }
-
-    private static SKBitmap? RasterizeSvgPicture(SKPicture? picture)
-    {
-        if (picture == null)
-        {
-            return null;
-        }
-
-        var bounds = picture.CullRect;
-        if (bounds.Width <= 0 || bounds.Height <= 0)
-        {
-            return null;
-        }
-
-        var scale = SvgRasterWidth / bounds.Width;
-        var height = (int)(bounds.Height * scale);
-        var bitmap = new SKBitmap(SvgRasterWidth, height);
-        using var canvas = new SKCanvas(bitmap);
-        canvas.Clear(SKColors.Transparent);
-        canvas.Scale(scale);
-        canvas.DrawPicture(picture);
-        canvas.Flush();
-        return bitmap;
-    }
 
     private static SKBitmap TrimTransparent(SKBitmap bitmap)
     {
@@ -665,7 +606,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         int imageWidth, int imageHeight,
         List<SKSizeI> badges,
         BadgePosition position, int margin, int gap,
-        BadgeLayout layout)
+        BadgeLayout layout, int priorExtent = 0)
     {
         var positions = new List<SKPointI>();
         if (badges.Count == 0)
@@ -683,23 +624,23 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             {
                 case BadgePosition.TopLeft:
                     startX = margin;
-                    startY = margin;
+                    startY = margin + priorExtent;
                     break;
                 case BadgePosition.TopRight:
                     startX = Math.Max(0, imageWidth - totalWidth - margin);
-                    startY = margin;
+                    startY = margin + priorExtent;
                     break;
                 case BadgePosition.BottomLeft:
                     startX = margin;
-                    startY = Math.Max(0, imageHeight - maxHeight - margin);
+                    startY = Math.Max(0, imageHeight - maxHeight - margin - priorExtent);
                     break;
                 case BadgePosition.BottomRight:
                     startX = Math.Max(0, imageWidth - totalWidth - margin);
-                    startY = Math.Max(0, imageHeight - maxHeight - margin);
+                    startY = Math.Max(0, imageHeight - maxHeight - margin - priorExtent);
                     break;
                 default:
                     startX = margin;
-                    startY = margin;
+                    startY = margin + priorExtent;
                     break;
             }
 
@@ -721,23 +662,23 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             {
                 case BadgePosition.TopLeft:
                     startX = margin;
-                    startY = margin;
+                    startY = margin + priorExtent;
                     break;
                 case BadgePosition.TopRight:
                     startX = Math.Max(0, imageWidth - maxWidth - margin);
-                    startY = margin;
+                    startY = margin + priorExtent;
                     break;
                 case BadgePosition.BottomLeft:
                     startX = margin;
-                    startY = Math.Max(0, imageHeight - totalHeight - margin);
+                    startY = Math.Max(0, imageHeight - totalHeight - margin - priorExtent);
                     break;
                 case BadgePosition.BottomRight:
                     startX = Math.Max(0, imageWidth - maxWidth - margin);
-                    startY = Math.Max(0, imageHeight - totalHeight - margin);
+                    startY = Math.Max(0, imageHeight - totalHeight - margin - priorExtent);
                     break;
                 default:
                     startX = margin;
-                    startY = margin;
+                    startY = margin + priorExtent;
                     break;
             }
 
@@ -765,7 +706,8 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
     private static string GetBadgeDisplayText(string badgeKey)
     {
         var config = Plugin.Instance?.Configuration;
-        if (config?.CustomBadgeTexts != null && config.CustomBadgeTexts.TryGetValue(badgeKey, out var customText) && !string.IsNullOrEmpty(customText))
+        var customText = config?.CustomBadgeTexts?.FirstOrDefault(x => string.Equals(x.Key, badgeKey, StringComparison.OrdinalIgnoreCase))?.Text;
+        if (!string.IsNullOrEmpty(customText))
         {
             return customText;
         }
