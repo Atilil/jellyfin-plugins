@@ -764,6 +764,12 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
 
     private static string GetBadgeDisplayText(string badgeKey)
     {
+        var config = Plugin.Instance?.Configuration;
+        if (config?.CustomBadgeTexts != null && config.CustomBadgeTexts.TryGetValue(badgeKey, out var customText) && !string.IsNullOrEmpty(customText))
+        {
+            return customText;
+        }
+
         return BadgeDisplayText.TryGetValue(badgeKey, out var text) ? text : badgeKey.ToUpperInvariant();
     }
 

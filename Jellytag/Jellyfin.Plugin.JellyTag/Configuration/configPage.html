@@ -701,6 +701,84 @@
                         </div>
                     </details>
 
+                    <!-- Custom Badge Text -->
+                    <details class="jellytag-section">
+                        <summary>Custom Badge Text</summary>
+                        <div class="jellytag-section-body">
+                            <div class="fieldDescription" style="margin-bottom:1em;">Override the display text for any badge. Leave empty to use the default text.</div>
+                            <div class="jellytag-grid" id="CustomBadgeTextsGrid">
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_4k">4K</label>
+                                    <input id="cbt_4k" data-badge-key="4k" type="text" placeholder="4K" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_1080p">1080p</label>
+                                    <input id="cbt_1080p" data-badge-key="1080p" type="text" placeholder="1080p" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_720p">720p</label>
+                                    <input id="cbt_720p" data-badge-key="720p" type="text" placeholder="720p" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_sd">SD</label>
+                                    <input id="cbt_sd" data-badge-key="sd" type="text" placeholder="SD" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_hdr10">HDR10</label>
+                                    <input id="cbt_hdr10" data-badge-key="hdr10" type="text" placeholder="HDR10" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_hdr10plus">HDR10+</label>
+                                    <input id="cbt_hdr10plus" data-badge-key="hdr10plus" type="text" placeholder="HDR10+" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_dv">Dolby Vision</label>
+                                    <input id="cbt_dv" data-badge-key="dv" type="text" placeholder="DV" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_hlg">HLG</label>
+                                    <input id="cbt_hlg" data-badge-key="hlg" type="text" placeholder="HLG" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_hdr">HDR (generic)</label>
+                                    <input id="cbt_hdr" data-badge-key="hdr" type="text" placeholder="HDR" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_atmos">Dolby Atmos</label>
+                                    <input id="cbt_atmos" data-badge-key="atmos" type="text" placeholder="ATMOS" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_dtsx">DTS:X</label>
+                                    <input id="cbt_dtsx" data-badge-key="dtsx" type="text" placeholder="DTS:X" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_truehd">TrueHD</label>
+                                    <input id="cbt_truehd" data-badge-key="truehd" type="text" placeholder="TrueHD" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_dtshdma">DTS-HD MA</label>
+                                    <input id="cbt_dtshdma" data-badge-key="dtshdma" type="text" placeholder="DTS-HD MA" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_7_1">7.1</label>
+                                    <input id="cbt_7_1" data-badge-key="7.1" type="text" placeholder="7.1" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_5_1">5.1</label>
+                                    <input id="cbt_5_1" data-badge-key="5.1" type="text" placeholder="5.1" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_stereo">Stereo</label>
+                                    <input id="cbt_stereo" data-badge-key="stereo" type="text" placeholder="STEREO" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_3d">3D</label>
+                                    <input id="cbt_3d" data-badge-key="3d" type="text" placeholder="3D" is="emby-input" />
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
                     <!-- Performance -->
                     <div class="verticalSection">
                         <h3 class="sectionTitle">Performance</h3>
@@ -936,6 +1014,13 @@
                         document.querySelector('#BackdropLanguageLayout').value = config.BackdropSettings.LanguageBadgeLayout || '';
                         document.querySelector('#BackdropLanguageSize').value = config.BackdropSettings.LanguageBadgeSizePercent;
 
+                        // Custom Badge Texts
+                        var cbtInputs = document.querySelectorAll('#CustomBadgeTextsGrid input[data-badge-key]');
+                        var cbt = config.CustomBadgeTexts || {};
+                        cbtInputs.forEach(function(el) {
+                            el.value = cbt[el.getAttribute('data-badge-key')] || '';
+                        });
+
                         document.querySelector('#CacheDurationHours').value = config.CacheDurationHours;
                         document.querySelector('#OutputFormat').value = config.OutputFormat;
                         document.querySelector('#JpegQuality').value = config.JpegQuality;
@@ -1059,6 +1144,14 @@
                             LanguageBadgeLayout: document.querySelector('#BackdropLanguageLayout').value || null,
                             LanguageBadgeSizePercent: parseInt(document.querySelector('#BackdropLanguageSize').value, 10)
                         };
+
+                        // Custom Badge Texts
+                        var saveCbt = {};
+                        document.querySelectorAll('#CustomBadgeTextsGrid input[data-badge-key]').forEach(function(el) {
+                            var val = el.value.trim();
+                            if (val) { saveCbt[el.getAttribute('data-badge-key')] = val; }
+                        });
+                        config.CustomBadgeTexts = saveCbt;
 
                         config.CacheDurationHours = parseInt(document.querySelector('#CacheDurationHours').value, 10);
                         config.OutputFormat = document.querySelector('#OutputFormat').value;

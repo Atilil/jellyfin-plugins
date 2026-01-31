@@ -310,6 +310,8 @@ public class PluginConfiguration : BasePluginConfiguration
             TextBadgeCornerRadius = 25
         };
 
+        CustomBadgeTexts = new Dictionary<string, string>();
+
         CacheDurationHours = 24;
         JpegQuality = 90;
         OutputFormat = OutputImageFormat.Jpeg;
@@ -426,6 +428,11 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets the backdrop image settings.
     /// </summary>
     public ImageTypeSettings BackdropSettings { get; set; }
+
+    /// <summary>
+    /// Gets or sets custom display text overrides per badge key.
+    /// </summary>
+    public Dictionary<string, string> CustomBadgeTexts { get; set; }
 
     /// <summary>
     /// Gets or sets the cache duration in hours.
