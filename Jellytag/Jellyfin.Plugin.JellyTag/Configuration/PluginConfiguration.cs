@@ -173,6 +173,36 @@ public class ImageTypeSettings
     public int TextBadgeCornerRadius { get; set; }
 
     /// <summary>
+    /// Gets or sets the video badge background color override. When null, uses global TextBadgeBgColor.
+    /// </summary>
+    public string? VideoBadgeBgColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the video badge text color override. When null, uses global TextBadgeTextColor.
+    /// </summary>
+    public string? VideoBadgeTextColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the audio badge background color override. When null, uses global TextBadgeBgColor.
+    /// </summary>
+    public string? AudioBadgeBgColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the audio badge text color override. When null, uses global TextBadgeTextColor.
+    /// </summary>
+    public string? AudioBadgeTextColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the language badge background color override. When null, uses global TextBadgeBgColor.
+    /// </summary>
+    public string? LanguageBadgeBgColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the language badge text color override. When null, uses global TextBadgeTextColor.
+    /// </summary>
+    public string? LanguageBadgeTextColor { get; set; }
+
+    /// <summary>
     /// Gets or sets the language badge position. When null, uses the same position as audio badges.
     /// </summary>
     public BadgePosition? LanguageBadgePosition { get; set; }

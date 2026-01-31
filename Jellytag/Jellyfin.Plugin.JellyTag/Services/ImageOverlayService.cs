@@ -777,29 +777,45 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         return new SKColor(0, 0, 0, alpha);
     }
 
+    private static (string bg, string text) ResolveCategoryColors(BadgeCategory category, ImageTypeSettings settings)
+    {
+        var bgColor = category switch
+        {
+            BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.ThreeD =>
+                settings.VideoBadgeBgColor ?? settings.TextBadgeBgColor ?? "#000000",
+            BadgeCategory.Audio =>
+                settings.AudioBadgeBgColor ?? settings.TextBadgeBgColor ?? "#000000",
+            BadgeCategory.Language =>
+                settings.LanguageBadgeBgColor ?? settings.TextBadgeBgColor ?? "#000000",
+            _ => settings.TextBadgeBgColor ?? "#000000"
+        };
+        var textColor = category switch
+        {
+            BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.ThreeD =>
+                settings.VideoBadgeTextColor ?? settings.TextBadgeTextColor ?? "#FFFFFF",
+            BadgeCategory.Audio =>
+                settings.AudioBadgeTextColor ?? settings.TextBadgeTextColor ?? "#FFFFFF",
+            BadgeCategory.Language =>
+                settings.LanguageBadgeTextColor ?? settings.TextBadgeTextColor ?? "#FFFFFF",
+            _ => settings.TextBadgeTextColor ?? "#FFFFFF"
+        };
+        return (bgColor, textColor);
+    }
+
     private static void RenderTextBadges(SKCanvas canvas, List<BadgeInfo> badges, List<SKPointI> positions, List<SKSizeI> sizes, ImageTypeSettings settings)
     {
         var bgAlpha = (byte)Math.Clamp(settings.TextBadgeBgOpacity, 0, 255);
-        var bgColor = ParseHexColor(settings.TextBadgeBgColor ?? "#000000", bgAlpha);
-        var textColor = SKColor.TryParse(settings.TextBadgeTextColor ?? "#FFFFFF", out var tc) ? tc : SKColors.White;
         var cornerRadiusPct = Math.Clamp(settings.TextBadgeCornerRadius, 0, 50);
-
-        using var bgPaint = new SKPaint
-        {
-            IsAntialias = true,
-            Color = bgColor,
-            Style = SKPaintStyle.Fill
-        };
-
-        using var textPaint = new SKPaint
-        {
-            IsAntialias = true,
-            Color = textColor,
-            Style = SKPaintStyle.Fill
-        };
 
         for (int i = 0; i < badges.Count; i++)
         {
+            var (bgHex, textHex) = ResolveCategoryColors(badges[i].Category, settings);
+            var bgColor = ParseHexColor(bgHex, bgAlpha);
+            var textColor = SKColor.TryParse(textHex, out var tc) ? tc : SKColors.White;
+
+            using var bgPaint = new SKPaint { IsAntialias = true, Color = bgColor, Style = SKPaintStyle.Fill };
+            using var textPaint = new SKPaint { IsAntialias = true, Color = textColor, Style = SKPaintStyle.Fill };
+
             var text = GetBadgeDisplayText(badges[i].BadgeKey);
             var width = sizes[i].Width;
             var height = sizes[i].Height;
