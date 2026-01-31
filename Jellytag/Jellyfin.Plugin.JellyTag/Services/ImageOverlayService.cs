@@ -39,6 +39,8 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         { "7.1", "7.1" },
         { "5.1", "5.1" },
         { "stereo", "STEREO" },
+        { "hdr", "HDR" },
+        { "3d", "3D" },
         { "UHD4K", "4K" },
         { "FHD1080p", "1080p" },
         { "HD720p", "720p" },
@@ -121,7 +123,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         }
 
         // Split badges into video (Resolution+Hdr), audio, and language groups
-        var videoBadges = badges.Where(b => b.Category != BadgeCategory.Audio && b.Category != BadgeCategory.Language).ToList();
+        var videoBadges = badges.Where(b => b.Category is BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.ThreeD).ToList();
         var audioBadges = badges.Where(b => b.Category == BadgeCategory.Audio).ToList();
         var languageBadges = badges.Where(b => b.Category == BadgeCategory.Language).ToList();
 
@@ -326,12 +328,14 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             },
             BadgeCategory.Hdr => badge.BadgeKey switch
             {
+                "hdr" => config.ShowGenericHdr,
                 "hdr10" => config.ShowHdr10,
                 "hdr10plus" => config.ShowHdr10Plus,
                 "dv" => config.ShowDolbyVision,
                 "hlg" => config.ShowHlg,
                 _ => false
             },
+            BadgeCategory.ThreeD => config.Show3D,
             BadgeCategory.Audio => badge.BadgeKey switch
             {
                 "atmos" => config.ShowDolbyAtmos,

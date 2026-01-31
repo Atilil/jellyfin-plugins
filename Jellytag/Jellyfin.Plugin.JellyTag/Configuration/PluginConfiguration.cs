@@ -212,6 +212,12 @@ public class PluginConfiguration : BasePluginConfiguration
         ShowDolbyVision = true;
         ShowHlg = false;
 
+        // HDR generic
+        ShowGenericHdr = false;
+
+        // 3D
+        Show3D = false;
+
         // Audio badges
         ShowDolbyAtmos = true;
         ShowDtsX = true;
@@ -328,6 +334,16 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets a value indicating whether to show HLG badges.
     /// </summary>
     public bool ShowHlg { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to use a generic HDR badge instead of specific HDR format badges.
+    /// </summary>
+    public bool ShowGenericHdr { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show 3D badges.
+    /// </summary>
+    public bool Show3D { get; set; }
 
     // Audio badges
 

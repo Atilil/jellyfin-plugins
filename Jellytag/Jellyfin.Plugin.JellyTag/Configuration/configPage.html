@@ -163,6 +163,26 @@
                                     </label>
                                 </div>
                             </div>
+                            <div class="checkboxContainer checkboxContainer-withDescription">
+                                <label class="emby-checkbox-label">
+                                    <input id="ShowGenericHdr" name="ShowGenericHdr" type="checkbox" is="emby-checkbox" />
+                                    <span>Use generic HDR badge</span>
+                                </label>
+                                <div class="fieldDescription">Show a single "HDR" badge instead of specific HDR format badges (HDR10, DV, etc.).</div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details class="jellytag-section">
+                        <summary>3D Badge</summary>
+                        <div class="jellytag-section-body">
+                            <div class="checkboxContainer checkboxContainer-withDescription">
+                                <label class="emby-checkbox-label">
+                                    <input id="Show3D" name="Show3D" type="checkbox" is="emby-checkbox" />
+                                    <span>3D Content</span>
+                                </label>
+                                <div class="fieldDescription">Show badge for 3D content.</div>
+                            </div>
                         </div>
                     </details>
 
@@ -737,6 +757,8 @@
                         document.querySelector('#ShowHdr10Plus').checked = config.ShowHdr10Plus;
                         document.querySelector('#ShowDolbyVision').checked = config.ShowDolbyVision;
                         document.querySelector('#ShowHlg').checked = config.ShowHlg;
+                        document.querySelector('#ShowGenericHdr').checked = config.ShowGenericHdr;
+                        document.querySelector('#Show3D').checked = config.Show3D;
 
                         // Audio
                         document.querySelector('#ShowDolbyAtmos').checked = config.ShowDolbyAtmos;
@@ -840,6 +862,8 @@
                         config.ShowHdr10Plus = document.querySelector('#ShowHdr10Plus').checked;
                         config.ShowDolbyVision = document.querySelector('#ShowDolbyVision').checked;
                         config.ShowHlg = document.querySelector('#ShowHlg').checked;
+                        config.ShowGenericHdr = document.querySelector('#ShowGenericHdr').checked;
+                        config.Show3D = document.querySelector('#Show3D').checked;
 
                         // Audio
                         config.ShowDolbyAtmos = document.querySelector('#ShowDolbyAtmos').checked;

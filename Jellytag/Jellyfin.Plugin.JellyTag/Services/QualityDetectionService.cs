@@ -227,6 +227,17 @@ public class QualityDetectionService : IQualityDetectionService
                 }
             }
 
+            // 3D detection
+            if (video.Video3DFormat.HasValue)
+            {
+                badges.Add(new BadgeInfo
+                {
+                    Category = BadgeCategory.ThreeD,
+                    BadgeKey = "3d",
+                    ResourceFileName = "badge-3d.png"
+                });
+            }
+
             // Audio detection - prefer the default audio track
             var allAudioStreams = mediaSource?.MediaStreams?.Where(s => s.Type == MediaStreamType.Audio).ToList();
             if (allAudioStreams != null && allAudioStreams.Count > 0)
@@ -333,6 +344,29 @@ public class QualityDetectionService : IQualityDetectionService
 
     private static BadgeInfo? DetectHdr(MediaStream videoStream)
     {
+        var config = Plugin.Instance?.Configuration;
+
+        // If generic HDR mode is enabled, return a single "hdr" badge for any HDR content
+        if (config?.ShowGenericHdr == true)
+        {
+            var range = videoStream.VideoRange;
+            var rt = videoStream.VideoRangeType;
+            if (range == VideoRange.HDR || rt is VideoRangeType.HDR10 or VideoRangeType.HDR10Plus
+                or VideoRangeType.HLG or VideoRangeType.DOVI or VideoRangeType.DOVIWithHDR10
+                or VideoRangeType.DOVIWithHLG or VideoRangeType.DOVIWithSDR or VideoRangeType.DOVIWithEL
+                or VideoRangeType.DOVIWithHDR10Plus or VideoRangeType.DOVIWithELHDR10Plus)
+            {
+                return new BadgeInfo
+                {
+                    Category = BadgeCategory.Hdr,
+                    BadgeKey = "hdr",
+                    ResourceFileName = "badge-hdr.png"
+                };
+            }
+
+            return null;
+        }
+
         var rangeType = videoStream.VideoRangeType;
 
         // Dolby Vision variants
