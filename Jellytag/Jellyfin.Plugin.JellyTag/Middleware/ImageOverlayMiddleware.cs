@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Jellyfin.Plugin.JellyTag.Configuration;
 using Jellyfin.Plugin.JellyTag.Services;
+using static Jellyfin.Plugin.JellyTag.Configuration.OutputImageFormat;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
@@ -120,7 +121,8 @@ public partial class ImageOverlayMiddleware
         {
             await using (cachedImage.ConfigureAwait(false))
             {
-                context.Response.ContentType = "image/jpeg";
+                var cachedContentType = config.OutputFormat == OutputImageFormat.WebP ? "image/webp" : "image/jpeg";
+                context.Response.ContentType = cachedContentType;
                 context.Response.ContentLength = cachedImage.Length;
                 await cachedImage.CopyToAsync(context.Response.Body).ConfigureAwait(false);
             }
@@ -146,10 +148,10 @@ public partial class ImageOverlayMiddleware
 
             capturedBody.Position = 0;
 
-            Stream resultStream;
+            (Stream resultStream, string contentType) result;
             try
             {
-                resultStream = await overlayService.AddBadgeOverlaysAsync(capturedBody, visibleBadges, imageSettings).ConfigureAwait(false);
+                result = await overlayService.AddBadgeOverlaysAsync(capturedBody, visibleBadges, imageSettings).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -159,17 +161,17 @@ public partial class ImageOverlayMiddleware
                 return;
             }
 
-            await using (resultStream.ConfigureAwait(false))
+            await using (result.resultStream.ConfigureAwait(false))
             {
                 // Cache the result
-                resultStream.Position = 0;
-                await cacheService.CacheImageAsync(itemId, badgeKey, imageTag, resultStream).ConfigureAwait(false);
+                result.resultStream.Position = 0;
+                await cacheService.CacheImageAsync(itemId, badgeKey, imageTag, result.resultStream).ConfigureAwait(false);
 
                 // Write to response
-                resultStream.Position = 0;
-                context.Response.ContentType = "image/jpeg";
-                context.Response.ContentLength = resultStream.Length;
-                await resultStream.CopyToAsync(originalBody).ConfigureAwait(false);
+                result.resultStream.Position = 0;
+                context.Response.ContentType = result.contentType;
+                context.Response.ContentLength = result.resultStream.Length;
+                await result.resultStream.CopyToAsync(originalBody).ConfigureAwait(false);
             }
         }
         finally

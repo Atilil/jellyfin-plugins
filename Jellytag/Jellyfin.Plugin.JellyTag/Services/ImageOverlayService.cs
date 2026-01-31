@@ -2,6 +2,7 @@ using System.Reflection;
 using Jellyfin.Plugin.JellyTag.Configuration;
 using Microsoft.Extensions.Logging;
 using SkiaSharp;
+using Svg.Skia;
 
 namespace Jellyfin.Plugin.JellyTag.Services;
 
@@ -99,7 +100,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
     }
 
     /// <inheritdoc />
-    public async Task<Stream> AddBadgeOverlaysAsync(Stream originalImage, List<BadgeInfo> badges, ImageTypeSettings settings)
+    public async Task<(Stream Stream, string ContentType)> AddBadgeOverlaysAsync(Stream originalImage, List<BadgeInfo> badges, ImageTypeSettings settings)
     {
         var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
 
@@ -116,7 +117,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             var output = new MemoryStream();
             await originalImage.CopyToAsync(output).ConfigureAwait(false);
             output.Position = 0;
-            return output;
+            return (output, "image/jpeg");
         }
 
         // Split badges into video (Resolution+Hdr), audio, and language groups
@@ -170,7 +171,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 var output = new MemoryStream();
                 await originalImage.CopyToAsync(output).ConfigureAwait(false);
                 output.Position = 0;
-                return output;
+                return (output, "image/jpeg");
             }
 
             // Merge language into audio group if same position+layout
@@ -278,14 +279,18 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
 
             canvas.Flush();
 
-            // Encode to JPEG
+            // Encode to configured format
             using var resultImage = surface.Snapshot();
-            using var data = resultImage.Encode(SKEncodedImageFormat.Jpeg, jpegQuality);
+            var outputFormat = config.OutputFormat;
+            var encodeFormat = outputFormat == OutputImageFormat.WebP ? SKEncodedImageFormat.Webp : SKEncodedImageFormat.Jpeg;
+            var encodeQuality = outputFormat == OutputImageFormat.WebP ? Math.Clamp(config.WebPQuality, 1, 100) : jpegQuality;
+            var contentType = outputFormat == OutputImageFormat.WebP ? "image/webp" : "image/jpeg";
+            using var data = resultImage.Encode(encodeFormat, encodeQuality);
 
             var outputStream = new MemoryStream();
             data.SaveTo(outputStream);
             outputStream.Position = 0;
-            return outputStream;
+            return (outputStream, contentType);
         }
         finally
         {
@@ -419,6 +424,8 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         }
     }
 
+    private const int SvgRasterWidth = 512;
+
     private void LoadBadges()
     {
         var assembly = Assembly.GetExecutingAssembly();
@@ -426,14 +433,11 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
 
         _logger.LogInformation("[JellyTag] Loading badges. Available resources: {Resources}", string.Join(", ", resourceNames));
 
+        // Build a set of badge base names from all embedded resources (both .svg and .png)
+        var assetsMarker = ".Assets.";
+        var badgeBaseNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var resourceName in resourceNames)
         {
-            if (!resourceName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            var assetsMarker = ".Assets.";
             var assetsIdx = resourceName.IndexOf(assetsMarker, StringComparison.OrdinalIgnoreCase);
             if (assetsIdx < 0)
             {
@@ -441,49 +445,153 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             }
 
             var fileName = resourceName[(assetsIdx + assetsMarker.Length)..];
+            if (fileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase) || fileName.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))
+            {
+                var baseName = Path.GetFileNameWithoutExtension(fileName);
+                badgeBaseNames.Add(baseName);
+            }
+        }
 
-            // Check for custom badge override first
-            var customBadgePath = GetCustomBadgePath(fileName);
-            if (customBadgePath != null && File.Exists(customBadgePath))
+        foreach (var baseName in badgeBaseNames)
+        {
+            var pngFileName = baseName + ".png";
+
+            // Check for custom badge override first (SVG then PNG)
+            var customSvgPath = GetCustomBadgePath(baseName + ".svg");
+            var customPngPath = GetCustomBadgePath(pngFileName);
+
+            if (customSvgPath != null && File.Exists(customSvgPath))
             {
                 try
                 {
-                    var customBadge = SKBitmap.Decode(customBadgePath);
+                    var customBadge = RasterizeSvgFile(customSvgPath);
                     if (customBadge != null)
                     {
                         customBadge = TrimTransparent(customBadge);
-                        _badgeCache[fileName] = customBadge;
-                        _logger.LogInformation("[JellyTag] Loaded custom badge override: {FileName}", fileName);
+                        _badgeCache[pngFileName] = customBadge;
+                        _logger.LogInformation("[JellyTag] Loaded custom SVG badge override: {FileName}", baseName + ".svg");
                         continue;
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "[JellyTag] Failed to load custom badge: {Path}, falling back to embedded", customBadgePath);
+                    _logger.LogWarning(ex, "[JellyTag] Failed to load custom SVG badge: {Path}", customSvgPath);
                 }
             }
 
-            try
+            if (customPngPath != null && File.Exists(customPngPath))
             {
-                using var stream = assembly.GetManifestResourceStream(resourceName);
-                if (stream != null)
+                try
                 {
-                    var badge = SKBitmap.Decode(stream);
-                    if (badge != null)
+                    var customBadge = SKBitmap.Decode(customPngPath);
+                    if (customBadge != null)
                     {
-                        badge = TrimTransparent(badge);
-                        _badgeCache[fileName] = badge;
-                        _logger.LogInformation("[JellyTag] Loaded badge {FileName}: {Width}x{Height}", fileName, badge.Width, badge.Height);
+                        customBadge = TrimTransparent(customBadge);
+                        _badgeCache[pngFileName] = customBadge;
+                        _logger.LogInformation("[JellyTag] Loaded custom PNG badge override: {FileName}", pngFileName);
+                        continue;
                     }
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "[JellyTag] Failed to load custom badge: {Path}, falling back to embedded", customPngPath);
+                }
             }
-            catch (Exception ex)
+
+            // Try embedded SVG first, then PNG
+            var svgResourceName = resourceNames.FirstOrDefault(r =>
+                r.IndexOf(assetsMarker, StringComparison.OrdinalIgnoreCase) >= 0 &&
+                r.EndsWith(baseName + ".svg", StringComparison.OrdinalIgnoreCase));
+
+            if (svgResourceName != null)
             {
-                _logger.LogError(ex, "[JellyTag] Failed to load badge: {FileName}", fileName);
+                try
+                {
+                    using var stream = assembly.GetManifestResourceStream(svgResourceName);
+                    if (stream != null)
+                    {
+                        var badge = RasterizeSvgStream(stream);
+                        if (badge != null)
+                        {
+                            badge = TrimTransparent(badge);
+                            _badgeCache[pngFileName] = badge;
+                            _logger.LogInformation("[JellyTag] Loaded SVG badge {BaseName}: {Width}x{Height}", baseName, badge.Width, badge.Height);
+                            continue;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "[JellyTag] Failed to load SVG badge: {BaseName}, trying PNG fallback", baseName);
+                }
+            }
+
+            var pngResourceName = resourceNames.FirstOrDefault(r =>
+                r.IndexOf(assetsMarker, StringComparison.OrdinalIgnoreCase) >= 0 &&
+                r.EndsWith(pngFileName, StringComparison.OrdinalIgnoreCase));
+
+            if (pngResourceName != null)
+            {
+                try
+                {
+                    using var stream = assembly.GetManifestResourceStream(pngResourceName);
+                    if (stream != null)
+                    {
+                        var badge = SKBitmap.Decode(stream);
+                        if (badge != null)
+                        {
+                            badge = TrimTransparent(badge);
+                            _badgeCache[pngFileName] = badge;
+                            _logger.LogInformation("[JellyTag] Loaded badge {FileName}: {Width}x{Height}", pngFileName, badge.Width, badge.Height);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "[JellyTag] Failed to load badge: {FileName}", pngFileName);
+                }
             }
         }
 
         _logger.LogInformation("[JellyTag] Badge loading complete. Loaded {Count} badges", _badgeCache.Count);
+    }
+
+    private static SKBitmap? RasterizeSvgFile(string filePath)
+    {
+        using var svg = new SKSvg();
+        svg.Load(filePath);
+        return RasterizeSvgPicture(svg.Picture);
+    }
+
+    private static SKBitmap? RasterizeSvgStream(Stream stream)
+    {
+        using var svg = new SKSvg();
+        svg.Load(stream);
+        return RasterizeSvgPicture(svg.Picture);
+    }
+
+    private static SKBitmap? RasterizeSvgPicture(SKPicture? picture)
+    {
+        if (picture == null)
+        {
+            return null;
+        }
+
+        var bounds = picture.CullRect;
+        if (bounds.Width <= 0 || bounds.Height <= 0)
+        {
+            return null;
+        }
+
+        var scale = SvgRasterWidth / bounds.Width;
+        var height = (int)(bounds.Height * scale);
+        var bitmap = new SKBitmap(SvgRasterWidth, height);
+        using var canvas = new SKCanvas(bitmap);
+        canvas.Clear(SKColors.Transparent);
+        canvas.Scale(scale);
+        canvas.DrawPicture(picture);
+        canvas.Flush();
+        return bitmap;
     }
 
     private static SKBitmap TrimTransparent(SKBitmap bitmap)

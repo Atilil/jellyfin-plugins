@@ -602,9 +602,24 @@
                         </div>
 
                         <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="OutputFormat">Output Format</label>
+                            <select id="OutputFormat" is="emby-select">
+                                <option value="Jpeg">JPEG</option>
+                                <option value="WebP">WebP</option>
+                            </select>
+                            <div class="fieldDescription">Image format for badge overlay output.</div>
+                        </div>
+
+                        <div class="inputContainer">
                             <label class="inputLabel inputLabelUnfocused" for="JpegQuality">JPEG Quality</label>
                             <input id="JpegQuality" type="number" min="50" max="100" step="1" is="emby-input" />
                             <div class="fieldDescription">Output image quality (50-100).</div>
+                        </div>
+
+                        <div class="inputContainer">
+                            <label class="inputLabel inputLabelUnfocused" for="WebPQuality">WebP Quality</label>
+                            <input id="WebPQuality" type="number" min="1" max="100" step="1" is="emby-input" />
+                            <div class="fieldDescription">WebP output quality (1-100).</div>
                         </div>
 
                         <div class="verticalSection">
@@ -792,7 +807,9 @@
                         document.querySelector('#BackdropLanguageSize').value = config.BackdropSettings.LanguageBadgeSizePercent;
 
                         document.querySelector('#CacheDurationHours').value = config.CacheDurationHours;
+                        document.querySelector('#OutputFormat').value = config.OutputFormat;
                         document.querySelector('#JpegQuality').value = config.JpegQuality;
+                        document.querySelector('#WebPQuality').value = config.WebPQuality;
 
                         // Setup badge style toggles after values are loaded
                         setupBadgeStyleToggle(document.querySelector('#PosterBadgeStyle'));
@@ -894,7 +911,9 @@
                         };
 
                         config.CacheDurationHours = parseInt(document.querySelector('#CacheDurationHours').value, 10);
+                        config.OutputFormat = document.querySelector('#OutputFormat').value;
                         config.JpegQuality = parseInt(document.querySelector('#JpegQuality').value, 10);
+                        config.WebPQuality = parseInt(document.querySelector('#WebPQuality').value, 10);
 
                         ApiClient.updatePluginConfiguration(JellyTagConfig.pluginUniqueId, config).then(function () {
                             Dashboard.processPluginConfigurationUpdateResult();

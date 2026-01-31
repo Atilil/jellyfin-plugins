@@ -66,6 +66,22 @@ public enum LanguageBadgeMode
 }
 
 /// <summary>
+/// Output image format.
+/// </summary>
+public enum OutputImageFormat
+{
+    /// <summary>
+    /// JPEG format.
+    /// </summary>
+    Jpeg,
+
+    /// <summary>
+    /// WebP format.
+    /// </summary>
+    WebP
+}
+
+/// <summary>
 /// Badge layout direction for stacking multiple badges.
 /// </summary>
 public enum BadgeLayout
@@ -260,6 +276,8 @@ public class PluginConfiguration : BasePluginConfiguration
 
         CacheDurationHours = 24;
         JpegQuality = 90;
+        OutputFormat = OutputImageFormat.Jpeg;
+        WebPQuality = 90;
     }
 
     /// <summary>
@@ -372,4 +390,14 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets the JPEG quality for output images (1-100).
     /// </summary>
     public int JpegQuality { get; set; }
+
+    /// <summary>
+    /// Gets or sets the output image format.
+    /// </summary>
+    public OutputImageFormat OutputFormat { get; set; }
+
+    /// <summary>
+    /// Gets or sets the WebP quality for output images (1-100).
+    /// </summary>
+    public int WebPQuality { get; set; }
 }

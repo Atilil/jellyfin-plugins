@@ -106,7 +106,9 @@ public class ImageCacheService : IImageCacheService
             {
                 if (Directory.Exists(_cachePath))
                 {
-                    var files = Directory.GetFiles(_cachePath, "*.jpg");
+                    var jpgFiles = Directory.GetFiles(_cachePath, "*.jpg");
+                    var webpFiles = Directory.GetFiles(_cachePath, "*.webp");
+                    var files = jpgFiles.Concat(webpFiles).ToArray();
                     foreach (var file in files)
                     {
                         try
@@ -134,8 +136,9 @@ public class ImageCacheService : IImageCacheService
     {
         try
         {
-            var pattern = $"{itemId}_*.jpg";
-            var files = Directory.GetFiles(_cachePath, pattern);
+            var jpgPattern = $"{itemId}_*.jpg";
+            var webpPattern = $"{itemId}_*.webp";
+            var files = Directory.GetFiles(_cachePath, jpgPattern).Concat(Directory.GetFiles(_cachePath, webpPattern)).ToArray();
             foreach (var file in files)
             {
                 try
@@ -169,7 +172,9 @@ public class ImageCacheService : IImageCacheService
 
     private string GetCachePath(string cacheKey)
     {
-        return Path.Combine(_cachePath, $"{cacheKey}.jpg");
+        var config = Plugin.Instance?.Configuration;
+        var ext = config?.OutputFormat == Configuration.OutputImageFormat.WebP ? ".webp" : ".jpg";
+        return Path.Combine(_cachePath, $"{cacheKey}{ext}");
     }
 
     private void EnsureCacheDirectoryExists()
