@@ -274,11 +274,14 @@ public partial class JellyTagController : ControllerBase
             return BadRequest("Invalid badge key");
         }
 
+        // Normalize dots to underscores for file lookup (e.g. "5.1" -> "5_1")
+        var fileKey = badgeKey.Replace('.', '_');
+
         // Check custom badge first
         var dataFolder = Plugin.Instance?.DataFolderPath;
         if (!string.IsNullOrEmpty(dataFolder))
         {
-            var customPath = Path.Combine(dataFolder, "custom-badges", $"badge-{badgeKey}.png");
+            var customPath = Path.Combine(dataFolder, "custom-badges", $"badge-{fileKey}.png");
             if (System.IO.File.Exists(customPath))
             {
                 return PhysicalFile(customPath, "image/png");
@@ -288,7 +291,7 @@ public partial class JellyTagController : ControllerBase
         // Fall back to embedded resource
         var assembly = Assembly.GetExecutingAssembly();
         var resourceName = assembly.GetManifestResourceNames()
-            .FirstOrDefault(r => r.EndsWith($"badge-{badgeKey}.png", StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(r => r.EndsWith($"badge-{fileKey}.png", StringComparison.OrdinalIgnoreCase));
 
         if (resourceName == null)
         {
