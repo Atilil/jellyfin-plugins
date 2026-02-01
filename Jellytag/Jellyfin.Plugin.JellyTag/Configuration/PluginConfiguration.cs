@@ -203,6 +203,16 @@ public class ImageTypeSettings
     public string? LanguageBadgeTextColor { get; set; }
 
     /// <summary>
+    /// Gets or sets the audio badge rendering style override. When null, inherits from BadgeStyle (video).
+    /// </summary>
+    public BadgeStyle? AudioBadgeStyle { get; set; }
+
+    /// <summary>
+    /// Gets or sets the language badge rendering style override. When null, inherits from resolved audio style.
+    /// </summary>
+    public BadgeStyle? LanguageBadgeStyle { get; set; }
+
+    /// <summary>
     /// Gets or sets the language badge position. When null, uses the same position as audio badges.
     /// </summary>
     public BadgePosition? LanguageBadgePosition { get; set; }

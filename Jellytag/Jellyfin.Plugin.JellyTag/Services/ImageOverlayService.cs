@@ -138,14 +138,20 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         var languagePosition = settings.LanguageBadgePosition ?? audioPosition;
         var languageLayout = settings.LanguageBadgeLayout ?? audioLayout;
 
-        // When audio uses "Same as video", merge into a single group
-        var audioIsSameAsVideo = settings.AudioBadgePosition == null && settings.AudioBadgeLayout == null;
+        // Resolve badge style per group with inheritance chain: language -> audio -> video
+        var videoStyle = settings.BadgeStyle;
+        var audioStyle = settings.AudioBadgeStyle ?? videoStyle;
+        var languageStyle = settings.LanguageBadgeStyle ?? audioStyle;
 
-        var useTextStyle = settings.BadgeStyle == Configuration.BadgeStyle.Text;
+        var videoUseText = videoStyle == Configuration.BadgeStyle.Text;
+        var audioUseText = audioStyle == Configuration.BadgeStyle.Text;
+        var languageUseText = languageStyle == Configuration.BadgeStyle.Text;
 
-        // When language uses same position+layout as audio, merge into audio group
-        // But only in text mode — in image mode, language badges are always text-rendered separately
-        var languageIsSameAsAudio = useTextStyle && languagePosition == audioPosition && languageLayout == audioLayout;
+        // When audio uses "Same as video", merge into a single group (same position + layout + style)
+        var audioIsSameAsVideo = settings.AudioBadgePosition == null && settings.AudioBadgeLayout == null && settings.AudioBadgeStyle == null;
+
+        // When language uses same position+layout+style as audio, merge into audio group
+        var languageIsSameAsAudio = languagePosition == audioPosition && languageLayout == audioLayout && languageStyle == audioStyle;
 
         // Process each group independently
         var videoSizes = new List<SKSizeI>();
@@ -168,11 +174,11 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         try
         {
             // Prepare video badges
-            await PrepareBadgeGroup(videoBadges, videoBadgeSizePercent, image.Width, useTextStyle, false, videoSizes, videoSourceBitmaps, videoFiltered, videoOwnedBitmaps).ConfigureAwait(false);
+            await PrepareBadgeGroup(videoBadges, videoBadgeSizePercent, image.Width, videoUseText, false, videoSizes, videoSourceBitmaps, videoFiltered, videoOwnedBitmaps).ConfigureAwait(false);
             // Prepare audio badges
-            await PrepareBadgeGroup(audioBadges, audioBadgeSizePercent, image.Width, useTextStyle, true, audioSizes, audioSourceBitmaps, audioFiltered, audioOwnedBitmaps).ConfigureAwait(false);
-            // Prepare language badges (always text mode since ResourceFileName is empty)
-            await PrepareBadgeGroup(languageBadges, languageBadgeSizePercent, image.Width, true, true, languageSizes, languageSourceBitmaps, languageFiltered, languageOwnedBitmaps).ConfigureAwait(false);
+            await PrepareBadgeGroup(audioBadges, audioBadgeSizePercent, image.Width, audioUseText, true, audioSizes, audioSourceBitmaps, audioFiltered, audioOwnedBitmaps).ConfigureAwait(false);
+            // Prepare language badges — in image mode, badges with ResourceFileName get flag images; those without fall back to text
+            await PrepareBadgeGroup(languageBadges, languageBadgeSizePercent, image.Width, languageUseText, true, languageSizes, languageSourceBitmaps, languageFiltered, languageOwnedBitmaps).ConfigureAwait(false);
 
             if (videoSizes.Count == 0 && audioSizes.Count == 0 && languageSizes.Count == 0)
             {
@@ -280,48 +286,13 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             var canvas = surface.Canvas;
             canvas.DrawBitmap(image, 0, 0);
 
-            if (useTextStyle)
-            {
-                if (videoFiltered.Count > 0)
-                {
-                    RenderTextBadges(canvas, videoFiltered, videoPositions, videoSizes, settings);
-                }
+            using var paint = new SKPaint { IsAntialias = true };
+            var sampling = new SKSamplingOptions(SKCubicResampler.Mitchell);
 
-                if (audioFiltered.Count > 0)
-                {
-                    RenderTextBadges(canvas, audioFiltered, audioPositions, audioSizes, settings);
-                }
-
-                if (languageFiltered.Count > 0)
-                {
-                    RenderTextBadges(canvas, languageFiltered, languagePositions, languageSizes, settings);
-                }
-            }
-            else
-            {
-                using var paint = new SKPaint { IsAntialias = true };
-                var sampling = new SKSamplingOptions(SKCubicResampler.Mitchell);
-
-                for (int i = 0; i < videoSourceBitmaps.Count; i++)
-                {
-                    var destRect = SKRect.Create(videoPositions[i].X, videoPositions[i].Y, videoSizes[i].Width, videoSizes[i].Height);
-                    using var badgeImage = SKImage.FromBitmap(videoSourceBitmaps[i]);
-                    canvas.DrawImage(badgeImage, destRect, sampling, paint);
-                }
-
-                for (int i = 0; i < audioSourceBitmaps.Count; i++)
-                {
-                    var destRect = SKRect.Create(audioPositions[i].X, audioPositions[i].Y, audioSizes[i].Width, audioSizes[i].Height);
-                    using var badgeImage = SKImage.FromBitmap(audioSourceBitmaps[i]);
-                    canvas.DrawImage(badgeImage, destRect, sampling, paint);
-                }
-
-                // Language badges are text-only, render them as text even in image mode
-                if (languageFiltered.Count > 0)
-                {
-                    RenderTextBadges(canvas, languageFiltered, languagePositions, languageSizes, settings);
-                }
-            }
+            // Render each group with its own style
+            RenderBadgeGroup(canvas, videoFiltered, videoSourceBitmaps, videoPositions, videoSizes, videoUseText, settings, paint, sampling);
+            RenderBadgeGroup(canvas, audioFiltered, audioSourceBitmaps, audioPositions, audioSizes, audioUseText, settings, paint, sampling);
+            RenderBadgeGroup(canvas, languageFiltered, languageSourceBitmaps, languagePositions, languageSizes, languageUseText, settings, paint, sampling);
 
             canvas.Flush();
 
@@ -439,12 +410,22 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             foreach (var badgeInfo in badges)
             {
                 var resourceFileName = badgeInfo.ResourceFileName;
+                var badgeWidth = Math.Max(1, (int)(imageWidth * (sizePercent / 100.0)));
+
                 if (string.IsNullOrEmpty(resourceFileName))
                 {
+                    // No image resource — fall back to text rendering for this badge
+                    var text = GetBadgeDisplayText(badgeInfo.BadgeKey);
+                    if (string.IsNullOrEmpty(text))
+                    {
+                        continue;
+                    }
+
+                    var badgeHeight = Math.Max(1, (int)(badgeWidth * 0.5));
+                    filtered.Add(badgeInfo);
+                    sizes.Add(new SKSizeI(badgeWidth, badgeHeight));
                     continue;
                 }
-
-                var badgeWidth = Math.Max(1, (int)(imageWidth * (sizePercent / 100.0)));
 
                 // Try SVG cache first
                 if (_svgCache.TryGetValue(resourceFileName, out var svgBytes))
@@ -462,7 +443,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                     }
                 }
 
-                // Also try without extension change (for .png key in svg cache when resourceFileName is .svg)
                 // Try raster cache
                 if (_rasterCache.TryGetValue(resourceFileName, out var rasterBitmap) && rasterBitmap != null)
                 {
@@ -973,6 +953,49 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
 
             canvas.DrawText(text, textX, textY, font, textPaint);
             font.Dispose();
+        }
+    }
+
+    private static void RenderBadgeGroup(
+        SKCanvas canvas, List<BadgeInfo> filtered, List<SKBitmap> sourceBitmaps,
+        List<SKPointI> positions, List<SKSizeI> sizes, bool useText,
+        ImageTypeSettings settings, SKPaint paint, SKSamplingOptions sampling)
+    {
+        if (filtered.Count == 0) return;
+
+        if (useText)
+        {
+            RenderTextBadges(canvas, filtered, positions, sizes, settings);
+        }
+        else
+        {
+            // In image mode, render bitmaps for badges that have them, text fallback for others
+            int bitmapIdx = 0;
+            var textBadges = new List<BadgeInfo>();
+            var textPositions = new List<SKPointI>();
+            var textSizes = new List<SKSizeI>();
+
+            for (int i = 0; i < filtered.Count; i++)
+            {
+                if (bitmapIdx < sourceBitmaps.Count && !string.IsNullOrEmpty(filtered[i].ResourceFileName))
+                {
+                    var destRect = SKRect.Create(positions[i].X, positions[i].Y, sizes[i].Width, sizes[i].Height);
+                    using var badgeImage = SKImage.FromBitmap(sourceBitmaps[bitmapIdx]);
+                    canvas.DrawImage(badgeImage, destRect, sampling, paint);
+                    bitmapIdx++;
+                }
+                else
+                {
+                    textBadges.Add(filtered[i]);
+                    textPositions.Add(positions[i]);
+                    textSizes.Add(sizes[i]);
+                }
+            }
+
+            if (textBadges.Count > 0)
+            {
+                RenderTextBadges(canvas, textBadges, textPositions, textSizes, settings);
+            }
         }
     }
 

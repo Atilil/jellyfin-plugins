@@ -276,7 +276,7 @@
                                     <input id="ShowSubtitleIndicator" name="ShowSubtitleIndicator" type="checkbox" is="emby-checkbox" />
                                     <span>Show VOST* indicator</span>
                                 </label>
-                                <div class="fieldDescription">Show VOST* indicator when a language has subtitles but no audio track.</div>
+                                <div class="fieldDescription">Show VOST* badge for languages that have subtitles but no matching audio track (e.g. VOSTEN if English subtitles exist but no English audio).</div>
                             </div>
                         </div>
                     </details>
@@ -380,6 +380,14 @@
                                     <summary>Audio Override</summary>
                                     <div class="jellytag-sub-body">
                                         <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="PosterAudioBadgeStyle">Audio Badge Style</label>
+                                            <select id="PosterAudioBadgeStyle" is="emby-select" class="audioBadgeStyleSelect">
+                                                <option value="">Same as video</option>
+                                                <option value="Image">Image</option>
+                                                <option value="Text">Text</option>
+                                            </select>
+                                        </div>
+                                        <div class="inputContainer">
                                             <label class="inputLabel inputLabelUnfocused" for="PosterAudioPosition">Audio Position</label>
                                             <select id="PosterAudioPosition" is="emby-select">
                                                 <option value="">Same as video</option>
@@ -406,6 +414,15 @@
                                 <details class="jellytag-sub">
                                     <summary>Language Override</summary>
                                     <div class="jellytag-sub-body">
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="PosterLanguageBadgeStyle">Language Badge Style</label>
+                                            <select id="PosterLanguageBadgeStyle" is="emby-select" class="languageBadgeStyleSelect">
+                                                <option value="">Same as audio</option>
+                                                <option value="SameAsVideo">Same as video</option>
+                                                <option value="Image">Image (flags)</option>
+                                                <option value="Text">Text</option>
+                                            </select>
+                                        </div>
                                         <div class="inputContainer">
                                             <label class="inputLabel inputLabelUnfocused" for="PosterLanguagePosition">Language Position</label>
                                             <select id="PosterLanguagePosition" is="emby-select">
@@ -531,6 +548,14 @@
                                     <summary>Audio Override</summary>
                                     <div class="jellytag-sub-body">
                                         <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="ThumbAudioBadgeStyle">Audio Badge Style</label>
+                                            <select id="ThumbAudioBadgeStyle" is="emby-select" class="audioBadgeStyleSelect">
+                                                <option value="">Same as video</option>
+                                                <option value="Image">Image</option>
+                                                <option value="Text">Text</option>
+                                            </select>
+                                        </div>
+                                        <div class="inputContainer">
                                             <label class="inputLabel inputLabelUnfocused" for="ThumbAudioPosition">Audio Position</label>
                                             <select id="ThumbAudioPosition" is="emby-select">
                                                 <option value="">Same as video</option>
@@ -557,6 +582,15 @@
                                 <details class="jellytag-sub">
                                     <summary>Language Override</summary>
                                     <div class="jellytag-sub-body">
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="ThumbLanguageBadgeStyle">Language Badge Style</label>
+                                            <select id="ThumbLanguageBadgeStyle" is="emby-select" class="languageBadgeStyleSelect">
+                                                <option value="">Same as audio</option>
+                                                <option value="SameAsVideo">Same as video</option>
+                                                <option value="Image">Image (flags)</option>
+                                                <option value="Text">Text</option>
+                                            </select>
+                                        </div>
                                         <div class="inputContainer">
                                             <label class="inputLabel inputLabelUnfocused" for="ThumbLanguagePosition">Language Position</label>
                                             <select id="ThumbLanguagePosition" is="emby-select">
@@ -682,6 +716,14 @@
                                     <summary>Audio Override</summary>
                                     <div class="jellytag-sub-body">
                                         <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="BackdropAudioBadgeStyle">Audio Badge Style</label>
+                                            <select id="BackdropAudioBadgeStyle" is="emby-select" class="audioBadgeStyleSelect">
+                                                <option value="">Same as video</option>
+                                                <option value="Image">Image</option>
+                                                <option value="Text">Text</option>
+                                            </select>
+                                        </div>
+                                        <div class="inputContainer">
                                             <label class="inputLabel inputLabelUnfocused" for="BackdropAudioPosition">Audio Position</label>
                                             <select id="BackdropAudioPosition" is="emby-select">
                                                 <option value="">Same as video</option>
@@ -708,6 +750,15 @@
                                 <details class="jellytag-sub">
                                     <summary>Language Override</summary>
                                     <div class="jellytag-sub-body">
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="BackdropLanguageBadgeStyle">Language Badge Style</label>
+                                            <select id="BackdropLanguageBadgeStyle" is="emby-select" class="languageBadgeStyleSelect">
+                                                <option value="">Same as audio</option>
+                                                <option value="SameAsVideo">Same as video</option>
+                                                <option value="Image">Image (flags)</option>
+                                                <option value="Text">Text</option>
+                                            </select>
+                                        </div>
                                         <div class="inputContainer">
                                             <label class="inputLabel inputLabelUnfocused" for="BackdropLanguagePosition">Language Position</label>
                                             <select id="BackdropLanguagePosition" is="emby-select">
@@ -996,6 +1047,13 @@
                 return langVal || null;
             }
 
+            // Helper to resolve language badge style: "" = null (same as audio), "SameAsVideo" = video style, else direct
+            function resolveLanguageBadgeStyle(langStyleVal, videoStyleVal) {
+                if (!langStyleVal) return null;
+                if (langStyleVal === 'SameAsVideo') return videoStyleVal;
+                return langStyleVal;
+            }
+
             document.querySelector('#JellyTagConfigPage')
                 .addEventListener('pageshow', function () {
                     Dashboard.showLoadingMsg();
@@ -1031,6 +1089,7 @@
                         document.querySelector('#PosterEnabled').checked = config.PosterSettings.Enabled;
                         document.querySelector('#PosterPosition').value = config.PosterSettings.BadgePosition;
                         document.querySelector('#PosterLayout').value = config.PosterSettings.BadgeLayout;
+                        document.querySelector('#PosterAudioBadgeStyle').value = config.PosterSettings.AudioBadgeStyle || '';
                         document.querySelector('#PosterAudioPosition').value = config.PosterSettings.AudioBadgePosition || '';
                         document.querySelector('#PosterAudioLayout').value = config.PosterSettings.AudioBadgeLayout || '';
                         document.querySelector('#PosterBadgeStyle').value = config.PosterSettings.BadgeStyle;
@@ -1053,6 +1112,7 @@
                         if (posterLangPos && posterLangPos === config.PosterSettings.BadgePosition) {
                             // Could be explicit same — keep as-is unless user set SameAsVideo
                         }
+                        document.querySelector('#PosterLanguageBadgeStyle').value = config.PosterSettings.LanguageBadgeStyle || '';
                         document.querySelector('#PosterLanguagePosition').value = posterLangPos;
                         document.querySelector('#PosterLanguageLayout').value = config.PosterSettings.LanguageBadgeLayout || '';
                         document.querySelector('#PosterLanguageSize').value = config.PosterSettings.LanguageBadgeSizePercent;
@@ -1061,6 +1121,7 @@
                         document.querySelector('#ThumbEnabled').checked = config.ThumbnailSettings.Enabled;
                         document.querySelector('#ThumbPosition').value = config.ThumbnailSettings.BadgePosition;
                         document.querySelector('#ThumbLayout').value = config.ThumbnailSettings.BadgeLayout;
+                        document.querySelector('#ThumbAudioBadgeStyle').value = config.ThumbnailSettings.AudioBadgeStyle || '';
                         document.querySelector('#ThumbAudioPosition').value = config.ThumbnailSettings.AudioBadgePosition || '';
                         document.querySelector('#ThumbAudioLayout').value = config.ThumbnailSettings.AudioBadgeLayout || '';
                         document.querySelector('#ThumbBadgeStyle').value = config.ThumbnailSettings.BadgeStyle;
@@ -1078,6 +1139,7 @@
                         document.querySelector('#ThumbAudioTextColor').value = config.ThumbnailSettings.AudioBadgeTextColor || '#FFFFFF';
                         document.querySelector('#ThumbLanguageBgColor').value = config.ThumbnailSettings.LanguageBadgeBgColor || '#000000';
                         document.querySelector('#ThumbLanguageTextColor').value = config.ThumbnailSettings.LanguageBadgeTextColor || '#FFFFFF';
+                        document.querySelector('#ThumbLanguageBadgeStyle').value = config.ThumbnailSettings.LanguageBadgeStyle || '';
                         document.querySelector('#ThumbLanguagePosition').value = config.ThumbnailSettings.LanguageBadgePosition || '';
                         document.querySelector('#ThumbLanguageLayout').value = config.ThumbnailSettings.LanguageBadgeLayout || '';
                         document.querySelector('#ThumbLanguageSize').value = config.ThumbnailSettings.LanguageBadgeSizePercent;
@@ -1086,6 +1148,7 @@
                         document.querySelector('#BackdropEnabled').checked = config.BackdropSettings.Enabled;
                         document.querySelector('#BackdropPosition').value = config.BackdropSettings.BadgePosition;
                         document.querySelector('#BackdropLayout').value = config.BackdropSettings.BadgeLayout;
+                        document.querySelector('#BackdropAudioBadgeStyle').value = config.BackdropSettings.AudioBadgeStyle || '';
                         document.querySelector('#BackdropAudioPosition').value = config.BackdropSettings.AudioBadgePosition || '';
                         document.querySelector('#BackdropAudioLayout').value = config.BackdropSettings.AudioBadgeLayout || '';
                         document.querySelector('#BackdropBadgeStyle').value = config.BackdropSettings.BadgeStyle;
@@ -1103,6 +1166,7 @@
                         document.querySelector('#BackdropAudioTextColor').value = config.BackdropSettings.AudioBadgeTextColor || '#FFFFFF';
                         document.querySelector('#BackdropLanguageBgColor').value = config.BackdropSettings.LanguageBadgeBgColor || '#000000';
                         document.querySelector('#BackdropLanguageTextColor').value = config.BackdropSettings.LanguageBadgeTextColor || '#FFFFFF';
+                        document.querySelector('#BackdropLanguageBadgeStyle').value = config.BackdropSettings.LanguageBadgeStyle || '';
                         document.querySelector('#BackdropLanguagePosition').value = config.BackdropSettings.LanguageBadgePosition || '';
                         document.querySelector('#BackdropLanguageLayout').value = config.BackdropSettings.LanguageBadgeLayout || '';
                         document.querySelector('#BackdropLanguageSize').value = config.BackdropSettings.LanguageBadgeSizePercent;
@@ -1171,6 +1235,8 @@
                             Enabled: document.querySelector('#PosterEnabled').checked,
                             BadgePosition: document.querySelector('#PosterPosition').value,
                             BadgeLayout: document.querySelector('#PosterLayout').value,
+                            AudioBadgeStyle: document.querySelector('#PosterAudioBadgeStyle').value || null,
+                            LanguageBadgeStyle: resolveLanguageBadgeStyle(document.querySelector('#PosterLanguageBadgeStyle').value, document.querySelector('#PosterBadgeStyle').value),
                             AudioBadgePosition: document.querySelector('#PosterAudioPosition').value || null,
                             AudioBadgeLayout: document.querySelector('#PosterAudioLayout').value || null,
                             BadgeStyle: document.querySelector('#PosterBadgeStyle').value,
@@ -1196,6 +1262,8 @@
                             Enabled: document.querySelector('#ThumbEnabled').checked,
                             BadgePosition: document.querySelector('#ThumbPosition').value,
                             BadgeLayout: document.querySelector('#ThumbLayout').value,
+                            AudioBadgeStyle: document.querySelector('#ThumbAudioBadgeStyle').value || null,
+                            LanguageBadgeStyle: resolveLanguageBadgeStyle(document.querySelector('#ThumbLanguageBadgeStyle').value, document.querySelector('#ThumbBadgeStyle').value),
                             AudioBadgePosition: document.querySelector('#ThumbAudioPosition').value || null,
                             AudioBadgeLayout: document.querySelector('#ThumbAudioLayout').value || null,
                             BadgeStyle: document.querySelector('#ThumbBadgeStyle').value,
@@ -1221,6 +1289,8 @@
                             Enabled: document.querySelector('#BackdropEnabled').checked,
                             BadgePosition: document.querySelector('#BackdropPosition').value,
                             BadgeLayout: document.querySelector('#BackdropLayout').value,
+                            AudioBadgeStyle: document.querySelector('#BackdropAudioBadgeStyle').value || null,
+                            LanguageBadgeStyle: resolveLanguageBadgeStyle(document.querySelector('#BackdropLanguageBadgeStyle').value, document.querySelector('#BackdropBadgeStyle').value),
                             AudioBadgePosition: document.querySelector('#BackdropAudioPosition').value || null,
                             AudioBadgeLayout: document.querySelector('#BackdropAudioLayout').value || null,
                             BadgeStyle: document.querySelector('#BackdropBadgeStyle').value,
