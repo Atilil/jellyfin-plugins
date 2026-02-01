@@ -105,8 +105,8 @@ public class ImageTypeConfig
     public bool ShowVostIndicator { get; set; } = true;
     public string? VostBgColor { get; set; }
     public string? VostTextColor { get; set; }
-    public int VostBgOpacity { get; set; }
-    public int VostCornerRadius { get; set; } = -1;
+    public int VostBgOpacity { get; set; } = 255;
+    public int VostCornerRadius { get; set; } = 1;
 }
 
 /// <summary>
@@ -120,15 +120,15 @@ public class PluginConfiguration : BasePluginConfiguration
 
         PosterConfig = CreateDefaultPosterConfig();
         ThumbnailConfig = CreateDefaultThumbnailConfig();
-        ThumbnailSameAsPoster = false;
-        ThumbnailSizeReduction = 10;
+        ThumbnailSameAsPoster = true;
+        ThumbnailSizeReduction = 5;
         ExcludedLibraryIds = new List<string>();
 
         CustomBadgeTexts = new List<BadgeTextOverride>();
         CacheDurationHours = 24;
         JpegQuality = 90;
-        OutputFormat = OutputImageFormat.WebP;
-        WebPQuality = 100;
+        OutputFormat = OutputImageFormat.Jpeg;
+        WebPQuality = 90;
     }
 
     public bool Enabled { get; set; }
@@ -352,39 +352,41 @@ public class PluginConfiguration : BasePluginConfiguration
         config.ResolutionPanel = new BadgePanelSettings
         {
             Enabled = true, Order = 0, Position = BadgePosition.TopLeft,
-            Layout = BadgeLayout.Vertical, SizePercent = 15, MarginPercent = 2.5f, GapPercent = 10f,
+            Layout = BadgeLayout.Vertical, SizePercent = 15, MarginPercent = 2f, GapPercent = 5f,
             EnabledBadges = new List<string> { "4k", "1080p", "720p", "sd" }
         };
         config.HdrPanel = new BadgePanelSettings
         {
             Enabled = true, Order = 1, Position = BadgePosition.TopLeft,
-            Layout = BadgeLayout.Vertical, SizePercent = 15, MarginPercent = 2.5f, GapPercent = 10f,
+            Layout = BadgeLayout.Vertical, SizePercent = 15, MarginPercent = 2f, GapPercent = 10f,
             EnabledBadges = new List<string> { "hdr10", "hdr10plus", "dv", "hlg", "3d" }
         };
         config.CodecPanel = new BadgePanelSettings
         {
-            Enabled = false, Order = 2, Position = BadgePosition.TopLeft,
-            Layout = BadgeLayout.Vertical, SizePercent = 15, MarginPercent = 2.5f, GapPercent = 10f,
+            Enabled = true, Order = 2, Position = BadgePosition.TopLeft,
+            Layout = BadgeLayout.Vertical, SizePercent = 15, MarginPercent = 2f, GapPercent = 10f,
             EnabledBadges = new List<string> { "h264", "hevc", "av1", "vp9" }
         };
         config.AudioPanel = new BadgePanelSettings
         {
             Enabled = true, Order = 3, Position = BadgePosition.TopLeft,
-            Layout = BadgeLayout.Vertical, SizePercent = 15, MarginPercent = 2.5f, GapPercent = 10f,
+            Layout = BadgeLayout.Vertical, SizePercent = 15, MarginPercent = 2f, GapPercent = 10f,
             EnabledBadges = new List<string> { "atmos", "dtsx", "truehd", "dtshdma", "7.1", "5.1", "stereo" }
         };
         config.LanguagePanel = new BadgePanelSettings
         {
             Enabled = true, Order = 4, Position = BadgePosition.TopLeft,
-            Layout = BadgeLayout.Vertical, SizePercent = 15, MarginPercent = 2.5f, GapPercent = 10f,
+            Layout = BadgeLayout.Vertical, SizePercent = 15, MarginPercent = 2f, GapPercent = 10f,
             ShowMode = BadgeDisplayMode.All,
             Style = BadgeStyle.Image,
             EnabledBadges = new List<string>()
         };
 
         config.ShowVostIndicator = true;
+        config.VostBgColor = "#000000";
+        config.VostTextColor = "#ffffff";
         config.VostBgOpacity = 255;
-        config.VostCornerRadius = 1;
+        config.VostCornerRadius = 10;
 
         return config;
     }

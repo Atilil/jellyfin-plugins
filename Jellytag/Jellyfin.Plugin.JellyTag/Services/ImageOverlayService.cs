@@ -484,7 +484,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         var assembly = Assembly.GetExecutingAssembly();
         var resourceNames = assembly.GetManifestResourceNames();
 
-        _logger.LogInformation("[JellyTag] Loading badges. Available resources: {Resources}", string.Join(", ", resourceNames));
+        _logger.LogInformation("Loading badges. Available resources: {Resources}", string.Join(", ", resourceNames));
 
         var assetsMarker = ".Assets.";
         var badgeBaseNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -519,12 +519,12 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                     {
                         var bytes = File.ReadAllBytes(customSvg);
                         _svgCache[svgFileName] = bytes;
-                        _logger.LogInformation("[JellyTag] Loaded custom SVG badge: {FileName}", svgFileName);
+                        _logger.LogInformation("Loaded custom SVG badge: {FileName}", svgFileName);
                         continue;
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "[JellyTag] Failed to load custom SVG badge: {Path}", customSvg);
+                        _logger.LogWarning(ex, "Failed to load custom SVG badge: {Path}", customSvg);
                     }
                 }
 
@@ -538,13 +538,13 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                         {
                             customBadge = TrimTransparent(customBadge);
                             _rasterCache[svgFileName] = customBadge;
-                            _logger.LogInformation("[JellyTag] Loaded custom PNG badge: {FileName}", pngFileName);
+                            _logger.LogInformation("Loaded custom PNG badge: {FileName}", pngFileName);
                             continue;
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, "[JellyTag] Failed to load custom PNG badge: {Path}", customPng);
+                        _logger.LogWarning(ex, "Failed to load custom PNG badge: {Path}", customPng);
                     }
                 }
 
@@ -561,14 +561,14 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                             {
                                 customBadge = TrimTransparent(customBadge);
                                 _rasterCache[svgFileName] = customBadge;
-                                _logger.LogInformation("[JellyTag] Loaded custom JPEG badge: {FileName}", baseName + ext);
+                                _logger.LogInformation("Loaded custom JPEG badge: {FileName}", baseName + ext);
                                 foundJpeg = true;
                                 break;
                             }
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogWarning(ex, "[JellyTag] Failed to load custom JPEG badge: {Path}", customJpg);
+                            _logger.LogWarning(ex, "Failed to load custom JPEG badge: {Path}", customJpg);
                         }
                     }
                 }
@@ -590,13 +590,13 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                         using var ms = new MemoryStream();
                         stream.CopyTo(ms);
                         _svgCache[svgFileName] = ms.ToArray();
-                        _logger.LogInformation("[JellyTag] Loaded embedded SVG badge: {FileName}", svgFileName);
+                        _logger.LogInformation("Loaded embedded SVG badge: {FileName}", svgFileName);
                         continue;
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "[JellyTag] Failed to load embedded SVG badge: {FileName}", svgFileName);
+                    _logger.LogError(ex, "Failed to load embedded SVG badge: {FileName}", svgFileName);
                 }
             }
 
@@ -616,18 +616,18 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                         {
                             badge = TrimTransparent(badge);
                             _rasterCache[svgFileName] = badge;
-                            _logger.LogInformation("[JellyTag] Loaded embedded PNG fallback: {FileName}", pngFileName);
+                            _logger.LogInformation("Loaded embedded PNG fallback: {FileName}", pngFileName);
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "[JellyTag] Failed to load embedded PNG badge: {FileName}", pngFileName);
+                    _logger.LogError(ex, "Failed to load embedded PNG badge: {FileName}", pngFileName);
                 }
             }
         }
 
-        _logger.LogInformation("[JellyTag] Badge loading complete. SVG: {SvgCount}, Raster: {RasterCount}", _svgCache.Count, _rasterCache.Count);
+        _logger.LogInformation("Badge loading complete. SVG: {SvgCount}, Raster: {RasterCount}", _svgCache.Count, _rasterCache.Count);
     }
 
     private static SKBitmap TrimTransparent(SKBitmap bitmap)
@@ -845,23 +845,29 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
 
             var fontSize = height * 0.7f;
             var font = new SKFont(SKTypeface.Default, fontSize);
-            font.Edging = SKFontEdging.SubpixelAntialias;
-            var textWidth = font.MeasureText(text);
-            if (textWidth > availableWidth && fontSize > 1f)
+            try
             {
-                fontSize *= (availableWidth / textWidth) * 0.95f;
-                fontSize = Math.Max(fontSize, 1f);
-                font.Dispose();
-                font = new SKFont(SKTypeface.Default, fontSize);
                 font.Edging = SKFontEdging.SubpixelAntialias;
-                textWidth = font.MeasureText(text);
+                var textWidth = font.MeasureText(text);
+                if (textWidth > availableWidth && fontSize > 1f)
+                {
+                    fontSize *= (availableWidth / textWidth) * 0.95f;
+                    fontSize = Math.Max(fontSize, 1f);
+                    font.Dispose();
+                    font = new SKFont(SKTypeface.Default, fontSize);
+                    font.Edging = SKFontEdging.SubpixelAntialias;
+                    textWidth = font.MeasureText(text);
+                }
+
+                var textX = rect.MidX - (textWidth / 2f);
+                var textY = rect.MidY + (fontSize / 3f);
+
+                canvas.DrawText(text, textX, textY, font, textPaint);
             }
-
-            var textX = rect.MidX - (textWidth / 2f);
-            var textY = rect.MidY + (fontSize / 3f);
-
-            canvas.DrawText(text, textX, textY, font, textPaint);
-            font.Dispose();
+            finally
+            {
+                font.Dispose();
+            }
         }
     }
 

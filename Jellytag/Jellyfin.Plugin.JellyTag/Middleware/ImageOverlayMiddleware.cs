@@ -97,11 +97,11 @@ public partial class ImageOverlayMiddleware
 
         // Detect all badges and filter by config
         var allBadges = qualityService.DetectAllBadges(item);
-        _logger.LogDebug("[JellyTag] DetectAllBadges for {Item}: {Count} badges found: {Badges}",
+        _logger.LogDebug("DetectAllBadges for {Item}: {Count} badges found: {Badges}",
             item.Name, allBadges.Count, string.Join(", ", allBadges.Select(b => $"{b.Category}:{b.BadgeKey}")));
 
         var visibleBadges = allBadges.Where(b => overlayService.ShouldShowBadge(b, imageConfig)).ToList();
-        _logger.LogDebug("[JellyTag] Visible badges after filter: {Count}: {Badges}",
+        _logger.LogDebug("Visible badges after filter: {Count}: {Badges}",
             visibleBadges.Count, string.Join(", ", visibleBadges.Select(b => b.BadgeKey)));
 
         if (visibleBadges.Count == 0)
@@ -111,7 +111,7 @@ public partial class ImageOverlayMiddleware
         }
 
         var badgeKey = string.Join("_", visibleBadges.Select(b => b.BadgeKey));
-        _logger.LogInformation("[JellyTag] Applying {Count} badges to {Item}: {BadgeKey}", visibleBadges.Count, item.Name, badgeKey);
+        _logger.LogInformation("Applying {Count} badges to {Item}: {BadgeKey}", visibleBadges.Count, item.Name, badgeKey);
 
         var query = context.Request.QueryString.Value ?? string.Empty;
         var tag = context.Request.Query["tag"].FirstOrDefault() ?? item.DateModified.Ticks.ToString();
@@ -155,7 +155,7 @@ public partial class ImageOverlayMiddleware
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "[JellyTag] Failed to add badge overlay, serving original image");
+                _logger.LogWarning(ex, "Failed to add badge overlay, serving original image");
                 capturedBody.Position = 0;
                 await capturedBody.CopyToAsync(originalBody).ConfigureAwait(false);
                 return;
