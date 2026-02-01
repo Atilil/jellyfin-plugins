@@ -248,6 +248,26 @@ public class ImageTypeSettings
     public int LanguageTextBadgeCornerRadius { get; set; } = -1;
 
     /// <summary>
+    /// Gets or sets the video codec badge background color override. When null, uses video badge colors.
+    /// </summary>
+    public string? CodecBadgeBgColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the video codec badge text color override. When null, uses video badge colors.
+    /// </summary>
+    public string? CodecBadgeTextColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the video codec text badge background opacity override (0 = inherit from global).
+    /// </summary>
+    public int CodecTextBadgeBgOpacity { get; set; }
+
+    /// <summary>
+    /// Gets or sets the video codec text badge corner radius override (-1 = inherit from global).
+    /// </summary>
+    public int CodecTextBadgeCornerRadius { get; set; } = -1;
+
+    /// <summary>
     /// Gets or sets the subtitle badge background color override. When null, uses global TextBadgeBgColor.
     /// </summary>
     public string? SubtitleBadgeBgColor { get; set; }

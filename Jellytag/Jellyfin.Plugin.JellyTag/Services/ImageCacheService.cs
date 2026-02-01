@@ -245,6 +245,8 @@ public class ImageCacheService : IImageCacheService
         sb.Append(s.SubtitleBadgeBgColor ?? "n").Append(s.SubtitleBadgeTextColor ?? "n");
         sb.Append(s.AudioTextBadgeBgOpacity).Append(s.AudioTextBadgeCornerRadius);
         sb.Append(s.LanguageTextBadgeBgOpacity).Append(s.LanguageTextBadgeCornerRadius);
+        sb.Append(s.CodecBadgeBgColor ?? "n").Append(s.CodecBadgeTextColor ?? "n");
+        sb.Append(s.CodecTextBadgeBgOpacity).Append(s.CodecTextBadgeCornerRadius);
         sb.Append(s.SubtitleTextBadgeBgOpacity).Append(s.SubtitleTextBadgeCornerRadius);
         sb.Append('|');
     }

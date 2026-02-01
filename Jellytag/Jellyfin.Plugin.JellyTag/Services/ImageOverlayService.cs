@@ -966,7 +966,9 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
     {
         var bgColor = category switch
         {
-            BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.VideoCodec or BadgeCategory.ThreeD =>
+            BadgeCategory.VideoCodec =>
+                settings.CodecBadgeBgColor ?? settings.VideoBadgeBgColor ?? settings.TextBadgeBgColor ?? "#000000",
+            BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.ThreeD =>
                 settings.VideoBadgeBgColor ?? settings.TextBadgeBgColor ?? "#000000",
             BadgeCategory.Audio =>
                 settings.AudioBadgeBgColor ?? settings.TextBadgeBgColor ?? "#000000",
@@ -978,7 +980,9 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         };
         var textColor = category switch
         {
-            BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.VideoCodec or BadgeCategory.ThreeD =>
+            BadgeCategory.VideoCodec =>
+                settings.CodecBadgeTextColor ?? settings.VideoBadgeTextColor ?? settings.TextBadgeTextColor ?? "#FFFFFF",
+            BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.ThreeD =>
                 settings.VideoBadgeTextColor ?? settings.TextBadgeTextColor ?? "#FFFFFF",
             BadgeCategory.Audio =>
                 settings.AudioBadgeTextColor ?? settings.TextBadgeTextColor ?? "#FFFFFF",
@@ -995,6 +999,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
     {
         var raw = category switch
         {
+            BadgeCategory.VideoCodec => settings.CodecTextBadgeBgOpacity > 0 ? settings.CodecTextBadgeBgOpacity : settings.TextBadgeBgOpacity,
             BadgeCategory.Audio => settings.AudioTextBadgeBgOpacity > 0 ? settings.AudioTextBadgeBgOpacity : settings.TextBadgeBgOpacity,
             BadgeCategory.Language => settings.LanguageTextBadgeBgOpacity > 0 ? settings.LanguageTextBadgeBgOpacity : settings.TextBadgeBgOpacity,
             BadgeCategory.Subtitle => settings.SubtitleTextBadgeBgOpacity > 0 ? settings.SubtitleTextBadgeBgOpacity : settings.TextBadgeBgOpacity,
@@ -1007,6 +1012,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
     {
         var raw = category switch
         {
+            BadgeCategory.VideoCodec => settings.CodecTextBadgeCornerRadius >= 0 ? settings.CodecTextBadgeCornerRadius : settings.TextBadgeCornerRadius,
             BadgeCategory.Audio => settings.AudioTextBadgeCornerRadius >= 0 ? settings.AudioTextBadgeCornerRadius : settings.TextBadgeCornerRadius,
             BadgeCategory.Language => settings.LanguageTextBadgeCornerRadius >= 0 ? settings.LanguageTextBadgeCornerRadius : settings.TextBadgeCornerRadius,
             BadgeCategory.Subtitle => settings.SubtitleTextBadgeCornerRadius >= 0 ? settings.SubtitleTextBadgeCornerRadius : settings.TextBadgeCornerRadius,

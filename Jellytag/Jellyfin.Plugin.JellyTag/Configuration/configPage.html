@@ -622,6 +622,30 @@
                                         </div>
                                     </div>
                                 </details>
+                                <details id="PosterCodecOverride" class="jellytag-sub">
+                                    <summary>Codec Override</summary>
+                                    <div class="jellytag-sub-body">
+                                        <div class="fieldDescription" style="margin-bottom:.5em;">Text style overrides for video codec badges (H.264, HEVC, AV1, VP9).</div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="PosterCodecBgColor">Codec BG Color</label>
+                                            <input id="PosterCodecBgColor" type="color" value="#000000" />
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="PosterCodecTextColor">Codec Text Color</label>
+                                            <input id="PosterCodecTextColor" type="color" value="#FFFFFF" />
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="PosterCodecTextBgOpacity">Codec BG Opacity</label>
+                                            <input id="PosterCodecTextBgOpacity" type="number" min="0" max="255" step="1" is="emby-input" />
+                                            <div class="fieldDescription">0 = inherit from video, 1-255 = custom opacity.</div>
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="PosterCodecTextCornerRadius">Codec Corner Radius (%)</label>
+                                            <input id="PosterCodecTextCornerRadius" type="number" min="-1" max="50" step="1" is="emby-input" />
+                                            <div class="fieldDescription">-1 = inherit from video, 0-50 = custom radius.</div>
+                                        </div>
+                                    </div>
+                                </details>
                         </div>
                     </details>
 
@@ -838,6 +862,30 @@
                                         </div>
                                     </div>
                                 </details>
+                                <details id="ThumbCodecOverride" class="jellytag-sub">
+                                    <summary>Codec Override</summary>
+                                    <div class="jellytag-sub-body">
+                                        <div class="fieldDescription" style="margin-bottom:.5em;">Text style overrides for video codec badges (H.264, HEVC, AV1, VP9).</div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="ThumbCodecBgColor">Codec BG Color</label>
+                                            <input id="ThumbCodecBgColor" type="color" value="#000000" />
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="ThumbCodecTextColor">Codec Text Color</label>
+                                            <input id="ThumbCodecTextColor" type="color" value="#FFFFFF" />
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="ThumbCodecTextBgOpacity">Codec BG Opacity</label>
+                                            <input id="ThumbCodecTextBgOpacity" type="number" min="0" max="255" step="1" is="emby-input" />
+                                            <div class="fieldDescription">0 = inherit from video, 1-255 = custom opacity.</div>
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="ThumbCodecTextCornerRadius">Codec Corner Radius (%)</label>
+                                            <input id="ThumbCodecTextCornerRadius" type="number" min="-1" max="50" step="1" is="emby-input" />
+                                            <div class="fieldDescription">-1 = inherit from video, 0-50 = custom radius.</div>
+                                        </div>
+                                    </div>
+                                </details>
                         </div>
                     </details>
 
@@ -1051,6 +1099,30 @@
                                             <label class="inputLabel inputLabelUnfocused" for="BackdropSubtitleTextCornerRadius">VOST Corner Radius (%)</label>
                                             <input id="BackdropSubtitleTextCornerRadius" type="number" min="-1" max="50" step="1" is="emby-input" />
                                             <div class="fieldDescription">-1 = inherit from global, 0-50 = custom radius.</div>
+                                        </div>
+                                    </div>
+                                </details>
+                                <details id="BackdropCodecOverride" class="jellytag-sub">
+                                    <summary>Codec Override</summary>
+                                    <div class="jellytag-sub-body">
+                                        <div class="fieldDescription" style="margin-bottom:.5em;">Text style overrides for video codec badges (H.264, HEVC, AV1, VP9).</div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="BackdropCodecBgColor">Codec BG Color</label>
+                                            <input id="BackdropCodecBgColor" type="color" value="#000000" />
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="BackdropCodecTextColor">Codec Text Color</label>
+                                            <input id="BackdropCodecTextColor" type="color" value="#FFFFFF" />
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="BackdropCodecTextBgOpacity">Codec BG Opacity</label>
+                                            <input id="BackdropCodecTextBgOpacity" type="number" min="0" max="255" step="1" is="emby-input" />
+                                            <div class="fieldDescription">0 = inherit from video, 1-255 = custom opacity.</div>
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="BackdropCodecTextCornerRadius">Codec Corner Radius (%)</label>
+                                            <input id="BackdropCodecTextCornerRadius" type="number" min="-1" max="50" step="1" is="emby-input" />
+                                            <div class="fieldDescription">-1 = inherit from video, 0-50 = custom radius.</div>
                                         </div>
                                     </div>
                                 </details>
@@ -1561,6 +1633,18 @@
                         document.querySelector('#ShowSubtitleIndicator').addEventListener('change', toggleVostOverrides);
                         toggleVostOverrides();
 
+                        // Codec override: load values
+                        var codecPrefixes = ['Poster', 'Thumb', 'Backdrop'];
+                        var codecSettings = ['PosterSettings', 'ThumbnailSettings', 'BackdropSettings'];
+                        for (var ci = 0; ci < codecPrefixes.length; ci++) {
+                            var cp = codecPrefixes[ci];
+                            var cs = config[codecSettings[ci]];
+                            document.querySelector('#' + cp + 'CodecBgColor').value = cs.CodecBadgeBgColor || '#000000';
+                            document.querySelector('#' + cp + 'CodecTextColor').value = cs.CodecBadgeTextColor || '#FFFFFF';
+                            document.querySelector('#' + cp + 'CodecTextBgOpacity').value = cs.CodecTextBadgeBgOpacity || 0;
+                            document.querySelector('#' + cp + 'CodecTextCornerRadius').value = cs.CodecTextBadgeCornerRadius != null ? cs.CodecTextBadgeCornerRadius : -1;
+                        }
+
                         Dashboard.hideLoadingMsg();
                     });
 
@@ -1647,7 +1731,11 @@
                     SubtitleBadgeBgColor: document.querySelector('#PosterSubtitleBgColor').value || null,
                     SubtitleBadgeTextColor: document.querySelector('#PosterSubtitleTextColor').value || null,
                     SubtitleTextBadgeBgOpacity: parseInt(document.querySelector('#PosterSubtitleTextBgOpacity').value, 10) || 0,
-                    SubtitleTextBadgeCornerRadius: parseInt(document.querySelector('#PosterSubtitleTextCornerRadius').value, 10)
+                    SubtitleTextBadgeCornerRadius: parseInt(document.querySelector('#PosterSubtitleTextCornerRadius').value, 10),
+                    CodecBadgeBgColor: document.querySelector('#PosterCodecBgColor').value || null,
+                    CodecBadgeTextColor: document.querySelector('#PosterCodecTextColor').value || null,
+                    CodecTextBadgeBgOpacity: parseInt(document.querySelector('#PosterCodecTextBgOpacity').value, 10) || 0,
+                    CodecTextBadgeCornerRadius: parseInt(document.querySelector('#PosterCodecTextCornerRadius').value, 10)
                 };
                 config.ThumbnailSettings = {
                     Enabled: document.querySelector('#ThumbEnabled').checked,
@@ -1682,7 +1770,11 @@
                     SubtitleBadgeBgColor: document.querySelector('#ThumbSubtitleBgColor').value || null,
                     SubtitleBadgeTextColor: document.querySelector('#ThumbSubtitleTextColor').value || null,
                     SubtitleTextBadgeBgOpacity: parseInt(document.querySelector('#ThumbSubtitleTextBgOpacity').value, 10) || 0,
-                    SubtitleTextBadgeCornerRadius: parseInt(document.querySelector('#ThumbSubtitleTextCornerRadius').value, 10)
+                    SubtitleTextBadgeCornerRadius: parseInt(document.querySelector('#ThumbSubtitleTextCornerRadius').value, 10),
+                    CodecBadgeBgColor: document.querySelector('#ThumbCodecBgColor').value || null,
+                    CodecBadgeTextColor: document.querySelector('#ThumbCodecTextColor').value || null,
+                    CodecTextBadgeBgOpacity: parseInt(document.querySelector('#ThumbCodecTextBgOpacity').value, 10) || 0,
+                    CodecTextBadgeCornerRadius: parseInt(document.querySelector('#ThumbCodecTextCornerRadius').value, 10)
                 };
                 config.BackdropSettings = {
                     Enabled: document.querySelector('#BackdropEnabled').checked,
@@ -1717,7 +1809,11 @@
                     SubtitleBadgeBgColor: document.querySelector('#BackdropSubtitleBgColor').value || null,
                     SubtitleBadgeTextColor: document.querySelector('#BackdropSubtitleTextColor').value || null,
                     SubtitleTextBadgeBgOpacity: parseInt(document.querySelector('#BackdropSubtitleTextBgOpacity').value, 10) || 0,
-                    SubtitleTextBadgeCornerRadius: parseInt(document.querySelector('#BackdropSubtitleTextCornerRadius').value, 10)
+                    SubtitleTextBadgeCornerRadius: parseInt(document.querySelector('#BackdropSubtitleTextCornerRadius').value, 10),
+                    CodecBadgeBgColor: document.querySelector('#BackdropCodecBgColor').value || null,
+                    CodecBadgeTextColor: document.querySelector('#BackdropCodecTextColor').value || null,
+                    CodecTextBadgeBgOpacity: parseInt(document.querySelector('#BackdropCodecTextBgOpacity').value, 10) || 0,
+                    CodecTextBadgeCornerRadius: parseInt(document.querySelector('#BackdropCodecTextCornerRadius').value, 10)
                 };
 
                 // Custom Badge Texts
