@@ -283,39 +283,65 @@ public class PluginConfiguration : BasePluginConfiguration
         // Resolution badges
         Show4K = true;
         Show1080p = true;
-        Show720p = false;
-        ShowSD = false;
+        Show720p = true;
+        ShowSD = true;
 
         // HDR badges
         ShowHdr10 = true;
         ShowHdr10Plus = true;
         ShowDolbyVision = true;
-        ShowHlg = false;
+        ShowHlg = true;
 
         // HDR generic
         ShowGenericHdr = false;
 
         // 3D
-        Show3D = false;
+        Show3D = true;
 
         // Audio badges
         ShowDolbyAtmos = true;
         ShowDtsX = true;
         ShowTrueHD = true;
         ShowDtsHdMa = true;
-        ShowChannelBadge = false;
+        ShowChannelBadge = true;
 
         // Language badges
-        LanguageBadgeMode = LanguageBadgeMode.None;
+        LanguageBadgeMode = LanguageBadgeMode.All;
         ShowSubtitleIndicator = true;
 
         PosterSettings = new ImageTypeSettings
         {
             Enabled = true,
             BadgeSizePercent = 15,
-            AudioBadgeSizePercent = 12,
+            AudioBadgeSizePercent = 15,
+            LanguageBadgeSizePercent = 15,
+            BadgeMarginPercent = 2.5f,
+            BadgeGapPercent = 10.0f,
+            BadgePosition = BadgePosition.TopLeft,
+            BadgeLayout = BadgeLayout.Vertical,
+            BadgeStyle = BadgeStyle.Image,
+            LanguageBadgeStyle = BadgeStyle.Image,
+            LanguageBadgePosition = BadgePosition.TopLeft,
+            LanguageBadgeLayout = BadgeLayout.Vertical,
+            TextBadgeBgColor = "#000000",
+            TextBadgeBgOpacity = 180,
+            TextBadgeTextColor = "#FFFFFF",
+            TextBadgeCornerRadius = 25,
+            AudioTextBadgeBgOpacity = 0,
+            AudioTextBadgeCornerRadius = -1,
+            LanguageTextBadgeBgOpacity = 0,
+            LanguageTextBadgeCornerRadius = -1,
+            SubtitleTextBadgeBgOpacity = 255,
+            SubtitleTextBadgeCornerRadius = 1
+        };
+
+        ThumbnailSettings = new ImageTypeSettings
+        {
+            Enabled = true,
+            BadgeSizePercent = 10,
+            AudioBadgeSizePercent = 10,
             LanguageBadgeSizePercent = 10,
-            BadgeMarginPercent = 2.0f,
+            BadgeMarginPercent = 2.5f,
             BadgeGapPercent = 10.0f,
             BadgePosition = BadgePosition.TopLeft,
             BadgeLayout = BadgeLayout.Vertical,
@@ -328,43 +354,20 @@ public class PluginConfiguration : BasePluginConfiguration
             AudioTextBadgeCornerRadius = -1,
             LanguageTextBadgeBgOpacity = 0,
             LanguageTextBadgeCornerRadius = -1,
-            SubtitleTextBadgeBgOpacity = 0,
-            SubtitleTextBadgeCornerRadius = -1
-        };
-
-        ThumbnailSettings = new ImageTypeSettings
-        {
-            Enabled = false,
-            BadgeSizePercent = 10,
-            AudioBadgeSizePercent = 8,
-            LanguageBadgeSizePercent = 10,
-            BadgeMarginPercent = 1.0f,
-            BadgeGapPercent = 10.0f,
-            BadgePosition = BadgePosition.TopRight,
-            BadgeLayout = BadgeLayout.Horizontal,
-            BadgeStyle = BadgeStyle.Image,
-            TextBadgeBgColor = "#000000",
-            TextBadgeBgOpacity = 180,
-            TextBadgeTextColor = "#FFFFFF",
-            TextBadgeCornerRadius = 25,
-            AudioTextBadgeBgOpacity = 0,
-            AudioTextBadgeCornerRadius = -1,
-            LanguageTextBadgeBgOpacity = 0,
-            LanguageTextBadgeCornerRadius = -1,
-            SubtitleTextBadgeBgOpacity = 0,
-            SubtitleTextBadgeCornerRadius = -1
+            SubtitleTextBadgeBgOpacity = 255,
+            SubtitleTextBadgeCornerRadius = 1
         };
 
         BackdropSettings = new ImageTypeSettings
         {
             Enabled = false,
-            BadgeSizePercent = 8,
-            AudioBadgeSizePercent = 6,
+            BadgeSizePercent = 10,
+            AudioBadgeSizePercent = 10,
             LanguageBadgeSizePercent = 10,
-            BadgeMarginPercent = 2.5f,
-            BadgeGapPercent = 10.0f,
-            BadgePosition = BadgePosition.BottomRight,
-            BadgeLayout = BadgeLayout.Horizontal,
+            BadgeMarginPercent = 2.0f,
+            BadgeGapPercent = 3.0f,
+            BadgePosition = BadgePosition.TopLeft,
+            BadgeLayout = BadgeLayout.Vertical,
             BadgeStyle = BadgeStyle.Image,
             TextBadgeBgColor = "#000000",
             TextBadgeBgOpacity = 180,
@@ -382,8 +385,8 @@ public class PluginConfiguration : BasePluginConfiguration
 
         CacheDurationHours = 24;
         JpegQuality = 90;
-        OutputFormat = OutputImageFormat.Jpeg;
-        WebPQuality = 90;
+        OutputFormat = OutputImageFormat.WebP;
+        WebPQuality = 100;
     }
 
     /// <summary>
