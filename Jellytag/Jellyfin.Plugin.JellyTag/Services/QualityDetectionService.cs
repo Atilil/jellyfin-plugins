@@ -120,7 +120,7 @@ public class QualityDetectionService : IQualityDetectionService
     {
         if (_badgeCache.TryGetValue(item.Id, out var cached) && DateTime.UtcNow - cached.CachedAt < BadgeCacheTtl)
         {
-            return cached.Badges;
+            return new List<BadgeInfo>(cached.Badges);
         }
 
         var badges = DetectAllBadgesInternal(item);
@@ -154,7 +154,7 @@ public class QualityDetectionService : IQualityDetectionService
             var children = _libraryManager.GetItemList(query);
 
             var bestResolution = VideoQuality.Unknown;
-            Video? firstVideoWithStreams = null;
+            Video? bestVideo = null;
 
             foreach (var child in children)
             {
@@ -164,14 +164,10 @@ public class QualityDetectionService : IQualityDetectionService
                     if (q != VideoQuality.Unknown && (bestResolution == VideoQuality.Unknown || q > bestResolution))
                     {
                         bestResolution = q;
+                        bestVideo = childVideo;
                     }
 
-                    firstVideoWithStreams ??= childVideo;
-
-                    if (bestResolution == VideoQuality.UHD4K && firstVideoWithStreams != null)
-                    {
-                        break;
-                    }
+                    bestVideo ??= childVideo;
                 }
             }
 
@@ -180,9 +176,9 @@ public class QualityDetectionService : IQualityDetectionService
                 badges.Add(CreateResolutionBadge(bestResolution));
             }
 
-            if (firstVideoWithStreams != null)
+            if (bestVideo != null)
             {
-                DetectHdrAndAudioBadges(firstVideoWithStreams, badges);
+                DetectHdrAndAudioBadges(bestVideo, badges);
             }
         }
 

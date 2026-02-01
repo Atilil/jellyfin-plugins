@@ -13,8 +13,8 @@ namespace Jellyfin.Plugin.JellyTag.Services;
 public class ImageOverlayService : IImageOverlayService, IDisposable
 {
     private readonly ILogger<ImageOverlayService> _logger;
-    private readonly Dictionary<string, byte[]> _svgCache = new();
-    private readonly Dictionary<string, SKBitmap?> _rasterCache = new();
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, byte[]> _svgCache = new();
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, SKBitmap?> _rasterCache = new();
     private readonly SemaphoreSlim _badgeLock = new(1, 1);
     private bool _badgesLoaded;
     private bool _disposed;
@@ -23,8 +23,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
     private const int MaxBadgeSizePercent = 50;
     private const float MinBadgeMarginPercent = 0f;
     private const float MaxBadgeMarginPercent = 20f;
-
-    private static readonly string[] SupportedCustomExtensions = { ".svg", ".png", ".jpg", ".jpeg" };
 
     private static readonly Dictionary<string, string> BadgeDisplayText = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -116,6 +114,11 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         var gapPercent = Math.Max(0f, settings.BadgeGapPercent);
         var jpegQuality = Math.Clamp(config.JpegQuality, 1, 100);
 
+        // Detect source format for fallback content-type
+        originalImage.Position = 0;
+        var sourceContentType = DetectImageContentType(originalImage);
+        originalImage.Position = 0;
+
         using var image = SKBitmap.Decode(originalImage);
         if (image == null)
         {
@@ -123,7 +126,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             var output = new MemoryStream();
             await originalImage.CopyToAsync(output).ConfigureAwait(false);
             output.Position = 0;
-            return (output, "image/jpeg");
+            return (output, sourceContentType);
         }
 
         // Split badges into video (Resolution+Hdr), audio, and language groups
@@ -174,11 +177,11 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         try
         {
             // Prepare video badges
-            await PrepareBadgeGroup(videoBadges, videoBadgeSizePercent, image.Width, videoUseText, false, videoSizes, videoSourceBitmaps, videoFiltered, videoOwnedBitmaps).ConfigureAwait(false);
+            await PrepareBadgeGroup(videoBadges, videoBadgeSizePercent, image.Width, videoUseText, videoSizes, videoSourceBitmaps, videoFiltered, videoOwnedBitmaps).ConfigureAwait(false);
             // Prepare audio badges
-            await PrepareBadgeGroup(audioBadges, audioBadgeSizePercent, image.Width, audioUseText, true, audioSizes, audioSourceBitmaps, audioFiltered, audioOwnedBitmaps).ConfigureAwait(false);
+            await PrepareBadgeGroup(audioBadges, audioBadgeSizePercent, image.Width, audioUseText, audioSizes, audioSourceBitmaps, audioFiltered, audioOwnedBitmaps).ConfigureAwait(false);
             // Prepare language badges — in image mode, badges with ResourceFileName get flag images; those without fall back to text
-            await PrepareBadgeGroup(languageBadges, languageBadgeSizePercent, image.Width, languageUseText, true, languageSizes, languageSourceBitmaps, languageFiltered, languageOwnedBitmaps).ConfigureAwait(false);
+            await PrepareBadgeGroup(languageBadges, languageBadgeSizePercent, image.Width, languageUseText, languageSizes, languageSourceBitmaps, languageFiltered, languageOwnedBitmaps).ConfigureAwait(false);
 
             if (videoSizes.Count == 0 && audioSizes.Count == 0 && languageSizes.Count == 0)
             {
@@ -186,7 +189,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 var output = new MemoryStream();
                 await originalImage.CopyToAsync(output).ConfigureAwait(false);
                 output.Position = 0;
-                return (output, "image/jpeg");
+                return (output, sourceContentType);
             }
 
             // Merge language into audio group if same position+layout
@@ -365,7 +368,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
     /// <inheritdoc />
     public void ReloadBadges()
     {
-        _badgeLock.Wait();
+        _badgeLock.WaitAsync().GetAwaiter().GetResult();
         try
         {
             foreach (var badge in _rasterCache.Values)
@@ -384,7 +387,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
     }
 
     private async Task PrepareBadgeGroup(
-        List<BadgeInfo> badges, int sizePercent, int imageWidth, bool useTextStyle, bool isAudio,
+        List<BadgeInfo> badges, int sizePercent, int imageWidth, bool useTextStyle,
         List<SKSizeI> sizes, List<SKBitmap> sourceBitmaps, List<BadgeInfo> filtered, List<SKBitmap> ownedBitmaps)
     {
         if (useTextStyle)
@@ -442,6 +445,18 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                         sizes.Add(new SKSizeI(badgeWidth, badgeHeight));
                         continue;
                     }
+
+                    // SVG rasterization failed — fall back to text
+                    var fallbackText = GetBadgeDisplayText(badgeInfo.BadgeKey);
+                    if (!string.IsNullOrEmpty(fallbackText))
+                    {
+                        var fbHeight = Math.Max(1, (int)(badgeWidth * 0.5));
+                        var textBadge = new BadgeInfo { Category = badgeInfo.Category, BadgeKey = badgeInfo.BadgeKey, ResourceFileName = string.Empty };
+                        filtered.Add(textBadge);
+                        sizes.Add(new SKSizeI(badgeWidth, fbHeight));
+                    }
+
+                    continue;
                 }
 
                 // Try raster cache
@@ -616,6 +631,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 }
 
                 // Custom JPG/JPEG
+                var foundJpeg = false;
                 foreach (var ext in new[] { ".jpg", ".jpeg" })
                 {
                     var customJpg = Path.Combine(customDir, baseName + ext);
@@ -629,7 +645,8 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                                 customBadge = TrimTransparent(customBadge);
                                 _rasterCache[svgFileName] = customBadge;
                                 _logger.LogInformation("[JellyTag] Loaded custom JPEG badge: {FileName}", baseName + ext);
-                                goto nextBadge;
+                                foundJpeg = true;
+                                break;
                             }
                         }
                         catch (Exception ex)
@@ -638,6 +655,8 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                         }
                     }
                 }
+
+                if (foundJpeg) continue;
             }
 
             // 2. Embedded SVG
@@ -692,7 +711,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 }
             }
 
-            nextBadge:;
         }
 
         _logger.LogInformation("[JellyTag] Badge loading complete. SVG: {SvgCount}, Raster: {RasterCount}", _svgCache.Count, _rasterCache.Count);
@@ -748,13 +766,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         }
 
         return Path.Combine(dataFolder, "custom-badges");
-    }
-
-    private static string? GetCustomBadgePath(string fileName)
-    {
-        var dir = GetCustomBadgeDir();
-        if (dir == null) return null;
-        return Path.Combine(dir, fileName);
     }
 
     private static bool ShouldReverseOrder(BadgeLayout layout, BadgePosition position) =>
@@ -872,6 +883,21 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         }
 
         return BadgeDisplayText.TryGetValue(badgeKey, out var text) ? text : badgeKey.ToUpperInvariant();
+    }
+
+    private static string DetectImageContentType(Stream stream)
+    {
+        Span<byte> header = stackalloc byte[12];
+        var read = stream.Read(header);
+        stream.Position = 0;
+        if (read >= 8 && header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47)
+            return "image/png";
+        if (read >= 4 && header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46
+            && read >= 12 && header[8] == 0x57 && header[9] == 0x45 && header[10] == 0x42 && header[11] == 0x50)
+            return "image/webp";
+        if (read >= 2 && header[0] == 0xFF && header[1] == 0xD8)
+            return "image/jpeg";
+        return "image/jpeg";
     }
 
     private static SKColor ParseHexColor(string hex, byte alpha)

@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.JellyTag.Services;
@@ -193,13 +192,57 @@ public class ImageCacheService : IImageCacheService
     private string GenerateCacheKey(Guid itemId, string badgeKey, string imageTag)
     {
         var config = Plugin.Instance?.Configuration;
-        var configJson = config != null ? JsonSerializer.Serialize(config) : string.Empty;
-        var input = $"{itemId}_{badgeKey}_{imageTag}_{configJson}";
+        var configFingerprint = config != null ? ComputeConfigFingerprint(config) : string.Empty;
+        var input = $"{itemId}_{badgeKey}_{imageTag}_{configFingerprint}";
 
         var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(input));
         var hash = Convert.ToHexString(hashBytes)[..16];
 
         return $"{itemId}_{hash}";
+    }
+
+    private static string ComputeConfigFingerprint(Configuration.PluginConfiguration config)
+    {
+        var sb = new StringBuilder(256);
+        sb.Append(config.Enabled).Append('|');
+        sb.Append(config.Show4K).Append(config.Show1080p).Append(config.Show720p).Append(config.ShowSD).Append('|');
+        sb.Append(config.ShowHdr10).Append(config.ShowHdr10Plus).Append(config.ShowDolbyVision).Append(config.ShowHlg).Append(config.ShowGenericHdr).Append('|');
+        sb.Append(config.Show3D).Append('|');
+        sb.Append(config.ShowDolbyAtmos).Append(config.ShowDtsX).Append(config.ShowTrueHD).Append(config.ShowDtsHdMa).Append(config.ShowChannelBadge).Append('|');
+        sb.Append((int)config.LanguageBadgeMode).Append(config.ShowSubtitleIndicator).Append('|');
+        sb.Append((int)config.OutputFormat).Append(config.JpegQuality).Append(config.WebPQuality).Append('|');
+        AppendSettingsFingerprint(sb, config.PosterSettings);
+        AppendSettingsFingerprint(sb, config.ThumbnailSettings);
+        AppendSettingsFingerprint(sb, config.BackdropSettings);
+        // Include custom badge texts
+        if (config.CustomBadgeTexts != null)
+        {
+            foreach (var cbt in config.CustomBadgeTexts)
+            {
+                sb.Append(cbt.Key).Append('=').Append(cbt.Text).Append(',');
+            }
+        }
+
+        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(sb.ToString()));
+        return Convert.ToHexString(hashBytes)[..16];
+    }
+
+    private static void AppendSettingsFingerprint(StringBuilder sb, Configuration.ImageTypeSettings s)
+    {
+        sb.Append(s.Enabled).Append(s.BadgeSizePercent).Append(s.AudioBadgeSizePercent).Append(s.LanguageBadgeSizePercent);
+        sb.Append(s.BadgeMarginPercent).Append(s.BadgeGapPercent);
+        sb.Append((int)s.BadgePosition).Append((int)s.BadgeLayout).Append((int)s.BadgeStyle);
+        sb.Append(s.AudioBadgePosition?.ToString() ?? "n").Append(s.AudioBadgeLayout?.ToString() ?? "n").Append(s.AudioBadgeStyle?.ToString() ?? "n");
+        sb.Append(s.LanguageBadgePosition?.ToString() ?? "n").Append(s.LanguageBadgeLayout?.ToString() ?? "n").Append(s.LanguageBadgeStyle?.ToString() ?? "n");
+        sb.Append(s.TextBadgeBgColor).Append(s.TextBadgeBgOpacity).Append(s.TextBadgeTextColor).Append(s.TextBadgeCornerRadius);
+        sb.Append(s.VideoBadgeBgColor ?? "n").Append(s.VideoBadgeTextColor ?? "n");
+        sb.Append(s.AudioBadgeBgColor ?? "n").Append(s.AudioBadgeTextColor ?? "n");
+        sb.Append(s.LanguageBadgeBgColor ?? "n").Append(s.LanguageBadgeTextColor ?? "n");
+        sb.Append(s.SubtitleBadgeBgColor ?? "n").Append(s.SubtitleBadgeTextColor ?? "n");
+        sb.Append(s.AudioTextBadgeBgOpacity).Append(s.AudioTextBadgeCornerRadius);
+        sb.Append(s.LanguageTextBadgeBgOpacity).Append(s.LanguageTextBadgeCornerRadius);
+        sb.Append(s.SubtitleTextBadgeBgOpacity).Append(s.SubtitleTextBadgeCornerRadius);
+        sb.Append('|');
     }
 
     private string GetCachePath(string cacheKey)

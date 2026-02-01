@@ -50,6 +50,7 @@ public partial class JellyTagController : ControllerBase
     /// Gets cache statistics.
     /// </summary>
     [HttpGet("CacheStats")]
+    [Authorize(Policy = "RequiresElevation")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult GetCacheStats()
     {
@@ -67,6 +68,7 @@ public partial class JellyTagController : ControllerBase
     /// Gets the plugin status.
     /// </summary>
     [HttpGet("Status")]
+    [Authorize(Policy = "RequiresElevation")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult GetStatus()
     {
@@ -82,11 +84,16 @@ public partial class JellyTagController : ControllerBase
             ShowHdr10Plus = config?.ShowHdr10Plus ?? false,
             ShowDolbyVision = config?.ShowDolbyVision ?? false,
             ShowHlg = config?.ShowHlg ?? false,
+            ShowGenericHdr = config?.ShowGenericHdr ?? false,
+            Show3D = config?.Show3D ?? false,
             ShowDolbyAtmos = config?.ShowDolbyAtmos ?? false,
             ShowDtsX = config?.ShowDtsX ?? false,
             ShowTrueHD = config?.ShowTrueHD ?? false,
             ShowDtsHdMa = config?.ShowDtsHdMa ?? false,
-            ShowChannelBadge = config?.ShowChannelBadge ?? false
+            ShowChannelBadge = config?.ShowChannelBadge ?? false,
+            LanguageBadgeMode = config?.LanguageBadgeMode.ToString() ?? "None",
+            ShowSubtitleIndicator = config?.ShowSubtitleIndicator ?? false,
+            OutputFormat = config?.OutputFormat.ToString() ?? "Jpeg"
         });
     }
 
@@ -172,6 +179,12 @@ public partial class JellyTagController : ControllerBase
         if (file == null || file.Length == 0)
         {
             return BadRequest("No file uploaded");
+        }
+
+        const long maxFileSize = 5 * 1024 * 1024; // 5 MB
+        if (file.Length > maxFileSize)
+        {
+            return BadRequest("File too large. Maximum size is 5 MB.");
         }
 
         var extension = file.ContentType.ToLowerInvariant() switch
@@ -271,6 +284,7 @@ public partial class JellyTagController : ControllerBase
     /// Lists all custom badge overrides.
     /// </summary>
     [HttpGet("CustomBadges")]
+    [Authorize(Policy = "RequiresElevation")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult GetCustomBadges()
     {

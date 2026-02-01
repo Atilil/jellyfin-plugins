@@ -26,7 +26,7 @@ cp "$PLUGIN_DIR/publish_out/SixLabors.ImageSharp.dll" "$OUTPUT_DIR/"
 # Create meta.json for the plugin
 cat > "$OUTPUT_DIR/meta.json" << 'EOF'
 {
-    "guid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "guid": "f4a2e8c1-9b3d-4f7a-b6c5-2d8e1a3f9b04",
     "name": "JellyTag",
     "overview": "Adds quality badges (4K, 1080p, etc.) to media posters and thumbnails.",
     "description": "JellyTag automatically adds quality resolution badges to your media posters and thumbnails. Badges are visible on all clients including web, mobile, TV, and Kodi.",
