@@ -321,6 +321,12 @@
                             <div class="jellytag-grid">
                                 <div class="checkboxContainer checkboxContainer-withDescription">
                                     <label class="emby-checkbox-label">
+                                        <input id="ShowH264" name="ShowH264" type="checkbox" is="emby-checkbox" />
+                                        <span>H.264 / AVC</span>
+                                    </label>
+                                </div>
+                                <div class="checkboxContainer checkboxContainer-withDescription">
+                                    <label class="emby-checkbox-label">
                                         <input id="ShowHevc" name="ShowHevc" type="checkbox" is="emby-checkbox" />
                                         <span>HEVC / H.265</span>
                                     </label>
@@ -1377,6 +1383,7 @@
                         document.querySelector('#ShowHlg').checked = config.ShowHlg;
                         document.querySelector('#ShowGenericHdr').checked = config.ShowGenericHdr;
                         document.querySelector('#Show3D').checked = config.Show3D;
+                        document.querySelector('#ShowH264').checked = config.ShowH264;
                         document.querySelector('#ShowHevc').checked = config.ShowHevc;
                         document.querySelector('#ShowAv1').checked = config.ShowAv1;
                         document.querySelector('#ShowVp9').checked = config.ShowVp9;
@@ -1575,6 +1582,7 @@
                 config.ShowHlg = document.querySelector('#ShowHlg').checked;
                 config.ShowGenericHdr = document.querySelector('#ShowGenericHdr').checked;
                 config.Show3D = document.querySelector('#Show3D').checked;
+                config.ShowH264 = document.querySelector('#ShowH264').checked;
                 config.ShowHevc = document.querySelector('#ShowHevc').checked;
                 config.ShowAv1 = document.querySelector('#ShowAv1').checked;
                 config.ShowVp9 = document.querySelector('#ShowVp9').checked;

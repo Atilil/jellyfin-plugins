@@ -210,7 +210,7 @@ public class ImageCacheService : IImageCacheService
         sb.Append(config.Enabled).Append('|');
         sb.Append(config.Show4K).Append(config.Show1080p).Append(config.Show720p).Append(config.ShowSD).Append('|');
         sb.Append(config.ShowHdr10).Append(config.ShowHdr10Plus).Append(config.ShowDolbyVision).Append(config.ShowHlg).Append(config.ShowGenericHdr).Append('|');
-        sb.Append(config.ShowHevc).Append(config.ShowAv1).Append(config.ShowVp9);
+        sb.Append(config.ShowH264).Append(config.ShowHevc).Append(config.ShowAv1).Append(config.ShowVp9);
         sb.Append(config.Show3D).Append('|');
         sb.Append(config.ShowDolbyAtmos).Append(config.ShowDtsX).Append(config.ShowTrueHD).Append(config.ShowDtsHdMa).Append(config.ShowChannelBadge).Append('|');
         sb.Append((int)config.LanguageBadgeMode).Append(config.ShowSubtitleIndicator).Append('|');

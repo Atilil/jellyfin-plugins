@@ -93,6 +93,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         { "vostrus", "VOSTR" },
         { "vostnld", "VOSTNL" },
         { "vostdut", "VOSTNL" },
+        { "h264", "H.264" },
         { "hevc", "HEVC" },
         { "av1", "AV1" },
         { "vp9", "VP9" },
@@ -394,6 +395,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             },
             BadgeCategory.VideoCodec => badge.BadgeKey switch
             {
+                "h264" => config.ShowH264,
                 "hevc" => config.ShowHevc,
                 "av1" => config.ShowAv1,
                 "vp9" => config.ShowVp9,

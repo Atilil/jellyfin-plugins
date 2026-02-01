@@ -224,7 +224,11 @@ public class QualityDetectionService : IQualityDetectionService
 
                 // Video codec detection
                 var codec = videoStream.Codec?.ToLowerInvariant() ?? string.Empty;
-                if (codec is "hevc" or "h265")
+                if (codec is "h264" or "avc")
+                {
+                    badges.Add(new BadgeInfo { Category = BadgeCategory.VideoCodec, BadgeKey = "h264", ResourceFileName = string.Empty });
+                }
+                else if (codec is "hevc" or "h265")
                 {
                     badges.Add(new BadgeInfo { Category = BadgeCategory.VideoCodec, BadgeKey = "hevc", ResourceFileName = string.Empty });
                 }
