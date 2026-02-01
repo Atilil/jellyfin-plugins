@@ -26,9 +26,14 @@ public enum BadgeCategory
     ThreeD,
 
     /// <summary>
-    /// Language badge (audio language, VOSTFR indicator).
+    /// Language badge (audio language).
     /// </summary>
-    Language
+    Language,
+
+    /// <summary>
+    /// Subtitle indicator badge (VOSTFR, VOSTEN, etc.).
+    /// </summary>
+    Subtitle
 }
 
 /// <summary>

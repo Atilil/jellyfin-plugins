@@ -129,7 +129,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         // Split badges into video (Resolution+Hdr), audio, and language groups
         var videoBadges = badges.Where(b => b.Category is BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.ThreeD).ToList();
         var audioBadges = badges.Where(b => b.Category == BadgeCategory.Audio).ToList();
-        var languageBadges = badges.Where(b => b.Category == BadgeCategory.Language).ToList();
+        var languageBadges = badges.Where(b => b.Category is BadgeCategory.Language or BadgeCategory.Subtitle).ToList();
 
         var videoPosition = settings.BadgePosition;
         var videoLayout = settings.BadgeLayout;
@@ -357,6 +357,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 _ => false
             },
             BadgeCategory.Language => true,
+            BadgeCategory.Subtitle => true,
             _ => false
         };
     }
@@ -893,6 +894,8 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 settings.AudioBadgeBgColor ?? settings.TextBadgeBgColor ?? "#000000",
             BadgeCategory.Language =>
                 settings.LanguageBadgeBgColor ?? settings.TextBadgeBgColor ?? "#000000",
+            BadgeCategory.Subtitle =>
+                settings.SubtitleBadgeBgColor ?? settings.TextBadgeBgColor ?? "#000000",
             _ => settings.TextBadgeBgColor ?? "#000000"
         };
         var textColor = category switch
@@ -903,19 +906,44 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 settings.AudioBadgeTextColor ?? settings.TextBadgeTextColor ?? "#FFFFFF",
             BadgeCategory.Language =>
                 settings.LanguageBadgeTextColor ?? settings.TextBadgeTextColor ?? "#FFFFFF",
+            BadgeCategory.Subtitle =>
+                settings.SubtitleBadgeTextColor ?? settings.TextBadgeTextColor ?? "#FFFFFF",
             _ => settings.TextBadgeTextColor ?? "#FFFFFF"
         };
         return (bgColor, textColor);
     }
 
+    private static byte ResolveCategoryOpacity(BadgeCategory category, ImageTypeSettings settings)
+    {
+        var raw = category switch
+        {
+            BadgeCategory.Audio => settings.AudioTextBadgeBgOpacity > 0 ? settings.AudioTextBadgeBgOpacity : settings.TextBadgeBgOpacity,
+            BadgeCategory.Language => settings.LanguageTextBadgeBgOpacity > 0 ? settings.LanguageTextBadgeBgOpacity : settings.TextBadgeBgOpacity,
+            BadgeCategory.Subtitle => settings.SubtitleTextBadgeBgOpacity > 0 ? settings.SubtitleTextBadgeBgOpacity : settings.TextBadgeBgOpacity,
+            _ => settings.TextBadgeBgOpacity
+        };
+        return (byte)Math.Clamp(raw, 0, 255);
+    }
+
+    private static int ResolveCategoryCornerRadius(BadgeCategory category, ImageTypeSettings settings)
+    {
+        var raw = category switch
+        {
+            BadgeCategory.Audio => settings.AudioTextBadgeCornerRadius >= 0 ? settings.AudioTextBadgeCornerRadius : settings.TextBadgeCornerRadius,
+            BadgeCategory.Language => settings.LanguageTextBadgeCornerRadius >= 0 ? settings.LanguageTextBadgeCornerRadius : settings.TextBadgeCornerRadius,
+            BadgeCategory.Subtitle => settings.SubtitleTextBadgeCornerRadius >= 0 ? settings.SubtitleTextBadgeCornerRadius : settings.TextBadgeCornerRadius,
+            _ => settings.TextBadgeCornerRadius
+        };
+        return Math.Clamp(raw, 0, 50);
+    }
+
     private static void RenderTextBadges(SKCanvas canvas, List<BadgeInfo> badges, List<SKPointI> positions, List<SKSizeI> sizes, ImageTypeSettings settings)
     {
-        var bgAlpha = (byte)Math.Clamp(settings.TextBadgeBgOpacity, 0, 255);
-        var cornerRadiusPct = Math.Clamp(settings.TextBadgeCornerRadius, 0, 50);
-
         for (int i = 0; i < badges.Count; i++)
         {
             var (bgHex, textHex) = ResolveCategoryColors(badges[i].Category, settings);
+            var bgAlpha = ResolveCategoryOpacity(badges[i].Category, settings);
+            var cornerRadiusPct = ResolveCategoryCornerRadius(badges[i].Category, settings);
             var bgColor = ParseHexColor(bgHex, bgAlpha);
             var textColor = SKColor.TryParse(textHex, out var tc) ? tc : SKColors.White;
 

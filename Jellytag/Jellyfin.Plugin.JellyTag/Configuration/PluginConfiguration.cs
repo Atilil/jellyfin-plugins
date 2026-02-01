@@ -226,6 +226,46 @@ public class ImageTypeSettings
     /// Gets or sets the language badge size as a percentage of the image width.
     /// </summary>
     public int LanguageBadgeSizePercent { get; set; }
+
+    /// <summary>
+    /// Gets or sets the audio text badge background opacity override (0 = inherit from global).
+    /// </summary>
+    public int AudioTextBadgeBgOpacity { get; set; }
+
+    /// <summary>
+    /// Gets or sets the audio text badge corner radius override (-1 = inherit from global).
+    /// </summary>
+    public int AudioTextBadgeCornerRadius { get; set; } = -1;
+
+    /// <summary>
+    /// Gets or sets the language text badge background opacity override (0 = inherit from global).
+    /// </summary>
+    public int LanguageTextBadgeBgOpacity { get; set; }
+
+    /// <summary>
+    /// Gets or sets the language text badge corner radius override (-1 = inherit from global).
+    /// </summary>
+    public int LanguageTextBadgeCornerRadius { get; set; } = -1;
+
+    /// <summary>
+    /// Gets or sets the subtitle badge background color override. When null, uses global TextBadgeBgColor.
+    /// </summary>
+    public string? SubtitleBadgeBgColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the subtitle badge text color override. When null, uses global TextBadgeTextColor.
+    /// </summary>
+    public string? SubtitleBadgeTextColor { get; set; }
+
+    /// <summary>
+    /// Gets or sets the subtitle text badge background opacity override (0 = inherit from global).
+    /// </summary>
+    public int SubtitleTextBadgeBgOpacity { get; set; }
+
+    /// <summary>
+    /// Gets or sets the subtitle text badge corner radius override (-1 = inherit from global).
+    /// </summary>
+    public int SubtitleTextBadgeCornerRadius { get; set; } = -1;
 }
 
 /// <summary>
@@ -283,7 +323,13 @@ public class PluginConfiguration : BasePluginConfiguration
             TextBadgeBgColor = "#000000",
             TextBadgeBgOpacity = 180,
             TextBadgeTextColor = "#FFFFFF",
-            TextBadgeCornerRadius = 25
+            TextBadgeCornerRadius = 25,
+            AudioTextBadgeBgOpacity = 0,
+            AudioTextBadgeCornerRadius = -1,
+            LanguageTextBadgeBgOpacity = 0,
+            LanguageTextBadgeCornerRadius = -1,
+            SubtitleTextBadgeBgOpacity = 0,
+            SubtitleTextBadgeCornerRadius = -1
         };
 
         ThumbnailSettings = new ImageTypeSettings
@@ -300,7 +346,13 @@ public class PluginConfiguration : BasePluginConfiguration
             TextBadgeBgColor = "#000000",
             TextBadgeBgOpacity = 180,
             TextBadgeTextColor = "#FFFFFF",
-            TextBadgeCornerRadius = 25
+            TextBadgeCornerRadius = 25,
+            AudioTextBadgeBgOpacity = 0,
+            AudioTextBadgeCornerRadius = -1,
+            LanguageTextBadgeBgOpacity = 0,
+            LanguageTextBadgeCornerRadius = -1,
+            SubtitleTextBadgeBgOpacity = 0,
+            SubtitleTextBadgeCornerRadius = -1
         };
 
         BackdropSettings = new ImageTypeSettings
@@ -317,7 +369,13 @@ public class PluginConfiguration : BasePluginConfiguration
             TextBadgeBgColor = "#000000",
             TextBadgeBgOpacity = 180,
             TextBadgeTextColor = "#FFFFFF",
-            TextBadgeCornerRadius = 25
+            TextBadgeCornerRadius = 25,
+            AudioTextBadgeBgOpacity = 0,
+            AudioTextBadgeCornerRadius = -1,
+            LanguageTextBadgeBgOpacity = 0,
+            LanguageTextBadgeCornerRadius = -1,
+            SubtitleTextBadgeBgOpacity = 0,
+            SubtitleTextBadgeCornerRadius = -1
         };
 
         CustomBadgeTexts = new List<BadgeTextOverride>();

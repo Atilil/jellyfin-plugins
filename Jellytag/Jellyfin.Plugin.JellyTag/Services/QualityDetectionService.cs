@@ -350,7 +350,7 @@ public class QualityDetectionService : IQualityDetectionService
                     {
                         badges.Add(new BadgeInfo
                         {
-                            Category = BadgeCategory.Language,
+                            Category = BadgeCategory.Subtitle,
                             BadgeKey = key,
                             ResourceFileName = string.Empty
                         });

@@ -74,7 +74,7 @@
             .jellytag-sub-body {
                 padding: .5em 1em 1em;
             }
-            .textBadgeFields.hidden {
+            .textBadgeFields.hidden, .hidden {
                 display: none;
             }
             .badge-card {
@@ -124,9 +124,108 @@
             .badge-card.custom .badge-reset {
                 display: block;
             }
+            /* Live Preview layout */
+            .jellytag-config-layout {
+                display: block;
+                margin-right: 350px;
+            }
+            .jellytag-config-layout > form {
+                min-width: 0;
+            }
+            .jellytag-preview-panel {
+                position: fixed;
+                top: 4.5em;
+                width: 322px;
+                max-height: calc(100vh - 5.5em);
+                overflow-y: auto;
+                border: 1px solid rgba(255,255,255,.12);
+                border-radius: .4em;
+                background: rgba(20,20,20,.95);
+                padding: 1em;
+                z-index: 50;
+            }
+            .jellytag-preview-panel h3 {
+                margin: 0 0 .8em;
+                font-size: 1.1em;
+            }
+            .jellytag-preview-panel .preview-search-wrap {
+                position: relative;
+                margin-bottom: 1em;
+            }
+            .jellytag-preview-panel .preview-search-wrap input {
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .jellytag-preview-panel .preview-search-results {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                z-index: 100;
+                background: #1c1c1e;
+                border: 1px solid rgba(255,255,255,.2);
+                border-radius: .3em;
+                max-height: 250px;
+                overflow-y: auto;
+                display: none;
+            }
+            .jellytag-preview-panel .preview-search-results .preview-search-item {
+                padding: .5em .8em;
+                cursor: pointer;
+                font-size: .9em;
+            }
+            .jellytag-preview-panel .preview-search-results .preview-search-item:hover {
+                background: rgba(0,164,220,.3);
+            }
+            .jellytag-preview-panel .preview-selected {
+                font-size: .85em;
+                color: #aaa;
+                margin-bottom: .8em;
+            }
+            .jellytag-preview-panel .preview-img {
+                width: 100%;
+                max-width: 300px;
+                border-radius: .3em;
+                margin-bottom: .8em;
+            }
+            .jellytag-preview-panel .preview-img.poster {
+                aspect-ratio: 2/3;
+                object-fit: cover;
+                max-height: 440px;
+            }
+            .jellytag-preview-panel .preview-img.thumb {
+                aspect-ratio: 16/9;
+                object-fit: cover;
+            }
+            .jellytag-preview-panel .preview-spinner {
+                display: none;
+                text-align: center;
+                color: #aaa;
+                padding: .5em 0;
+                font-size: .9em;
+            }
+            .jellytag-preview-panel .preview-error {
+                display: none;
+                color: #e57373;
+                font-size: .85em;
+                margin-top: .5em;
+            }
+            @media (max-width: 1000px) {
+                .jellytag-config-layout {
+                    margin-right: 0;
+                }
+                .jellytag-preview-panel {
+                    position: static;
+                    width: 100%;
+                    max-width: 100%;
+                    max-height: none;
+                    margin-bottom: 1em;
+                }
+            }
         </style>
         <div data-role="content">
             <div class="content-primary">
+                <div class="jellytag-config-layout">
                 <form id="JellyTagConfigForm">
                     <div class="sectionTitleContainer flex align-items-center">
                         <h2 class="sectionTitle">JellyTag Configuration</h2>
@@ -334,9 +433,9 @@
                                         <div class="fieldDescription">Percentage of badge height (0 = square, 50 = pill).</div>
                                     </div>
                                     <details class="jellytag-sub">
-                                        <summary>Category Colors</summary>
+                                        <summary>Video Category Colors</summary>
                                         <div class="jellytag-sub-body">
-                                            <div class="fieldDescription" style="margin-bottom:.5em;">Override colors per badge category. Leave empty to use global colors above.</div>
+                                            <div class="fieldDescription" style="margin-bottom:.5em;">Override colors for video badges. Leave empty to use global colors above.</div>
                                             <div class="inputContainer">
                                                 <label class="inputLabel inputLabelUnfocused" for="PosterVideoBgColor">Video Badge BG Color</label>
                                                 <input id="PosterVideoBgColor" type="color" value="#000000" />
@@ -344,22 +443,6 @@
                                             <div class="inputContainer">
                                                 <label class="inputLabel inputLabelUnfocused" for="PosterVideoTextColor">Video Badge Text Color</label>
                                                 <input id="PosterVideoTextColor" type="color" value="#FFFFFF" />
-                                            </div>
-                                            <div class="inputContainer">
-                                                <label class="inputLabel inputLabelUnfocused" for="PosterAudioBgColor">Audio Badge BG Color</label>
-                                                <input id="PosterAudioBgColor" type="color" value="#000000" />
-                                            </div>
-                                            <div class="inputContainer">
-                                                <label class="inputLabel inputLabelUnfocused" for="PosterAudioTextColor">Audio Badge Text Color</label>
-                                                <input id="PosterAudioTextColor" type="color" value="#FFFFFF" />
-                                            </div>
-                                            <div class="inputContainer">
-                                                <label class="inputLabel inputLabelUnfocused" for="PosterLanguageBgColor">Language Badge BG Color</label>
-                                                <input id="PosterLanguageBgColor" type="color" value="#000000" />
-                                            </div>
-                                            <div class="inputContainer">
-                                                <label class="inputLabel inputLabelUnfocused" for="PosterLanguageTextColor">Language Badge Text Color</label>
-                                                <input id="PosterLanguageTextColor" type="color" value="#FFFFFF" />
                                             </div>
                                         </div>
                                     </details>
@@ -409,6 +492,26 @@
                                             <label class="inputLabel inputLabelUnfocused" for="PosterAudioSize">Audio Badge Size (%)</label>
                                             <input id="PosterAudioSize" type="number" min="5" max="50" step="1" is="emby-input" />
                                         </div>
+                                        <div id="PosterAudioTextFields" class="hidden">
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="PosterAudioBgColor">Audio Badge BG Color</label>
+                                                <input id="PosterAudioBgColor" type="color" value="#000000" />
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="PosterAudioTextColor">Audio Badge Text Color</label>
+                                                <input id="PosterAudioTextColor" type="color" value="#FFFFFF" />
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="PosterAudioTextBgOpacity">Audio BG Opacity</label>
+                                                <input id="PosterAudioTextBgOpacity" type="number" min="0" max="255" step="1" is="emby-input" />
+                                                <div class="fieldDescription">0 = inherit from global, 1-255 = custom opacity.</div>
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="PosterAudioTextCornerRadius">Audio Corner Radius (%)</label>
+                                                <input id="PosterAudioTextCornerRadius" type="number" min="-1" max="50" step="1" is="emby-input" />
+                                                <div class="fieldDescription">-1 = inherit from global, 0-50 = custom radius.</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </details>
                                 <details class="jellytag-sub">
@@ -445,6 +548,50 @@
                                         <div class="inputContainer">
                                             <label class="inputLabel inputLabelUnfocused" for="PosterLanguageSize">Language Badge Size (%)</label>
                                             <input id="PosterLanguageSize" type="number" min="5" max="50" step="1" is="emby-input" />
+                                        </div>
+                                        <div id="PosterLanguageTextFields" class="hidden">
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="PosterLanguageBgColor">Language Badge BG Color</label>
+                                                <input id="PosterLanguageBgColor" type="color" value="#000000" />
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="PosterLanguageTextColor">Language Badge Text Color</label>
+                                                <input id="PosterLanguageTextColor" type="color" value="#FFFFFF" />
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="PosterLanguageTextBgOpacity">Language BG Opacity</label>
+                                                <input id="PosterLanguageTextBgOpacity" type="number" min="0" max="255" step="1" is="emby-input" />
+                                                <div class="fieldDescription">0 = inherit from global, 1-255 = custom opacity.</div>
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="PosterLanguageTextCornerRadius">Language Corner Radius (%)</label>
+                                                <input id="PosterLanguageTextCornerRadius" type="number" min="-1" max="50" step="1" is="emby-input" />
+                                                <div class="fieldDescription">-1 = inherit from global, 0-50 = custom radius.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </details>
+                                <details id="PosterVostOverride" class="jellytag-sub hidden">
+                                    <summary>VOST Override</summary>
+                                    <div class="jellytag-sub-body">
+                                        <div class="fieldDescription" style="margin-bottom:.5em;">Text style overrides for VOST* subtitle indicator badges.</div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="PosterSubtitleBgColor">VOST BG Color</label>
+                                            <input id="PosterSubtitleBgColor" type="color" value="#000000" />
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="PosterSubtitleTextColor">VOST Text Color</label>
+                                            <input id="PosterSubtitleTextColor" type="color" value="#FFFFFF" />
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="PosterSubtitleTextBgOpacity">VOST BG Opacity</label>
+                                            <input id="PosterSubtitleTextBgOpacity" type="number" min="0" max="255" step="1" is="emby-input" />
+                                            <div class="fieldDescription">0 = inherit from global, 1-255 = custom opacity.</div>
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="PosterSubtitleTextCornerRadius">VOST Corner Radius (%)</label>
+                                            <input id="PosterSubtitleTextCornerRadius" type="number" min="-1" max="50" step="1" is="emby-input" />
+                                            <div class="fieldDescription">-1 = inherit from global, 0-50 = custom radius.</div>
                                         </div>
                                     </div>
                                 </details>
@@ -502,9 +649,9 @@
                                         <input id="ThumbTextCornerRadius" type="number" min="0" max="50" step="1" is="emby-input" />
                                     </div>
                                     <details class="jellytag-sub">
-                                        <summary>Category Colors</summary>
+                                        <summary>Video Category Colors</summary>
                                         <div class="jellytag-sub-body">
-                                            <div class="fieldDescription" style="margin-bottom:.5em;">Override colors per badge category.</div>
+                                            <div class="fieldDescription" style="margin-bottom:.5em;">Override colors for video badges.</div>
                                             <div class="inputContainer">
                                                 <label class="inputLabel inputLabelUnfocused" for="ThumbVideoBgColor">Video Badge BG Color</label>
                                                 <input id="ThumbVideoBgColor" type="color" value="#000000" />
@@ -512,22 +659,6 @@
                                             <div class="inputContainer">
                                                 <label class="inputLabel inputLabelUnfocused" for="ThumbVideoTextColor">Video Badge Text Color</label>
                                                 <input id="ThumbVideoTextColor" type="color" value="#FFFFFF" />
-                                            </div>
-                                            <div class="inputContainer">
-                                                <label class="inputLabel inputLabelUnfocused" for="ThumbAudioBgColor">Audio Badge BG Color</label>
-                                                <input id="ThumbAudioBgColor" type="color" value="#000000" />
-                                            </div>
-                                            <div class="inputContainer">
-                                                <label class="inputLabel inputLabelUnfocused" for="ThumbAudioTextColor">Audio Badge Text Color</label>
-                                                <input id="ThumbAudioTextColor" type="color" value="#FFFFFF" />
-                                            </div>
-                                            <div class="inputContainer">
-                                                <label class="inputLabel inputLabelUnfocused" for="ThumbLanguageBgColor">Language Badge BG Color</label>
-                                                <input id="ThumbLanguageBgColor" type="color" value="#000000" />
-                                            </div>
-                                            <div class="inputContainer">
-                                                <label class="inputLabel inputLabelUnfocused" for="ThumbLanguageTextColor">Language Badge Text Color</label>
-                                                <input id="ThumbLanguageTextColor" type="color" value="#FFFFFF" />
                                             </div>
                                         </div>
                                     </details>
@@ -577,6 +708,26 @@
                                             <label class="inputLabel inputLabelUnfocused" for="ThumbAudioSize">Audio Badge Size (%)</label>
                                             <input id="ThumbAudioSize" type="number" min="5" max="50" step="1" is="emby-input" />
                                         </div>
+                                        <div id="ThumbAudioTextFields" class="hidden">
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="ThumbAudioBgColor">Audio Badge BG Color</label>
+                                                <input id="ThumbAudioBgColor" type="color" value="#000000" />
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="ThumbAudioTextColor">Audio Badge Text Color</label>
+                                                <input id="ThumbAudioTextColor" type="color" value="#FFFFFF" />
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="ThumbAudioTextBgOpacity">Audio BG Opacity</label>
+                                                <input id="ThumbAudioTextBgOpacity" type="number" min="0" max="255" step="1" is="emby-input" />
+                                                <div class="fieldDescription">0 = inherit from global, 1-255 = custom opacity.</div>
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="ThumbAudioTextCornerRadius">Audio Corner Radius (%)</label>
+                                                <input id="ThumbAudioTextCornerRadius" type="number" min="-1" max="50" step="1" is="emby-input" />
+                                                <div class="fieldDescription">-1 = inherit from global, 0-50 = custom radius.</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </details>
                                 <details class="jellytag-sub">
@@ -613,6 +764,50 @@
                                         <div class="inputContainer">
                                             <label class="inputLabel inputLabelUnfocused" for="ThumbLanguageSize">Language Badge Size (%)</label>
                                             <input id="ThumbLanguageSize" type="number" min="5" max="50" step="1" is="emby-input" />
+                                        </div>
+                                        <div id="ThumbLanguageTextFields" class="hidden">
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="ThumbLanguageBgColor">Language Badge BG Color</label>
+                                                <input id="ThumbLanguageBgColor" type="color" value="#000000" />
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="ThumbLanguageTextColor">Language Badge Text Color</label>
+                                                <input id="ThumbLanguageTextColor" type="color" value="#FFFFFF" />
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="ThumbLanguageTextBgOpacity">Language BG Opacity</label>
+                                                <input id="ThumbLanguageTextBgOpacity" type="number" min="0" max="255" step="1" is="emby-input" />
+                                                <div class="fieldDescription">0 = inherit from global, 1-255 = custom opacity.</div>
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="ThumbLanguageTextCornerRadius">Language Corner Radius (%)</label>
+                                                <input id="ThumbLanguageTextCornerRadius" type="number" min="-1" max="50" step="1" is="emby-input" />
+                                                <div class="fieldDescription">-1 = inherit from global, 0-50 = custom radius.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </details>
+                                <details id="ThumbVostOverride" class="jellytag-sub hidden">
+                                    <summary>VOST Override</summary>
+                                    <div class="jellytag-sub-body">
+                                        <div class="fieldDescription" style="margin-bottom:.5em;">Text style overrides for VOST* subtitle indicator badges.</div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="ThumbSubtitleBgColor">VOST BG Color</label>
+                                            <input id="ThumbSubtitleBgColor" type="color" value="#000000" />
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="ThumbSubtitleTextColor">VOST Text Color</label>
+                                            <input id="ThumbSubtitleTextColor" type="color" value="#FFFFFF" />
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="ThumbSubtitleTextBgOpacity">VOST BG Opacity</label>
+                                            <input id="ThumbSubtitleTextBgOpacity" type="number" min="0" max="255" step="1" is="emby-input" />
+                                            <div class="fieldDescription">0 = inherit from global, 1-255 = custom opacity.</div>
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="ThumbSubtitleTextCornerRadius">VOST Corner Radius (%)</label>
+                                            <input id="ThumbSubtitleTextCornerRadius" type="number" min="-1" max="50" step="1" is="emby-input" />
+                                            <div class="fieldDescription">-1 = inherit from global, 0-50 = custom radius.</div>
                                         </div>
                                     </div>
                                 </details>
@@ -670,9 +865,9 @@
                                         <input id="BackdropTextCornerRadius" type="number" min="0" max="50" step="1" is="emby-input" />
                                     </div>
                                     <details class="jellytag-sub">
-                                        <summary>Category Colors</summary>
+                                        <summary>Video Category Colors</summary>
                                         <div class="jellytag-sub-body">
-                                            <div class="fieldDescription" style="margin-bottom:.5em;">Override colors per badge category.</div>
+                                            <div class="fieldDescription" style="margin-bottom:.5em;">Override colors for video badges.</div>
                                             <div class="inputContainer">
                                                 <label class="inputLabel inputLabelUnfocused" for="BackdropVideoBgColor">Video Badge BG Color</label>
                                                 <input id="BackdropVideoBgColor" type="color" value="#000000" />
@@ -680,22 +875,6 @@
                                             <div class="inputContainer">
                                                 <label class="inputLabel inputLabelUnfocused" for="BackdropVideoTextColor">Video Badge Text Color</label>
                                                 <input id="BackdropVideoTextColor" type="color" value="#FFFFFF" />
-                                            </div>
-                                            <div class="inputContainer">
-                                                <label class="inputLabel inputLabelUnfocused" for="BackdropAudioBgColor">Audio Badge BG Color</label>
-                                                <input id="BackdropAudioBgColor" type="color" value="#000000" />
-                                            </div>
-                                            <div class="inputContainer">
-                                                <label class="inputLabel inputLabelUnfocused" for="BackdropAudioTextColor">Audio Badge Text Color</label>
-                                                <input id="BackdropAudioTextColor" type="color" value="#FFFFFF" />
-                                            </div>
-                                            <div class="inputContainer">
-                                                <label class="inputLabel inputLabelUnfocused" for="BackdropLanguageBgColor">Language Badge BG Color</label>
-                                                <input id="BackdropLanguageBgColor" type="color" value="#000000" />
-                                            </div>
-                                            <div class="inputContainer">
-                                                <label class="inputLabel inputLabelUnfocused" for="BackdropLanguageTextColor">Language Badge Text Color</label>
-                                                <input id="BackdropLanguageTextColor" type="color" value="#FFFFFF" />
                                             </div>
                                         </div>
                                     </details>
@@ -745,6 +924,26 @@
                                             <label class="inputLabel inputLabelUnfocused" for="BackdropAudioSize">Audio Badge Size (%)</label>
                                             <input id="BackdropAudioSize" type="number" min="5" max="50" step="1" is="emby-input" />
                                         </div>
+                                        <div id="BackdropAudioTextFields" class="hidden">
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="BackdropAudioBgColor">Audio Badge BG Color</label>
+                                                <input id="BackdropAudioBgColor" type="color" value="#000000" />
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="BackdropAudioTextColor">Audio Badge Text Color</label>
+                                                <input id="BackdropAudioTextColor" type="color" value="#FFFFFF" />
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="BackdropAudioTextBgOpacity">Audio BG Opacity</label>
+                                                <input id="BackdropAudioTextBgOpacity" type="number" min="0" max="255" step="1" is="emby-input" />
+                                                <div class="fieldDescription">0 = inherit from global, 1-255 = custom opacity.</div>
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="BackdropAudioTextCornerRadius">Audio Corner Radius (%)</label>
+                                                <input id="BackdropAudioTextCornerRadius" type="number" min="-1" max="50" step="1" is="emby-input" />
+                                                <div class="fieldDescription">-1 = inherit from global, 0-50 = custom radius.</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </details>
                                 <details class="jellytag-sub">
@@ -781,6 +980,50 @@
                                         <div class="inputContainer">
                                             <label class="inputLabel inputLabelUnfocused" for="BackdropLanguageSize">Language Badge Size (%)</label>
                                             <input id="BackdropLanguageSize" type="number" min="5" max="50" step="1" is="emby-input" />
+                                        </div>
+                                        <div id="BackdropLanguageTextFields" class="hidden">
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="BackdropLanguageBgColor">Language Badge BG Color</label>
+                                                <input id="BackdropLanguageBgColor" type="color" value="#000000" />
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="BackdropLanguageTextColor">Language Badge Text Color</label>
+                                                <input id="BackdropLanguageTextColor" type="color" value="#FFFFFF" />
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="BackdropLanguageTextBgOpacity">Language BG Opacity</label>
+                                                <input id="BackdropLanguageTextBgOpacity" type="number" min="0" max="255" step="1" is="emby-input" />
+                                                <div class="fieldDescription">0 = inherit from global, 1-255 = custom opacity.</div>
+                                            </div>
+                                            <div class="inputContainer">
+                                                <label class="inputLabel inputLabelUnfocused" for="BackdropLanguageTextCornerRadius">Language Corner Radius (%)</label>
+                                                <input id="BackdropLanguageTextCornerRadius" type="number" min="-1" max="50" step="1" is="emby-input" />
+                                                <div class="fieldDescription">-1 = inherit from global, 0-50 = custom radius.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </details>
+                                <details id="BackdropVostOverride" class="jellytag-sub hidden">
+                                    <summary>VOST Override</summary>
+                                    <div class="jellytag-sub-body">
+                                        <div class="fieldDescription" style="margin-bottom:.5em;">Text style overrides for VOST* subtitle indicator badges.</div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="BackdropSubtitleBgColor">VOST BG Color</label>
+                                            <input id="BackdropSubtitleBgColor" type="color" value="#000000" />
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="BackdropSubtitleTextColor">VOST Text Color</label>
+                                            <input id="BackdropSubtitleTextColor" type="color" value="#FFFFFF" />
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="BackdropSubtitleTextBgOpacity">VOST BG Opacity</label>
+                                            <input id="BackdropSubtitleTextBgOpacity" type="number" min="0" max="255" step="1" is="emby-input" />
+                                            <div class="fieldDescription">0 = inherit from global, 1-255 = custom opacity.</div>
+                                        </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="BackdropSubtitleTextCornerRadius">VOST Corner Radius (%)</label>
+                                            <input id="BackdropSubtitleTextCornerRadius" type="number" min="-1" max="50" step="1" is="emby-input" />
+                                            <div class="fieldDescription">-1 = inherit from global, 0-50 = custom radius.</div>
                                         </div>
                                     </div>
                                 </details>
@@ -921,6 +1164,22 @@
                         </button>
                     </div>
                 </form>
+                <div class="jellytag-preview-panel">
+                    <h3>Live Preview</h3>
+                    <div class="preview-search-wrap">
+                        <input id="PreviewSearch" type="text" is="emby-input" placeholder="Search for a movie..." />
+                        <div id="PreviewSearchResults" class="preview-search-results"></div>
+                    </div>
+                    <div id="PreviewSelected" class="preview-selected"></div>
+                    <div id="PreviewSpinner" class="preview-spinner">Refreshing preview...</div>
+                    <img id="PreviewPoster" class="preview-img poster" style="display:none;" />
+                    <img id="PreviewThumb" class="preview-img thumb" style="display:none;" />
+                    <div id="PreviewError" class="preview-error"></div>
+                    <button id="RefreshPreview" type="button" is="emby-button" class="raised block" style="width:100%; margin-top:.5em;">
+                        <span>Refresh Preview</span>
+                    </button>
+                </div>
+                </div>
             </div>
         </div>
 
@@ -933,6 +1192,23 @@
             function setupBadgeStyleToggle(selectEl) {
                 var targetId = selectEl.getAttribute('data-textfields');
                 if (!targetId) return;
+                var target = document.getElementById(targetId);
+                if (!target) return;
+                function toggle() {
+                    if (selectEl.value === 'Text') {
+                        target.classList.remove('hidden');
+                    } else {
+                        target.classList.add('hidden');
+                    }
+                }
+                selectEl.addEventListener('change', toggle);
+                selectEl.addEventListener('input', toggle);
+                var obs = new MutationObserver(toggle);
+                obs.observe(selectEl, { attributes: true, attributeFilter: ['data-value'] });
+                toggle();
+            }
+
+            function setupOverrideStyleToggle(selectEl, targetId) {
                 var target = document.getElementById(targetId);
                 if (!target) return;
                 function toggle() {
@@ -1116,6 +1392,10 @@
                         document.querySelector('#PosterLanguagePosition').value = posterLangPos;
                         document.querySelector('#PosterLanguageLayout').value = config.PosterSettings.LanguageBadgeLayout || '';
                         document.querySelector('#PosterLanguageSize').value = config.PosterSettings.LanguageBadgeSizePercent;
+                        document.querySelector('#PosterAudioTextBgOpacity').value = config.PosterSettings.AudioTextBadgeBgOpacity || 0;
+                        document.querySelector('#PosterAudioTextCornerRadius').value = config.PosterSettings.AudioTextBadgeCornerRadius != null ? config.PosterSettings.AudioTextBadgeCornerRadius : -1;
+                        document.querySelector('#PosterLanguageTextBgOpacity').value = config.PosterSettings.LanguageTextBadgeBgOpacity || 0;
+                        document.querySelector('#PosterLanguageTextCornerRadius').value = config.PosterSettings.LanguageTextBadgeCornerRadius != null ? config.PosterSettings.LanguageTextBadgeCornerRadius : -1;
 
                         // Thumbnail
                         document.querySelector('#ThumbEnabled').checked = config.ThumbnailSettings.Enabled;
@@ -1143,6 +1423,10 @@
                         document.querySelector('#ThumbLanguagePosition').value = config.ThumbnailSettings.LanguageBadgePosition || '';
                         document.querySelector('#ThumbLanguageLayout').value = config.ThumbnailSettings.LanguageBadgeLayout || '';
                         document.querySelector('#ThumbLanguageSize').value = config.ThumbnailSettings.LanguageBadgeSizePercent;
+                        document.querySelector('#ThumbAudioTextBgOpacity').value = config.ThumbnailSettings.AudioTextBadgeBgOpacity || 0;
+                        document.querySelector('#ThumbAudioTextCornerRadius').value = config.ThumbnailSettings.AudioTextBadgeCornerRadius != null ? config.ThumbnailSettings.AudioTextBadgeCornerRadius : -1;
+                        document.querySelector('#ThumbLanguageTextBgOpacity').value = config.ThumbnailSettings.LanguageTextBadgeBgOpacity || 0;
+                        document.querySelector('#ThumbLanguageTextCornerRadius').value = config.ThumbnailSettings.LanguageTextBadgeCornerRadius != null ? config.ThumbnailSettings.LanguageTextBadgeCornerRadius : -1;
 
                         // Backdrop
                         document.querySelector('#BackdropEnabled').checked = config.BackdropSettings.Enabled;
@@ -1170,6 +1454,10 @@
                         document.querySelector('#BackdropLanguagePosition').value = config.BackdropSettings.LanguageBadgePosition || '';
                         document.querySelector('#BackdropLanguageLayout').value = config.BackdropSettings.LanguageBadgeLayout || '';
                         document.querySelector('#BackdropLanguageSize').value = config.BackdropSettings.LanguageBadgeSizePercent;
+                        document.querySelector('#BackdropAudioTextBgOpacity').value = config.BackdropSettings.AudioTextBadgeBgOpacity || 0;
+                        document.querySelector('#BackdropAudioTextCornerRadius').value = config.BackdropSettings.AudioTextBadgeCornerRadius != null ? config.BackdropSettings.AudioTextBadgeCornerRadius : -1;
+                        document.querySelector('#BackdropLanguageTextBgOpacity').value = config.BackdropSettings.LanguageTextBadgeBgOpacity || 0;
+                        document.querySelector('#BackdropLanguageTextCornerRadius').value = config.BackdropSettings.LanguageTextBadgeCornerRadius != null ? config.BackdropSettings.LanguageTextBadgeCornerRadius : -1;
 
                         // Custom Badge Texts
                         var cbtInputs = document.querySelectorAll('#CustomBadgeTextsGrid input[data-badge-key]');
@@ -1191,141 +1479,210 @@
                         setupBadgeStyleToggle(document.querySelector('#ThumbBadgeStyle'));
                         setupBadgeStyleToggle(document.querySelector('#BackdropBadgeStyle'));
 
+                        setupOverrideStyleToggle(document.querySelector('#PosterAudioBadgeStyle'), 'PosterAudioTextFields');
+                        setupOverrideStyleToggle(document.querySelector('#PosterLanguageBadgeStyle'), 'PosterLanguageTextFields');
+                        setupOverrideStyleToggle(document.querySelector('#ThumbAudioBadgeStyle'), 'ThumbAudioTextFields');
+                        setupOverrideStyleToggle(document.querySelector('#ThumbLanguageBadgeStyle'), 'ThumbLanguageTextFields');
+                        setupOverrideStyleToggle(document.querySelector('#BackdropAudioBadgeStyle'), 'BackdropAudioTextFields');
+                        setupOverrideStyleToggle(document.querySelector('#BackdropLanguageBadgeStyle'), 'BackdropLanguageTextFields');
+
+                        // VOST override: load values + toggle visibility based on ShowSubtitleIndicator
+                        var vostPrefixes = ['Poster', 'Thumb', 'Backdrop'];
+                        var vostSettings = ['PosterSettings', 'ThumbnailSettings', 'BackdropSettings'];
+                        for (var vi = 0; vi < vostPrefixes.length; vi++) {
+                            var vp = vostPrefixes[vi];
+                            var vs = config[vostSettings[vi]];
+                            document.querySelector('#' + vp + 'SubtitleBgColor').value = vs.SubtitleBadgeBgColor || '#000000';
+                            document.querySelector('#' + vp + 'SubtitleTextColor').value = vs.SubtitleBadgeTextColor || '#FFFFFF';
+                            document.querySelector('#' + vp + 'SubtitleTextBgOpacity').value = vs.SubtitleTextBadgeBgOpacity || 0;
+                            document.querySelector('#' + vp + 'SubtitleTextCornerRadius').value = vs.SubtitleTextBadgeCornerRadius != null ? vs.SubtitleTextBadgeCornerRadius : -1;
+                        }
+                        function toggleVostOverrides() {
+                            var show = document.querySelector('#ShowSubtitleIndicator').checked;
+                            vostPrefixes.forEach(function(vp) {
+                                var el = document.querySelector('#' + vp + 'VostOverride');
+                                if (el) { show ? el.classList.remove('hidden') : el.classList.add('hidden'); }
+                            });
+                        }
+                        document.querySelector('#ShowSubtitleIndicator').addEventListener('change', toggleVostOverrides);
+                        toggleVostOverrides();
+
                         Dashboard.hideLoadingMsg();
                     });
 
                     loadBadgeGallery();
                     loadCacheStats();
                     toggleOutputQuality();
+
+                    // Position preview panel just right of the form
+                    var panel = document.querySelector('.jellytag-preview-panel');
+                    var form = document.querySelector('#JellyTagConfigForm');
+                    if (panel && form) {
+                        function positionPanel() {
+                            if (window.innerWidth <= 1000) { panel.style.left = ''; return; }
+                            var rect = form.getBoundingClientRect();
+                            panel.style.left = (rect.right + 16) + 'px';
+                        }
+                        positionPanel();
+                        window.addEventListener('resize', positionPanel);
+                    }
                 });
+
+            function collectConfigFromForm(config) {
+                config.Enabled = document.querySelector('#Enabled').checked;
+
+                // Resolution
+                config.Show4K = document.querySelector('#Show4K').checked;
+                config.Show1080p = document.querySelector('#Show1080p').checked;
+                config.Show720p = document.querySelector('#Show720p').checked;
+                config.ShowSD = document.querySelector('#ShowSD').checked;
+
+                // HDR / 3D
+                config.ShowHdr10 = document.querySelector('#ShowHdr10').checked;
+                config.ShowHdr10Plus = document.querySelector('#ShowHdr10Plus').checked;
+                config.ShowDolbyVision = document.querySelector('#ShowDolbyVision').checked;
+                config.ShowHlg = document.querySelector('#ShowHlg').checked;
+                config.ShowGenericHdr = document.querySelector('#ShowGenericHdr').checked;
+                config.Show3D = document.querySelector('#Show3D').checked;
+
+                // Audio
+                config.ShowDolbyAtmos = document.querySelector('#ShowDolbyAtmos').checked;
+                config.ShowDtsX = document.querySelector('#ShowDtsX').checked;
+                config.ShowTrueHD = document.querySelector('#ShowTrueHD').checked;
+                config.ShowDtsHdMa = document.querySelector('#ShowDtsHdMa').checked;
+                config.ShowChannelBadge = document.querySelector('#ShowChannelBadge').checked;
+
+                // Language
+                config.LanguageBadgeMode = document.querySelector('#LanguageBadgeMode').value;
+                config.ShowSubtitleIndicator = document.querySelector('#ShowSubtitleIndicator').checked;
+
+                config.PosterSettings = {
+                    Enabled: document.querySelector('#PosterEnabled').checked,
+                    BadgePosition: document.querySelector('#PosterPosition').value,
+                    BadgeLayout: document.querySelector('#PosterLayout').value,
+                    AudioBadgeStyle: document.querySelector('#PosterAudioBadgeStyle').value || null,
+                    LanguageBadgeStyle: resolveLanguageBadgeStyle(document.querySelector('#PosterLanguageBadgeStyle').value, document.querySelector('#PosterBadgeStyle').value),
+                    AudioBadgePosition: document.querySelector('#PosterAudioPosition').value || null,
+                    AudioBadgeLayout: document.querySelector('#PosterAudioLayout').value || null,
+                    BadgeStyle: document.querySelector('#PosterBadgeStyle').value,
+                    BadgeSizePercent: parseInt(document.querySelector('#PosterSize').value, 10),
+                    AudioBadgeSizePercent: parseInt(document.querySelector('#PosterAudioSize').value, 10),
+                    BadgeMarginPercent: parseFloat(document.querySelector('#PosterMargin').value),
+                    BadgeGapPercent: parseFloat(document.querySelector('#PosterGap').value),
+                    TextBadgeBgColor: document.querySelector('#PosterTextBgColor').value,
+                    TextBadgeBgOpacity: parseInt(document.querySelector('#PosterTextBgOpacity').value, 10),
+                    TextBadgeTextColor: document.querySelector('#PosterTextColor').value,
+                    TextBadgeCornerRadius: parseInt(document.querySelector('#PosterTextCornerRadius').value, 10),
+                    VideoBadgeBgColor: document.querySelector('#PosterVideoBgColor').value || null,
+                    VideoBadgeTextColor: document.querySelector('#PosterVideoTextColor').value || null,
+                    AudioBadgeBgColor: document.querySelector('#PosterAudioBgColor').value || null,
+                    AudioBadgeTextColor: document.querySelector('#PosterAudioTextColor').value || null,
+                    LanguageBadgeBgColor: document.querySelector('#PosterLanguageBgColor').value || null,
+                    LanguageBadgeTextColor: document.querySelector('#PosterLanguageTextColor').value || null,
+                    LanguageBadgePosition: resolveLanguagePosition(document.querySelector('#PosterLanguagePosition').value, document.querySelector('#PosterPosition').value),
+                    LanguageBadgeLayout: document.querySelector('#PosterLanguageLayout').value || null,
+                    LanguageBadgeSizePercent: parseInt(document.querySelector('#PosterLanguageSize').value, 10),
+                    AudioTextBadgeBgOpacity: parseInt(document.querySelector('#PosterAudioTextBgOpacity').value, 10) || 0,
+                    AudioTextBadgeCornerRadius: parseInt(document.querySelector('#PosterAudioTextCornerRadius').value, 10),
+                    LanguageTextBadgeBgOpacity: parseInt(document.querySelector('#PosterLanguageTextBgOpacity').value, 10) || 0,
+                    LanguageTextBadgeCornerRadius: parseInt(document.querySelector('#PosterLanguageTextCornerRadius').value, 10),
+                    SubtitleBadgeBgColor: document.querySelector('#PosterSubtitleBgColor').value || null,
+                    SubtitleBadgeTextColor: document.querySelector('#PosterSubtitleTextColor').value || null,
+                    SubtitleTextBadgeBgOpacity: parseInt(document.querySelector('#PosterSubtitleTextBgOpacity').value, 10) || 0,
+                    SubtitleTextBadgeCornerRadius: parseInt(document.querySelector('#PosterSubtitleTextCornerRadius').value, 10)
+                };
+                config.ThumbnailSettings = {
+                    Enabled: document.querySelector('#ThumbEnabled').checked,
+                    BadgePosition: document.querySelector('#ThumbPosition').value,
+                    BadgeLayout: document.querySelector('#ThumbLayout').value,
+                    AudioBadgeStyle: document.querySelector('#ThumbAudioBadgeStyle').value || null,
+                    LanguageBadgeStyle: resolveLanguageBadgeStyle(document.querySelector('#ThumbLanguageBadgeStyle').value, document.querySelector('#ThumbBadgeStyle').value),
+                    AudioBadgePosition: document.querySelector('#ThumbAudioPosition').value || null,
+                    AudioBadgeLayout: document.querySelector('#ThumbAudioLayout').value || null,
+                    BadgeStyle: document.querySelector('#ThumbBadgeStyle').value,
+                    BadgeSizePercent: parseInt(document.querySelector('#ThumbSize').value, 10),
+                    AudioBadgeSizePercent: parseInt(document.querySelector('#ThumbAudioSize').value, 10),
+                    BadgeMarginPercent: parseFloat(document.querySelector('#ThumbMargin').value),
+                    BadgeGapPercent: parseFloat(document.querySelector('#ThumbGap').value),
+                    TextBadgeBgColor: document.querySelector('#ThumbTextBgColor').value,
+                    TextBadgeBgOpacity: parseInt(document.querySelector('#ThumbTextBgOpacity').value, 10),
+                    TextBadgeTextColor: document.querySelector('#ThumbTextColor').value,
+                    TextBadgeCornerRadius: parseInt(document.querySelector('#ThumbTextCornerRadius').value, 10),
+                    VideoBadgeBgColor: document.querySelector('#ThumbVideoBgColor').value || null,
+                    VideoBadgeTextColor: document.querySelector('#ThumbVideoTextColor').value || null,
+                    AudioBadgeBgColor: document.querySelector('#ThumbAudioBgColor').value || null,
+                    AudioBadgeTextColor: document.querySelector('#ThumbAudioTextColor').value || null,
+                    LanguageBadgeBgColor: document.querySelector('#ThumbLanguageBgColor').value || null,
+                    LanguageBadgeTextColor: document.querySelector('#ThumbLanguageTextColor').value || null,
+                    LanguageBadgePosition: resolveLanguagePosition(document.querySelector('#ThumbLanguagePosition').value, document.querySelector('#ThumbPosition').value),
+                    LanguageBadgeLayout: document.querySelector('#ThumbLanguageLayout').value || null,
+                    LanguageBadgeSizePercent: parseInt(document.querySelector('#ThumbLanguageSize').value, 10),
+                    AudioTextBadgeBgOpacity: parseInt(document.querySelector('#ThumbAudioTextBgOpacity').value, 10) || 0,
+                    AudioTextBadgeCornerRadius: parseInt(document.querySelector('#ThumbAudioTextCornerRadius').value, 10),
+                    LanguageTextBadgeBgOpacity: parseInt(document.querySelector('#ThumbLanguageTextBgOpacity').value, 10) || 0,
+                    LanguageTextBadgeCornerRadius: parseInt(document.querySelector('#ThumbLanguageTextCornerRadius').value, 10),
+                    SubtitleBadgeBgColor: document.querySelector('#ThumbSubtitleBgColor').value || null,
+                    SubtitleBadgeTextColor: document.querySelector('#ThumbSubtitleTextColor').value || null,
+                    SubtitleTextBadgeBgOpacity: parseInt(document.querySelector('#ThumbSubtitleTextBgOpacity').value, 10) || 0,
+                    SubtitleTextBadgeCornerRadius: parseInt(document.querySelector('#ThumbSubtitleTextCornerRadius').value, 10)
+                };
+                config.BackdropSettings = {
+                    Enabled: document.querySelector('#BackdropEnabled').checked,
+                    BadgePosition: document.querySelector('#BackdropPosition').value,
+                    BadgeLayout: document.querySelector('#BackdropLayout').value,
+                    AudioBadgeStyle: document.querySelector('#BackdropAudioBadgeStyle').value || null,
+                    LanguageBadgeStyle: resolveLanguageBadgeStyle(document.querySelector('#BackdropLanguageBadgeStyle').value, document.querySelector('#BackdropBadgeStyle').value),
+                    AudioBadgePosition: document.querySelector('#BackdropAudioPosition').value || null,
+                    AudioBadgeLayout: document.querySelector('#BackdropAudioLayout').value || null,
+                    BadgeStyle: document.querySelector('#BackdropBadgeStyle').value,
+                    BadgeSizePercent: parseInt(document.querySelector('#BackdropSize').value, 10),
+                    AudioBadgeSizePercent: parseInt(document.querySelector('#BackdropAudioSize').value, 10),
+                    BadgeMarginPercent: parseFloat(document.querySelector('#BackdropMargin').value),
+                    BadgeGapPercent: parseFloat(document.querySelector('#BackdropGap').value),
+                    TextBadgeBgColor: document.querySelector('#BackdropTextBgColor').value,
+                    TextBadgeBgOpacity: parseInt(document.querySelector('#BackdropTextBgOpacity').value, 10),
+                    TextBadgeTextColor: document.querySelector('#BackdropTextColor').value,
+                    TextBadgeCornerRadius: parseInt(document.querySelector('#BackdropTextCornerRadius').value, 10),
+                    VideoBadgeBgColor: document.querySelector('#BackdropVideoBgColor').value || null,
+                    VideoBadgeTextColor: document.querySelector('#BackdropVideoTextColor').value || null,
+                    AudioBadgeBgColor: document.querySelector('#BackdropAudioBgColor').value || null,
+                    AudioBadgeTextColor: document.querySelector('#BackdropAudioTextColor').value || null,
+                    LanguageBadgeBgColor: document.querySelector('#BackdropLanguageBgColor').value || null,
+                    LanguageBadgeTextColor: document.querySelector('#BackdropLanguageTextColor').value || null,
+                    LanguageBadgePosition: resolveLanguagePosition(document.querySelector('#BackdropLanguagePosition').value, document.querySelector('#BackdropPosition').value),
+                    LanguageBadgeLayout: document.querySelector('#BackdropLanguageLayout').value || null,
+                    LanguageBadgeSizePercent: parseInt(document.querySelector('#BackdropLanguageSize').value, 10),
+                    AudioTextBadgeBgOpacity: parseInt(document.querySelector('#BackdropAudioTextBgOpacity').value, 10) || 0,
+                    AudioTextBadgeCornerRadius: parseInt(document.querySelector('#BackdropAudioTextCornerRadius').value, 10),
+                    LanguageTextBadgeBgOpacity: parseInt(document.querySelector('#BackdropLanguageTextBgOpacity').value, 10) || 0,
+                    LanguageTextBadgeCornerRadius: parseInt(document.querySelector('#BackdropLanguageTextCornerRadius').value, 10),
+                    SubtitleBadgeBgColor: document.querySelector('#BackdropSubtitleBgColor').value || null,
+                    SubtitleBadgeTextColor: document.querySelector('#BackdropSubtitleTextColor').value || null,
+                    SubtitleTextBadgeBgOpacity: parseInt(document.querySelector('#BackdropSubtitleTextBgOpacity').value, 10) || 0,
+                    SubtitleTextBadgeCornerRadius: parseInt(document.querySelector('#BackdropSubtitleTextCornerRadius').value, 10)
+                };
+
+                // Custom Badge Texts
+                var saveCbt = [];
+                document.querySelectorAll('#CustomBadgeTextsGrid input[data-badge-key]').forEach(function(el) {
+                    var val = el.value.trim();
+                    if (val) { saveCbt.push({ Key: el.getAttribute('data-badge-key'), Text: val }); }
+                });
+                config.CustomBadgeTexts = saveCbt;
+
+                config.CacheDurationHours = parseInt(document.querySelector('#CacheDurationHours').value, 10);
+                config.OutputFormat = document.querySelector('#OutputFormat').value;
+                config.JpegQuality = parseInt(document.querySelector('#JpegQuality').value, 10);
+                config.WebPQuality = parseInt(document.querySelector('#WebPQuality').value, 10);
+                return config;
+            }
 
             document.querySelector('#JellyTagConfigForm')
                 .addEventListener('submit', function (e) {
                     e.preventDefault();
                     Dashboard.showLoadingMsg();
                     ApiClient.getPluginConfiguration(JellyTagConfig.pluginUniqueId).then(function (config) {
-                        config.Enabled = document.querySelector('#Enabled').checked;
-
-                        // Resolution
-                        config.Show4K = document.querySelector('#Show4K').checked;
-                        config.Show1080p = document.querySelector('#Show1080p').checked;
-                        config.Show720p = document.querySelector('#Show720p').checked;
-                        config.ShowSD = document.querySelector('#ShowSD').checked;
-
-                        // HDR / 3D
-                        config.ShowHdr10 = document.querySelector('#ShowHdr10').checked;
-                        config.ShowHdr10Plus = document.querySelector('#ShowHdr10Plus').checked;
-                        config.ShowDolbyVision = document.querySelector('#ShowDolbyVision').checked;
-                        config.ShowHlg = document.querySelector('#ShowHlg').checked;
-                        config.ShowGenericHdr = document.querySelector('#ShowGenericHdr').checked;
-                        config.Show3D = document.querySelector('#Show3D').checked;
-
-                        // Audio
-                        config.ShowDolbyAtmos = document.querySelector('#ShowDolbyAtmos').checked;
-                        config.ShowDtsX = document.querySelector('#ShowDtsX').checked;
-                        config.ShowTrueHD = document.querySelector('#ShowTrueHD').checked;
-                        config.ShowDtsHdMa = document.querySelector('#ShowDtsHdMa').checked;
-                        config.ShowChannelBadge = document.querySelector('#ShowChannelBadge').checked;
-
-                        // Language
-                        config.LanguageBadgeMode = document.querySelector('#LanguageBadgeMode').value;
-                        config.ShowSubtitleIndicator = document.querySelector('#ShowSubtitleIndicator').checked;
-
-                        config.PosterSettings = {
-                            Enabled: document.querySelector('#PosterEnabled').checked,
-                            BadgePosition: document.querySelector('#PosterPosition').value,
-                            BadgeLayout: document.querySelector('#PosterLayout').value,
-                            AudioBadgeStyle: document.querySelector('#PosterAudioBadgeStyle').value || null,
-                            LanguageBadgeStyle: resolveLanguageBadgeStyle(document.querySelector('#PosterLanguageBadgeStyle').value, document.querySelector('#PosterBadgeStyle').value),
-                            AudioBadgePosition: document.querySelector('#PosterAudioPosition').value || null,
-                            AudioBadgeLayout: document.querySelector('#PosterAudioLayout').value || null,
-                            BadgeStyle: document.querySelector('#PosterBadgeStyle').value,
-                            BadgeSizePercent: parseInt(document.querySelector('#PosterSize').value, 10),
-                            AudioBadgeSizePercent: parseInt(document.querySelector('#PosterAudioSize').value, 10),
-                            BadgeMarginPercent: parseFloat(document.querySelector('#PosterMargin').value),
-                            BadgeGapPercent: parseFloat(document.querySelector('#PosterGap').value),
-                            TextBadgeBgColor: document.querySelector('#PosterTextBgColor').value,
-                            TextBadgeBgOpacity: parseInt(document.querySelector('#PosterTextBgOpacity').value, 10),
-                            TextBadgeTextColor: document.querySelector('#PosterTextColor').value,
-                            TextBadgeCornerRadius: parseInt(document.querySelector('#PosterTextCornerRadius').value, 10),
-                            VideoBadgeBgColor: document.querySelector('#PosterVideoBgColor').value || null,
-                            VideoBadgeTextColor: document.querySelector('#PosterVideoTextColor').value || null,
-                            AudioBadgeBgColor: document.querySelector('#PosterAudioBgColor').value || null,
-                            AudioBadgeTextColor: document.querySelector('#PosterAudioTextColor').value || null,
-                            LanguageBadgeBgColor: document.querySelector('#PosterLanguageBgColor').value || null,
-                            LanguageBadgeTextColor: document.querySelector('#PosterLanguageTextColor').value || null,
-                            LanguageBadgePosition: resolveLanguagePosition(document.querySelector('#PosterLanguagePosition').value, document.querySelector('#PosterPosition').value),
-                            LanguageBadgeLayout: document.querySelector('#PosterLanguageLayout').value || null,
-                            LanguageBadgeSizePercent: parseInt(document.querySelector('#PosterLanguageSize').value, 10)
-                        };
-                        config.ThumbnailSettings = {
-                            Enabled: document.querySelector('#ThumbEnabled').checked,
-                            BadgePosition: document.querySelector('#ThumbPosition').value,
-                            BadgeLayout: document.querySelector('#ThumbLayout').value,
-                            AudioBadgeStyle: document.querySelector('#ThumbAudioBadgeStyle').value || null,
-                            LanguageBadgeStyle: resolveLanguageBadgeStyle(document.querySelector('#ThumbLanguageBadgeStyle').value, document.querySelector('#ThumbBadgeStyle').value),
-                            AudioBadgePosition: document.querySelector('#ThumbAudioPosition').value || null,
-                            AudioBadgeLayout: document.querySelector('#ThumbAudioLayout').value || null,
-                            BadgeStyle: document.querySelector('#ThumbBadgeStyle').value,
-                            BadgeSizePercent: parseInt(document.querySelector('#ThumbSize').value, 10),
-                            AudioBadgeSizePercent: parseInt(document.querySelector('#ThumbAudioSize').value, 10),
-                            BadgeMarginPercent: parseFloat(document.querySelector('#ThumbMargin').value),
-                            BadgeGapPercent: parseFloat(document.querySelector('#ThumbGap').value),
-                            TextBadgeBgColor: document.querySelector('#ThumbTextBgColor').value,
-                            TextBadgeBgOpacity: parseInt(document.querySelector('#ThumbTextBgOpacity').value, 10),
-                            TextBadgeTextColor: document.querySelector('#ThumbTextColor').value,
-                            TextBadgeCornerRadius: parseInt(document.querySelector('#ThumbTextCornerRadius').value, 10),
-                            VideoBadgeBgColor: document.querySelector('#ThumbVideoBgColor').value || null,
-                            VideoBadgeTextColor: document.querySelector('#ThumbVideoTextColor').value || null,
-                            AudioBadgeBgColor: document.querySelector('#ThumbAudioBgColor').value || null,
-                            AudioBadgeTextColor: document.querySelector('#ThumbAudioTextColor').value || null,
-                            LanguageBadgeBgColor: document.querySelector('#ThumbLanguageBgColor').value || null,
-                            LanguageBadgeTextColor: document.querySelector('#ThumbLanguageTextColor').value || null,
-                            LanguageBadgePosition: resolveLanguagePosition(document.querySelector('#ThumbLanguagePosition').value, document.querySelector('#ThumbPosition').value),
-                            LanguageBadgeLayout: document.querySelector('#ThumbLanguageLayout').value || null,
-                            LanguageBadgeSizePercent: parseInt(document.querySelector('#ThumbLanguageSize').value, 10)
-                        };
-                        config.BackdropSettings = {
-                            Enabled: document.querySelector('#BackdropEnabled').checked,
-                            BadgePosition: document.querySelector('#BackdropPosition').value,
-                            BadgeLayout: document.querySelector('#BackdropLayout').value,
-                            AudioBadgeStyle: document.querySelector('#BackdropAudioBadgeStyle').value || null,
-                            LanguageBadgeStyle: resolveLanguageBadgeStyle(document.querySelector('#BackdropLanguageBadgeStyle').value, document.querySelector('#BackdropBadgeStyle').value),
-                            AudioBadgePosition: document.querySelector('#BackdropAudioPosition').value || null,
-                            AudioBadgeLayout: document.querySelector('#BackdropAudioLayout').value || null,
-                            BadgeStyle: document.querySelector('#BackdropBadgeStyle').value,
-                            BadgeSizePercent: parseInt(document.querySelector('#BackdropSize').value, 10),
-                            AudioBadgeSizePercent: parseInt(document.querySelector('#BackdropAudioSize').value, 10),
-                            BadgeMarginPercent: parseFloat(document.querySelector('#BackdropMargin').value),
-                            BadgeGapPercent: parseFloat(document.querySelector('#BackdropGap').value),
-                            TextBadgeBgColor: document.querySelector('#BackdropTextBgColor').value,
-                            TextBadgeBgOpacity: parseInt(document.querySelector('#BackdropTextBgOpacity').value, 10),
-                            TextBadgeTextColor: document.querySelector('#BackdropTextColor').value,
-                            TextBadgeCornerRadius: parseInt(document.querySelector('#BackdropTextCornerRadius').value, 10),
-                            VideoBadgeBgColor: document.querySelector('#BackdropVideoBgColor').value || null,
-                            VideoBadgeTextColor: document.querySelector('#BackdropVideoTextColor').value || null,
-                            AudioBadgeBgColor: document.querySelector('#BackdropAudioBgColor').value || null,
-                            AudioBadgeTextColor: document.querySelector('#BackdropAudioTextColor').value || null,
-                            LanguageBadgeBgColor: document.querySelector('#BackdropLanguageBgColor').value || null,
-                            LanguageBadgeTextColor: document.querySelector('#BackdropLanguageTextColor').value || null,
-                            LanguageBadgePosition: resolveLanguagePosition(document.querySelector('#BackdropLanguagePosition').value, document.querySelector('#BackdropPosition').value),
-                            LanguageBadgeLayout: document.querySelector('#BackdropLanguageLayout').value || null,
-                            LanguageBadgeSizePercent: parseInt(document.querySelector('#BackdropLanguageSize').value, 10)
-                        };
-
-                        // Custom Badge Texts
-                        var saveCbt = [];
-                        document.querySelectorAll('#CustomBadgeTextsGrid input[data-badge-key]').forEach(function(el) {
-                            var val = el.value.trim();
-                            if (val) { saveCbt.push({ Key: el.getAttribute('data-badge-key'), Text: val }); }
-                        });
-                        config.CustomBadgeTexts = saveCbt;
-
-                        config.CacheDurationHours = parseInt(document.querySelector('#CacheDurationHours').value, 10);
-                        config.OutputFormat = document.querySelector('#OutputFormat').value;
-                        config.JpegQuality = parseInt(document.querySelector('#JpegQuality').value, 10);
-                        config.WebPQuality = parseInt(document.querySelector('#WebPQuality').value, 10);
-
+                        collectConfigFromForm(config);
                         ApiClient.updatePluginConfiguration(JellyTagConfig.pluginUniqueId, config).then(function () {
                             Dashboard.processPluginConfigurationUpdateResult();
                         });
@@ -1407,6 +1764,155 @@
             var outputFmtEl = document.querySelector('#OutputFormat');
             outputFmtEl.addEventListener('change', toggleOutputQuality);
             outputFmtEl.addEventListener('input', toggleOutputQuality);
+
+            // Live Preview logic
+            (function () {
+                var previewItemId = null;
+                var previewItemName = '';
+                var searchTimer = null;
+                var refreshTimer = null;
+                var refreshing = false;
+
+                var searchInput = document.querySelector('#PreviewSearch');
+                var searchResults = document.querySelector('#PreviewSearchResults');
+                var selectedEl = document.querySelector('#PreviewSelected');
+                var spinner = document.querySelector('#PreviewSpinner');
+                var posterImg = document.querySelector('#PreviewPoster');
+                var thumbImg = document.querySelector('#PreviewThumb');
+                var errorEl = document.querySelector('#PreviewError');
+                var refreshBtn = document.querySelector('#RefreshPreview');
+
+                // 4a — Search
+                searchInput.addEventListener('input', function () {
+                    clearTimeout(searchTimer);
+                    var query = searchInput.value.trim();
+                    if (query.length < 2) {
+                        searchResults.style.display = 'none';
+                        return;
+                    }
+                    searchTimer = setTimeout(function () {
+                        ApiClient.getItems(ApiClient.getCurrentUserId(), {
+                            SearchTerm: query,
+                            IncludeItemTypes: 'Movie',
+                            Limit: 8,
+                            Recursive: true,
+                            Fields: 'PrimaryImageAspectRatio'
+                        }).then(function (result) {
+                            searchResults.innerHTML = '';
+                            if (!result.Items || result.Items.length === 0) {
+                                searchResults.innerHTML = '<div class="preview-search-item" style="color:#aaa;">No results</div>';
+                                searchResults.style.display = 'block';
+                                return;
+                            }
+                            result.Items.forEach(function (item) {
+                                var div = document.createElement('div');
+                                div.className = 'preview-search-item';
+                                div.textContent = item.Name + (item.ProductionYear ? ' (' + item.ProductionYear + ')' : '');
+                                div.addEventListener('click', function () {
+                                    previewItemId = item.Id;
+                                    previewItemName = item.Name + (item.ProductionYear ? ' (' + item.ProductionYear + ')' : '');
+                                    selectedEl.textContent = previewItemName;
+                                    searchResults.style.display = 'none';
+                                    searchInput.value = '';
+                                    refreshPreview();
+                                });
+                                searchResults.appendChild(div);
+                            });
+                            searchResults.style.display = 'block';
+                        });
+                    }, 300);
+                });
+
+                // 4e — Close dropdown on outside click
+                document.addEventListener('click', function (e) {
+                    if (!searchResults.contains(e.target) && e.target !== searchInput) {
+                        searchResults.style.display = 'none';
+                    }
+                });
+
+                // 4b — Refresh preview
+                function refreshPreview() {
+                    if (!previewItemId || refreshing) return;
+                    refreshing = true;
+                    errorEl.style.display = 'none';
+                    errorEl.textContent = '';
+                    spinner.style.display = 'block';
+
+                    ApiClient.getPluginConfiguration(JellyTagConfig.pluginUniqueId).then(function (config) {
+                        collectConfigFromForm(config);
+                        return ApiClient.updatePluginConfiguration(JellyTagConfig.pluginUniqueId, config);
+                    }).then(function () {
+                        return ApiClient.ajax({
+                            type: 'POST',
+                            url: ApiClient.getUrl('JellyTag/ClearCache')
+                        });
+                    }).then(function () {
+                        var token = ApiClient.accessToken();
+                        var bust = '_t=' + Date.now();
+                        var tokenParam = token ? '&api_key=' + token : '';
+
+                        var posterUrl = ApiClient.getUrl('Items/' + previewItemId + '/Images/Primary') + '?' + bust + tokenParam;
+                        var thumbUrl = ApiClient.getUrl('Items/' + previewItemId + '/Images/Thumb') + '?' + bust + tokenParam;
+
+                        var posterLoaded = new Promise(function (resolve) {
+                            var img = new Image();
+                            img.onload = function () {
+                                posterImg.src = posterUrl;
+                                posterImg.style.display = 'block';
+                                resolve();
+                            };
+                            img.onerror = function () {
+                                posterImg.style.display = 'none';
+                                resolve();
+                            };
+                            img.src = posterUrl;
+                        });
+
+                        var thumbLoaded = new Promise(function (resolve) {
+                            var img = new Image();
+                            img.onload = function () {
+                                thumbImg.src = thumbUrl;
+                                thumbImg.style.display = 'block';
+                                resolve();
+                            };
+                            img.onerror = function () {
+                                thumbImg.style.display = 'none';
+                                resolve();
+                            };
+                            img.src = thumbUrl;
+                        });
+
+                        return Promise.all([posterLoaded, thumbLoaded]);
+                    }).then(function () {
+                        spinner.style.display = 'none';
+                        refreshing = false;
+                    }).catch(function (err) {
+                        spinner.style.display = 'none';
+                        refreshing = false;
+                        errorEl.textContent = 'Preview error: ' + (err.message || err);
+                        errorEl.style.display = 'block';
+                    });
+                }
+
+                // 4c — Auto-refresh on form changes
+                var form = document.querySelector('#JellyTagConfigForm');
+                form.addEventListener('input', function (e) {
+                    if (e.target.closest('.jellytag-preview-panel')) return;
+                    clearTimeout(refreshTimer);
+                    refreshTimer = setTimeout(refreshPreview, 1500);
+                });
+                form.addEventListener('change', function (e) {
+                    if (e.target.closest('.jellytag-preview-panel')) return;
+                    clearTimeout(refreshTimer);
+                    refreshTimer = setTimeout(refreshPreview, 1500);
+                });
+
+                // 4d — Manual refresh
+                refreshBtn.addEventListener('click', function () {
+                    clearTimeout(refreshTimer);
+                    refreshPreview();
+                });
+            })();
         </script>
     </div>
 </body>
