@@ -1131,7 +1131,33 @@
                                     <label class="inputLabel inputLabelUnfocused" for="cbt_3d">3D</label>
                                     <input id="cbt_3d" data-badge-key="3d" type="text" placeholder="3D" is="emby-input" />
                                 </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_h264">H.264</label>
+                                    <input id="cbt_h264" data-badge-key="h264" type="text" placeholder="H.264" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_hevc">HEVC</label>
+                                    <input id="cbt_hevc" data-badge-key="hevc" type="text" placeholder="HEVC" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_av1">AV1</label>
+                                    <input id="cbt_av1" data-badge-key="av1" type="text" placeholder="AV1" is="emby-input" />
+                                </div>
+                                <div class="inputContainer">
+                                    <label class="inputLabel inputLabelUnfocused" for="cbt_vp9">VP9</label>
+                                    <input id="cbt_vp9" data-badge-key="vp9" type="text" placeholder="VP9" is="emby-input" />
+                                </div>
                             </div>
+                        </div>
+                    </details>
+
+                    <!-- Custom Badge Upload -->
+                    <details class="jellytag-section">
+                        <summary>Custom Badges</summary>
+                        <div class="jellytag-section-body">
+                            <div class="fieldDescription" style="margin-bottom: 1em;">Click a badge to upload a custom replacement (SVG, PNG or JPEG). Click the reset button to revert to the default.</div>
+                            <div id="BadgeGallery" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:12px;"></div>
+                            <input id="CustomBadgeFile" type="file" accept="image/svg+xml,image/png,image/jpeg" style="display:none;" />
                         </div>
                     </details>
 
@@ -1166,16 +1192,6 @@
                             </div>
 
                             <div id="CacheStatsInfo" class="fieldDescription" style="margin-top:.5em;"></div>
-                        </div>
-                    </details>
-
-                    <!-- Custom Badge Upload -->
-                    <details class="jellytag-section">
-                        <summary>Custom Badges</summary>
-                        <div class="jellytag-section-body">
-                            <div class="fieldDescription" style="margin-bottom: 1em;">Click a badge to upload a custom replacement (SVG, PNG or JPEG). Click the reset button to revert to the default.</div>
-                            <div id="BadgeGallery" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:12px;"></div>
-                            <input id="CustomBadgeFile" type="file" accept="image/svg+xml,image/png,image/jpeg" style="display:none;" />
                         </div>
                     </details>
 
