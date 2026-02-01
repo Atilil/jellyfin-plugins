@@ -121,6 +121,7 @@ public class PluginConfiguration : BasePluginConfiguration
         PosterConfig = CreateDefaultPosterConfig();
         ThumbnailConfig = CreateDefaultThumbnailConfig();
         ThumbnailSameAsPoster = false;
+        ThumbnailSizeReduction = 10;
         ExcludedLibraryIds = new List<string>();
 
         CustomBadgeTexts = new List<BadgeTextOverride>();
@@ -135,6 +136,12 @@ public class PluginConfiguration : BasePluginConfiguration
     public ImageTypeConfig PosterConfig { get; set; }
     public ImageTypeConfig ThumbnailConfig { get; set; }
     public bool ThumbnailSameAsPoster { get; set; }
+
+    /// <summary>
+    /// Size reduction (in percentage points) applied to badge sizes when ThumbnailSameAsPoster is enabled.
+    /// For example, 10 means a 15% poster badge becomes 5% on thumbnails.
+    /// </summary>
+    public int ThumbnailSizeReduction { get; set; }
 
     /// <summary>
     /// Library IDs excluded from badge generation. Empty means all libraries are included.

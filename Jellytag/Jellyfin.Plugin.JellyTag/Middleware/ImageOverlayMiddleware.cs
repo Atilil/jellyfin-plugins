@@ -183,12 +183,67 @@ public partial class ImageOverlayMiddleware
 
     private static ImageTypeConfig? GetImageTypeConfig(PluginConfiguration config, string imageType, BaseItem item)
     {
+        var isThumb = imageType.ToUpperInvariant() switch
+        {
+            "PRIMARY" when item is Episode => true,
+            "THUMB" => true,
+            _ => false
+        };
+
+        if (isThumb && config.ThumbnailSameAsPoster)
+        {
+            return ApplySizeReduction(config.PosterConfig, config.ThumbnailSizeReduction);
+        }
+
         return imageType.ToUpperInvariant() switch
         {
-            "PRIMARY" when item is Episode => config.ThumbnailSameAsPoster ? config.PosterConfig : config.ThumbnailConfig,
+            "PRIMARY" when item is Episode => config.ThumbnailConfig,
             "PRIMARY" => config.PosterConfig,
-            "THUMB" => config.ThumbnailSameAsPoster ? config.PosterConfig : config.ThumbnailConfig,
+            "THUMB" => config.ThumbnailConfig,
             _ => null
+        };
+    }
+
+    private static ImageTypeConfig ApplySizeReduction(ImageTypeConfig source, int reduction)
+    {
+        if (reduction <= 0) return source;
+
+        var clone = new ImageTypeConfig
+        {
+            Enabled = source.Enabled,
+            ResolutionPanel = ClonePanelWithReduction(source.ResolutionPanel, reduction),
+            HdrPanel = ClonePanelWithReduction(source.HdrPanel, reduction),
+            CodecPanel = ClonePanelWithReduction(source.CodecPanel, reduction),
+            AudioPanel = ClonePanelWithReduction(source.AudioPanel, reduction),
+            LanguagePanel = ClonePanelWithReduction(source.LanguagePanel, reduction),
+            ShowVostIndicator = source.ShowVostIndicator,
+            VostBgColor = source.VostBgColor,
+            VostTextColor = source.VostTextColor,
+            VostBgOpacity = source.VostBgOpacity,
+            VostCornerRadius = source.VostCornerRadius
+        };
+        return clone;
+    }
+
+    private static BadgePanelSettings ClonePanelWithReduction(BadgePanelSettings panel, int reduction)
+    {
+        return new BadgePanelSettings
+        {
+            Enabled = panel.Enabled,
+            Position = panel.Position,
+            ShowMode = panel.ShowMode,
+            Layout = panel.Layout,
+            GapPercent = panel.GapPercent,
+            SizePercent = Math.Max(1, panel.SizePercent - reduction),
+            MarginPercent = panel.MarginPercent,
+            Style = panel.Style,
+            Order = panel.Order,
+            TextBgColor = panel.TextBgColor,
+            TextBgOpacity = panel.TextBgOpacity,
+            TextColor = panel.TextColor,
+            TextCornerRadius = panel.TextCornerRadius,
+            BadgeTypeOverrides = panel.BadgeTypeOverrides,
+            EnabledBadges = panel.EnabledBadges
         };
     }
 }
