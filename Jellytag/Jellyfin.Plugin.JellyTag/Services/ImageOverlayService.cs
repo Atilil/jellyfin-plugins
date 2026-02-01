@@ -153,6 +153,12 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 var panelBadges = badges.Where(b => GetPanelForCategory(b.Category, imageConfig) == panel).ToList();
                 if (panelBadges.Count == 0) continue;
 
+                // Apply ShowMode filter: Highest = keep only the first (highest priority) badge
+                if (panel.ShowMode == BadgeDisplayMode.Highest && panelBadges.Count > 1)
+                {
+                    panelBadges = new List<BadgeInfo> { panelBadges[0] };
+                }
+
                 var sizePercent = Math.Clamp(panel.SizePercent, MinBadgeSizePercent, MaxBadgeSizePercent);
                 var useText = panel.Style == BadgeStyle.Text;
 

@@ -19,6 +19,8 @@ public class QualityDetectionService : IQualityDetectionService
     private readonly ILogger<QualityDetectionService> _logger;
     private readonly ConcurrentDictionary<Guid, (List<BadgeInfo> Badges, DateTime CachedAt)> _badgeCache = new();
     private static readonly TimeSpan BadgeCacheTtl = TimeSpan.FromMinutes(5);
+    private DateTime _lastCacheCleanup = DateTime.UtcNow;
+    private static readonly TimeSpan CacheCleanupInterval = TimeSpan.FromMinutes(10);
 
     public QualityDetectionService(
         ILibraryManager libraryManager,
@@ -100,6 +102,20 @@ public class QualityDetectionService : IQualityDetectionService
 
         var badges = DetectAllBadgesInternal(item);
         _badgeCache[item.Id] = (badges, DateTime.UtcNow);
+
+        // Periodically evict expired entries to prevent unbounded memory growth
+        if (DateTime.UtcNow - _lastCacheCleanup > CacheCleanupInterval)
+        {
+            _lastCacheCleanup = DateTime.UtcNow;
+            var expiredKeys = _badgeCache
+                .Where(kvp => DateTime.UtcNow - kvp.Value.CachedAt > BadgeCacheTtl)
+                .Select(kvp => kvp.Key)
+                .ToList();
+            foreach (var key in expiredKeys)
+            {
+                _badgeCache.TryRemove(key, out _);
+            }
+        }
         return badges;
     }
 
@@ -261,13 +277,12 @@ public class QualityDetectionService : IQualityDetectionService
         { "gre", "ell" }, { "may", "msa" }, { "tgl", "fil" }, { "slo", "slk" }, { "baq", "eus" }, { "wel", "cym" }
     };
 
+    // Only include language codes that have a matching flag-{code}.svg asset
     private static readonly HashSet<string> KnownFlagCodes = new(StringComparer.OrdinalIgnoreCase)
     {
         "fra", "eng", "jpn", "deu", "spa", "ita", "por", "kor", "zho", "rus",
         "nld", "ara", "hin", "tha", "pol", "tur", "swe", "dan", "nor", "fin",
-        "ces", "hun", "ron", "ukr", "vie", "heb",
-        "ell", "ind", "msa", "fil", "hrv", "srp", "bul", "slk", "lit", "lav",
-        "est", "cat", "eus", "glg", "cym"
+        "ces", "hun", "ron", "ukr", "vie", "heb"
     };
 
     private static string GetFlagResourceFileName(string langCode)
