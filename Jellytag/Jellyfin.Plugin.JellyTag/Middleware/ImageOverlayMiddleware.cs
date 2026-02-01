@@ -80,6 +80,17 @@ public partial class ImageOverlayMiddleware
             return;
         }
 
+        // Check if item's library is excluded
+        if (config.ExcludedLibraryIds.Count > 0)
+        {
+            var collectionFolders = libraryManager.GetCollectionFolders(item);
+            if (collectionFolders.Any(f => config.ExcludedLibraryIds.Contains(f.Id.ToString("N"))))
+            {
+                await _next(context).ConfigureAwait(false);
+                return;
+            }
+        }
+
         var imageConfig = GetImageTypeConfig(config, imageType, item);
         if (imageConfig == null || !imageConfig.Enabled)
         {

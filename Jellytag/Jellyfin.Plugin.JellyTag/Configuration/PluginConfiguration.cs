@@ -121,6 +121,7 @@ public class PluginConfiguration : BasePluginConfiguration
         PosterConfig = CreateDefaultPosterConfig();
         ThumbnailConfig = CreateDefaultThumbnailConfig();
         ThumbnailSameAsPoster = false;
+        ExcludedLibraryIds = new List<string>();
 
         CustomBadgeTexts = new List<BadgeTextOverride>();
         CacheDurationHours = 24;
@@ -134,6 +135,11 @@ public class PluginConfiguration : BasePluginConfiguration
     public ImageTypeConfig PosterConfig { get; set; }
     public ImageTypeConfig ThumbnailConfig { get; set; }
     public bool ThumbnailSameAsPoster { get; set; }
+
+    /// <summary>
+    /// Library IDs excluded from badge generation. Empty means all libraries are included.
+    /// </summary>
+    public List<string> ExcludedLibraryIds { get; set; }
 
     public List<BadgeTextOverride> CustomBadgeTexts { get; set; }
     public int CacheDurationHours { get; set; }

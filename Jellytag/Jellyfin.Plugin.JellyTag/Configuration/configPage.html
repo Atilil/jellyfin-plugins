@@ -73,6 +73,15 @@
                         </div>
                     </div>
 
+                    <!-- Libraries -->
+                    <details class="jellytag-section">
+                        <summary>Libraries</summary>
+                        <div class="jellytag-section-body">
+                            <div class="fieldDescription" style="margin-bottom:1em;">Uncheck a library to disable badge generation for its items.</div>
+                            <div id="LibraryCheckboxes"><em>Loading libraries...</em></div>
+                        </div>
+                    </details>
+
                     <!-- Posters (Primary) -->
                     <details class="jellytag-section" open>
                         <summary>Posters (Primary)</summary>
@@ -738,6 +747,7 @@
             config.ThumbnailSameAsPoster = q('ThumbnailSameAsPoster').checked;
             config.PosterConfig = collectImageTypeConfig('Poster');
             config.ThumbnailConfig = collectImageTypeConfig('Thumb');
+            config.ExcludedLibraryIds = collectExcludedLibraries();
 
             // Nullify legacy
             config.PosterSettings = null;
@@ -779,12 +789,45 @@
             if (c) c.classList.toggle('hidden', same);
         }
 
+        // ===== Library filter =====
+        function loadLibraryCheckboxes(excludedIds) {
+            var container = document.querySelector('#LibraryCheckboxes');
+            var token = ApiClient.accessToken();
+            var headers = {}; if (token) headers['Authorization'] = 'MediaBrowser Token="' + token + '"';
+            fetch(ApiClient.getUrl('Library/VirtualFolders'), {headers:headers}).then(function(r){return r.json();}).then(function(folders) {
+                container.innerHTML = '';
+                folders.forEach(function(folder) {
+                    var folderId = folder.ItemId;
+                    var isExcluded = excludedIds.indexOf(folderId) >= 0;
+                    var div = document.createElement('div');
+                    div.className = 'checkboxContainer checkboxContainer-withDescription';
+                    div.innerHTML = '<label class="emby-checkbox-label">' +
+                        '<input type="checkbox" is="emby-checkbox" class="libCheckbox" data-library-id="' + folderId + '"' + (isExcluded ? '' : ' checked') + ' />' +
+                        '<span>' + folder.Name + '</span></label>';
+                    container.appendChild(div);
+                });
+                if (folders.length === 0) container.innerHTML = '<em>No libraries found.</em>';
+            }).catch(function(err) {
+                console.error('[JellyTag] Failed to load libraries:', err);
+                container.innerHTML = '<em>Failed to load libraries.</em>';
+            });
+        }
+
+        function collectExcludedLibraries() {
+            var excluded = [];
+            document.querySelectorAll('#LibraryCheckboxes .libCheckbox').forEach(function(cb) {
+                if (!cb.checked) excluded.push(cb.getAttribute('data-library-id'));
+            });
+            return excluded;
+        }
+
         // ===== Badge Gallery =====
         var allBadgeKeys = [
             {key:'4k',label:'4K'},{key:'1080p',label:'1080p'},{key:'720p',label:'720p'},{key:'sd',label:'SD'},
             {key:'hdr10',label:'HDR10'},{key:'hdr10plus',label:'HDR10+'},{key:'dv',label:'Dolby Vision'},{key:'hlg',label:'HLG'},
             {key:'atmos',label:'Atmos'},{key:'dtsx',label:'DTS:X'},{key:'truehd',label:'TrueHD'},{key:'dtshdma',label:'DTS-HD MA'},
-            {key:'5.1',label:'5.1'},{key:'7.1',label:'7.1'},{key:'stereo',label:'Stereo'}
+            {key:'5.1',label:'5.1'},{key:'7.1',label:'7.1'},{key:'stereo',label:'Stereo'},
+            {key:'h264',label:'H.264'},{key:'hevc',label:'HEVC'},{key:'av1',label:'AV1'},{key:'vp9',label:'VP9'}
         ];
 
         function loadBadgeGallery() {
@@ -867,6 +910,7 @@
                 q('ThumbnailSameAsPoster').addEventListener('change', toggleThumbSameAsPoster);
                 toggleThumbSameAsPoster();
 
+                loadLibraryCheckboxes(config.ExcludedLibraryIds || []);
                 Dashboard.hideLoadingMsg();
             }).catch(function(err) {
                 console.error('[JellyTag] Failed to load config:', err);
