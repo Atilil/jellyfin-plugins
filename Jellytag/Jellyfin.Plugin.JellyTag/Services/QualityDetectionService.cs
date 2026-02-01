@@ -364,7 +364,7 @@ public class QualityDetectionService : IQualityDetectionService
 
         if (videoStream.VideoRange == VideoRange.HDR)
         {
-            return new BadgeInfo { Category = BadgeCategory.Hdr, BadgeKey = "hdr10", ResourceFileName = "badge-hdr10.svg" };
+            return new BadgeInfo { Category = BadgeCategory.Hdr, BadgeKey = "hdr", ResourceFileName = "badge-hdr.svg" };
         }
 
         return null;

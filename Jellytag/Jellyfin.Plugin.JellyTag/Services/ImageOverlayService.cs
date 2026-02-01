@@ -286,7 +286,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
     /// <inheritdoc />
     public void ReloadBadges()
     {
-        _badgeLock.WaitAsync().GetAwaiter().GetResult();
+        _badgeLock.Wait();
         try
         {
             foreach (var badge in _rasterCache.Values)
@@ -374,6 +374,18 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                     sourceBitmaps.Add(rasterBitmap);
                     filtered.Add(badgeInfo);
                     sizes.Add(new SKSizeI(badgeWidth, badgeHeight));
+                }
+                else
+                {
+                    // Resource not found in any cache — fall back to text badge
+                    var fallbackText = GetBadgeDisplayText(badgeInfo.BadgeKey);
+                    if (!string.IsNullOrEmpty(fallbackText))
+                    {
+                        var fbHeight = Math.Max(1, (int)(badgeWidth * 0.5));
+                        var textBadge = new BadgeInfo { Category = badgeInfo.Category, BadgeKey = badgeInfo.BadgeKey, ResourceFileName = string.Empty };
+                        filtered.Add(textBadge);
+                        sizes.Add(new SKSizeI(badgeWidth, fbHeight));
+                    }
                 }
             }
         }

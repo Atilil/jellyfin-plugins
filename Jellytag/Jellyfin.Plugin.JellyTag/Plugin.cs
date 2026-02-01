@@ -27,6 +27,9 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
         : base(applicationPaths, xmlSerializer)
     {
         Instance = this;
+
+        // Run legacy migration once at startup
+        Configuration.MigrateFromLegacy();
     }
 
     /// <inheritdoc />

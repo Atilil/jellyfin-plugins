@@ -302,6 +302,7 @@ public partial class JellyTagController : ControllerBase
     /// Order: custom (svg > png > jpg) → embedded (svg > png).
     /// </summary>
     [HttpGet("BadgePreview/{badgeKey}")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public IActionResult GetBadgePreview(string badgeKey)

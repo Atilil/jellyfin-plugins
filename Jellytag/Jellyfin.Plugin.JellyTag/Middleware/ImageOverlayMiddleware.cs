@@ -55,9 +55,6 @@ public partial class ImageOverlayMiddleware
             return;
         }
 
-        // Run migration if needed
-        config.MigrateFromLegacy();
-
         var itemIdStr = match.Groups[1].Value;
         var imageType = match.Groups[2].Value;
 
@@ -183,7 +180,9 @@ public partial class ImageOverlayMiddleware
 
     private static ImageTypeConfig? GetImageTypeConfig(PluginConfiguration config, string imageType, BaseItem item)
     {
-        var isThumb = imageType.ToUpperInvariant() switch
+        var type = imageType.ToUpperInvariant();
+
+        var isThumb = type switch
         {
             "PRIMARY" when item is Episode => true,
             "THUMB" => true,
@@ -195,7 +194,7 @@ public partial class ImageOverlayMiddleware
             return ApplySizeReduction(config.PosterConfig, config.ThumbnailSizeReduction);
         }
 
-        return imageType.ToUpperInvariant() switch
+        return type switch
         {
             "PRIMARY" when item is Episode => config.ThumbnailConfig,
             "PRIMARY" => config.PosterConfig,
@@ -242,8 +241,8 @@ public partial class ImageOverlayMiddleware
             TextBgOpacity = panel.TextBgOpacity,
             TextColor = panel.TextColor,
             TextCornerRadius = panel.TextCornerRadius,
-            BadgeTypeOverrides = panel.BadgeTypeOverrides,
-            EnabledBadges = panel.EnabledBadges
+            BadgeTypeOverrides = new List<BadgeTypeStyleOverride>(panel.BadgeTypeOverrides),
+            EnabledBadges = new List<string>(panel.EnabledBadges)
         };
     }
 }
