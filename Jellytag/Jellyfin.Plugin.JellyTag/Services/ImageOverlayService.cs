@@ -26,139 +26,103 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
 
     private static readonly Dictionary<string, string> BadgeDisplayText = new(StringComparer.OrdinalIgnoreCase)
     {
-        { "4k", "4K" },
-        { "1080p", "1080p" },
-        { "720p", "720p" },
-        { "sd", "SD" },
-        { "hdr10", "HDR10" },
-        { "hdr10plus", "HDR10+" },
-        { "dv", "DV" },
-        { "hlg", "HLG" },
-        { "atmos", "ATMOS" },
-        { "dtsx", "DTS:X" },
-        { "truehd", "TrueHD" },
-        { "dtshdma", "DTS-HD MA" },
-        { "7.1", "7.1" },
-        { "5.1", "5.1" },
-        { "stereo", "STEREO" },
-        { "hdr", "HDR" },
-        { "3d", "3D" },
-        { "UHD4K", "4K" },
-        { "FHD1080p", "1080p" },
-        { "HD720p", "720p" },
-        { "fra", "FR" },
-        { "fre", "FR" },
-        { "eng", "EN" },
-        { "jpn", "JP" },
-        { "deu", "DE" },
-        { "ger", "DE" },
-        { "spa", "ES" },
-        { "ita", "IT" },
-        { "por", "PT" },
-        { "kor", "KR" },
-        { "zho", "ZH" },
-        { "chi", "ZH" },
-        { "rus", "RU" },
-        { "nld", "NL" },
-        { "dut", "NL" },
-        { "ara", "AR" },
-        { "hin", "HI" },
-        { "tha", "TH" },
-        { "pol", "PL" },
-        { "tur", "TR" },
-        { "swe", "SV" },
-        { "dan", "DA" },
-        { "nor", "NO" },
-        { "fin", "FI" },
-        { "ces", "CS" },
-        { "cze", "CS" },
-        { "hun", "HU" },
-        { "ron", "RO" },
-        { "rum", "RO" },
-        { "ukr", "UK" },
-        { "vie", "VI" },
-        { "heb", "HE" },
-        { "vostfra", "VOSTFR" },
-        { "vostfre", "VOSTFR" },
-        { "vosteng", "VOSTEN" },
-        { "vostjpn", "VOSTJP" },
-        { "vostdeu", "VOSTDE" },
-        { "vostger", "VOSTDE" },
-        { "vostspa", "VOSTES" },
-        { "vostita", "VOSTIT" },
-        { "vostpor", "VOSTPT" },
-        { "vostkor", "VOSTKR" },
-        { "vostzho", "VOSTZH" },
-        { "vostchi", "VOSTZH" },
-        { "vostrus", "VOSTR" },
-        { "vostnld", "VOSTNL" },
-        { "vostdut", "VOSTNL" },
-        { "h264", "H.264" },
-        { "hevc", "HEVC" },
-        { "av1", "AV1" },
-        { "vp9", "VP9" },
-        { "ell", "GR" },
-        { "gre", "GR" },
-        { "ind", "ID" },
-        { "msa", "MS" },
-        { "tgl", "TL" },
-        { "fil", "TL" },
-        { "hrv", "HR" },
-        { "srp", "SR" },
-        { "bul", "BG" },
-        { "slk", "SK" },
-        { "slo", "SK" },
-        { "lit", "LT" },
-        { "lav", "LV" },
-        { "est", "ET" },
-        { "cat", "CA" },
-        { "eus", "EU" },
-        { "baq", "EU" },
-        { "glg", "GL" },
-        { "cym", "CY" },
-        { "wel", "CY" },
-        { "vostell", "VOSTGR" },
-        { "vostgre", "VOSTGR" },
-        { "vostind", "VOSTID" },
-        { "vostmsa", "VOSTMS" },
-        { "vosttgl", "VOSTTL" },
-        { "vostfil", "VOSTTL" },
-        { "vosthrv", "VOSTHR" },
-        { "vostsrp", "VOSTSR" },
-        { "vostbul", "VOSTBG" },
-        { "vostslk", "VOSTSK" },
-        { "vostslo", "VOSTSK" },
-        { "vostlit", "VOSTLT" },
-        { "vostlav", "VOSTLV" },
-        { "vostest", "VOSTET" },
-        { "vostcat", "VOSTCA" },
-        { "vosteus", "VOSTEU" },
-        { "vostbaq", "VOSTEU" },
-        { "vostglg", "VOSTGL" },
-        { "vostcym", "VOSTCY" },
-        { "vostwel", "VOSTCY" }
+        { "4k", "4K" }, { "1080p", "1080p" }, { "720p", "720p" }, { "sd", "SD" },
+        { "hdr10", "HDR10" }, { "hdr10plus", "HDR10+" }, { "dv", "DV" }, { "hlg", "HLG" },
+        { "atmos", "ATMOS" }, { "dtsx", "DTS:X" }, { "truehd", "TrueHD" }, { "dtshdma", "DTS-HD MA" },
+        { "7.1", "7.1" }, { "5.1", "5.1" }, { "stereo", "STEREO" },
+        { "hdr", "HDR" }, { "3d", "3D" },
+        { "UHD4K", "4K" }, { "FHD1080p", "1080p" }, { "HD720p", "720p" },
+        { "fra", "FR" }, { "fre", "FR" }, { "eng", "EN" }, { "jpn", "JP" },
+        { "deu", "DE" }, { "ger", "DE" }, { "spa", "ES" }, { "ita", "IT" },
+        { "por", "PT" }, { "kor", "KR" }, { "zho", "ZH" }, { "chi", "ZH" },
+        { "rus", "RU" }, { "nld", "NL" }, { "dut", "NL" }, { "ara", "AR" },
+        { "hin", "HI" }, { "tha", "TH" }, { "pol", "PL" }, { "tur", "TR" },
+        { "swe", "SV" }, { "dan", "DA" }, { "nor", "NO" }, { "fin", "FI" },
+        { "ces", "CS" }, { "cze", "CS" }, { "hun", "HU" }, { "ron", "RO" },
+        { "rum", "RO" }, { "ukr", "UK" }, { "vie", "VI" }, { "heb", "HE" },
+        { "vostfra", "VOSTFR" }, { "vostfre", "VOSTFR" }, { "vosteng", "VOSTEN" },
+        { "vostjpn", "VOSTJP" }, { "vostdeu", "VOSTDE" }, { "vostger", "VOSTDE" },
+        { "vostspa", "VOSTES" }, { "vostita", "VOSTIT" }, { "vostpor", "VOSTPT" },
+        { "vostkor", "VOSTKR" }, { "vostzho", "VOSTZH" }, { "vostchi", "VOSTZH" },
+        { "vostrus", "VOSTR" }, { "vostnld", "VOSTNL" }, { "vostdut", "VOSTNL" },
+        { "h264", "H.264" }, { "hevc", "HEVC" }, { "av1", "AV1" }, { "vp9", "VP9" },
+        { "ell", "GR" }, { "gre", "GR" }, { "ind", "ID" }, { "msa", "MS" },
+        { "tgl", "TL" }, { "fil", "TL" }, { "hrv", "HR" }, { "srp", "SR" },
+        { "bul", "BG" }, { "slk", "SK" }, { "slo", "SK" }, { "lit", "LT" },
+        { "lav", "LV" }, { "est", "ET" }, { "cat", "CA" }, { "eus", "EU" },
+        { "baq", "EU" }, { "glg", "GL" }, { "cym", "CY" }, { "wel", "CY" },
+        { "vostell", "VOSTGR" }, { "vostgre", "VOSTGR" }, { "vostind", "VOSTID" },
+        { "vostmsa", "VOSTMS" }, { "vosttgl", "VOSTTL" }, { "vostfil", "VOSTTL" },
+        { "vosthrv", "VOSTHR" }, { "vostsrp", "VOSTSR" }, { "vostbul", "VOSTBG" },
+        { "vostslk", "VOSTSK" }, { "vostslo", "VOSTSK" }, { "vostlit", "VOSTLT" },
+        { "vostlav", "VOSTLV" }, { "vostest", "VOSTET" }, { "vostcat", "VOSTCA" },
+        { "vosteus", "VOSTEU" }, { "vostbaq", "VOSTEU" }, { "vostglg", "VOSTGL" },
+        { "vostcym", "VOSTCY" }, { "vostwel", "VOSTCY" }
     };
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ImageOverlayService"/> class.
-    /// </summary>
     public ImageOverlayService(ILogger<ImageOverlayService> logger)
     {
         _logger = logger;
     }
 
+    /// <summary>
+    /// Maps a BadgeCategory to the corresponding panel in ImageTypeConfig.
+    /// </summary>
+    private static BadgePanelSettings GetPanelForCategory(BadgeCategory category, ImageTypeConfig imageConfig)
+    {
+        return category switch
+        {
+            BadgeCategory.Resolution => imageConfig.ResolutionPanel,
+            BadgeCategory.Hdr or BadgeCategory.ThreeD => imageConfig.HdrPanel,
+            BadgeCategory.VideoCodec => imageConfig.CodecPanel,
+            BadgeCategory.Audio => imageConfig.AudioPanel,
+            BadgeCategory.Language or BadgeCategory.Subtitle => imageConfig.LanguagePanel,
+            _ => imageConfig.ResolutionPanel
+        };
+    }
+
     /// <inheritdoc />
-    public async Task<(Stream Stream, string ContentType)> AddBadgeOverlaysAsync(Stream originalImage, List<BadgeInfo> badges, ImageTypeSettings settings)
+    public bool ShouldShowBadge(BadgeInfo badge, ImageTypeConfig imageConfig)
+    {
+        var config = Plugin.Instance?.Configuration;
+        if (config == null || !config.Enabled)
+        {
+            return false;
+        }
+
+        var panel = GetPanelForCategory(badge.Category, imageConfig);
+        if (!panel.Enabled)
+        {
+            return false;
+        }
+
+        // For language/subtitle badges, EnabledBadges is empty = show all (language codes are dynamic)
+        if (badge.Category is BadgeCategory.Language or BadgeCategory.Subtitle)
+        {
+            // Subtitle badges depend on ShowVostIndicator
+            if (badge.Category == BadgeCategory.Subtitle && !imageConfig.ShowVostIndicator)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        // For other categories, check EnabledBadges list
+        if (panel.EnabledBadges.Count == 0)
+        {
+            return false;
+        }
+
+        return panel.EnabledBadges.Contains(badge.BadgeKey, StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <inheritdoc />
+    public async Task<(Stream Stream, string ContentType)> AddBadgeOverlaysAsync(Stream originalImage, List<BadgeInfo> badges, ImageTypeConfig imageConfig)
     {
         var config = Plugin.Instance?.Configuration ?? new PluginConfiguration();
-
-        var videoBadgeSizePercent = Math.Clamp(settings.BadgeSizePercent, MinBadgeSizePercent, MaxBadgeSizePercent);
-        var audioBadgeSizePercent = Math.Clamp(settings.AudioBadgeSizePercent > 0 ? settings.AudioBadgeSizePercent : settings.BadgeSizePercent, MinBadgeSizePercent, MaxBadgeSizePercent);
-        var marginPercent = Math.Clamp(settings.BadgeMarginPercent, MinBadgeMarginPercent, MaxBadgeMarginPercent);
-        var gapPercent = Math.Max(0f, settings.BadgeGapPercent);
         var jpegQuality = Math.Clamp(config.JpegQuality, 1, 100);
 
-        // Detect source format for fallback content-type
         originalImage.Position = 0;
         var sourceContentType = DetectImageContentType(originalImage);
         originalImage.Position = 0;
@@ -173,61 +137,46 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             return (output, sourceContentType);
         }
 
-        // Split badges into video (Resolution+Hdr), audio, and language groups
-        var videoBadges = badges.Where(b => b.Category is BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.VideoCodec or BadgeCategory.ThreeD).ToList();
-        var audioBadges = badges.Where(b => b.Category == BadgeCategory.Audio).ToList();
-        var languageBadges = badges.Where(b => b.Category is BadgeCategory.Language or BadgeCategory.Subtitle).ToList();
+        // Get ordered panels
+        var panels = GetOrderedPanels(imageConfig);
 
-        var videoPosition = settings.BadgePosition;
-        var videoLayout = settings.BadgeLayout;
-        var audioPosition = settings.AudioBadgePosition ?? settings.BadgePosition;
-        var audioLayout = settings.AudioBadgeLayout ?? settings.BadgeLayout;
-        var languagePosition = settings.LanguageBadgePosition ?? audioPosition;
-        var languageLayout = settings.LanguageBadgeLayout ?? audioLayout;
-
-        // Resolve badge style per group with inheritance chain: language -> audio -> video
-        var videoStyle = settings.BadgeStyle;
-        var audioStyle = settings.AudioBadgeStyle ?? videoStyle;
-        var languageStyle = settings.LanguageBadgeStyle ?? audioStyle;
-
-        var videoUseText = videoStyle == Configuration.BadgeStyle.Text;
-        var audioUseText = audioStyle == Configuration.BadgeStyle.Text;
-        var languageUseText = languageStyle == Configuration.BadgeStyle.Text;
-
-        // When audio uses "Same as video", merge into a single group (same position + layout + style)
-        var audioIsSameAsVideo = settings.AudioBadgePosition == null && settings.AudioBadgeLayout == null && settings.AudioBadgeStyle == null;
-
-        // When language uses same position+layout+style as audio, merge into audio group
-        var languageIsSameAsAudio = languagePosition == audioPosition && languageLayout == audioLayout && languageStyle == audioStyle;
-
-        // Process each group independently
-        var videoSizes = new List<SKSizeI>();
-        var videoSourceBitmaps = new List<SKBitmap>();
-        var videoFiltered = new List<BadgeInfo>();
-        var videoOwnedBitmaps = new List<SKBitmap>();
-
-        var audioSizes = new List<SKSizeI>();
-        var audioSourceBitmaps = new List<SKBitmap>();
-        var audioFiltered = new List<BadgeInfo>();
-        var audioOwnedBitmaps = new List<SKBitmap>();
-
-        var languageSizes = new List<SKSizeI>();
-        var languageSourceBitmaps = new List<SKBitmap>();
-        var languageFiltered = new List<BadgeInfo>();
-        var languageOwnedBitmaps = new List<SKBitmap>();
-
-        var languageBadgeSizePercent = Math.Clamp(settings.LanguageBadgeSizePercent > 0 ? settings.LanguageBadgeSizePercent : audioBadgeSizePercent, MinBadgeSizePercent, MaxBadgeSizePercent);
+        // Group badges by panel, prepare and render each panel
+        var allPanelGroups = new List<PanelRenderGroup>();
+        var allOwnedBitmaps = new List<SKBitmap>();
 
         try
         {
-            // Prepare video badges
-            await PrepareBadgeGroup(videoBadges, videoBadgeSizePercent, image.Width, videoUseText, videoSizes, videoSourceBitmaps, videoFiltered, videoOwnedBitmaps).ConfigureAwait(false);
-            // Prepare audio badges
-            await PrepareBadgeGroup(audioBadges, audioBadgeSizePercent, image.Width, audioUseText, audioSizes, audioSourceBitmaps, audioFiltered, audioOwnedBitmaps).ConfigureAwait(false);
-            // Prepare language badges — in image mode, badges with ResourceFileName get flag images; those without fall back to text
-            await PrepareBadgeGroup(languageBadges, languageBadgeSizePercent, image.Width, languageUseText, languageSizes, languageSourceBitmaps, languageFiltered, languageOwnedBitmaps).ConfigureAwait(false);
+            foreach (var (panel, category) in panels)
+            {
+                if (!panel.Enabled) continue;
 
-            if (videoSizes.Count == 0 && audioSizes.Count == 0 && languageSizes.Count == 0)
+                var panelBadges = badges.Where(b => GetPanelForCategory(b.Category, imageConfig) == panel).ToList();
+                if (panelBadges.Count == 0) continue;
+
+                var sizePercent = Math.Clamp(panel.SizePercent, MinBadgeSizePercent, MaxBadgeSizePercent);
+                var useText = panel.Style == BadgeStyle.Text;
+
+                var sizes = new List<SKSizeI>();
+                var sourceBitmaps = new List<SKBitmap>();
+                var filtered = new List<BadgeInfo>();
+                var ownedBitmaps = new List<SKBitmap>();
+
+                await PrepareBadgeGroup(panelBadges, sizePercent, image.Width, useText, sizes, sourceBitmaps, filtered, ownedBitmaps).ConfigureAwait(false);
+                allOwnedBitmaps.AddRange(ownedBitmaps);
+
+                if (filtered.Count == 0) continue;
+
+                allPanelGroups.Add(new PanelRenderGroup
+                {
+                    Panel = panel,
+                    Filtered = filtered,
+                    Sizes = sizes,
+                    SourceBitmaps = sourceBitmaps,
+                    ImageConfig = imageConfig
+                });
+            }
+
+            if (allPanelGroups.Count == 0)
             {
                 originalImage.Position = 0;
                 var output = new MemoryStream();
@@ -236,97 +185,37 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 return (output, sourceContentType);
             }
 
-            // Merge language into audio group if same position+layout
-            if (languageIsSameAsAudio)
+            // Calculate positions: panels at the same position stack on top of each other in Order order
+            // Track cumulative vertical extent per position corner
+            var priorExtents = new Dictionary<BadgePosition, int>
             {
-                audioFiltered.AddRange(languageFiltered);
-                audioSizes.AddRange(languageSizes);
-                audioSourceBitmaps.AddRange(languageSourceBitmaps);
-                audioOwnedBitmaps.AddRange(languageOwnedBitmaps);
-                languageFiltered.Clear();
-                languageSizes.Clear();
-                languageSourceBitmaps.Clear();
-                languageOwnedBitmaps.Clear();
-            }
+                { BadgePosition.TopLeft, 0 }, { BadgePosition.TopRight, 0 },
+                { BadgePosition.BottomLeft, 0 }, { BadgePosition.BottomRight, 0 }
+            };
 
-            // When "Same as video", merge audio into the video group
-            if (audioIsSameAsVideo)
+            foreach (var group in allPanelGroups)
             {
-                videoFiltered.AddRange(audioFiltered);
-                videoSizes.AddRange(audioSizes);
-                videoSourceBitmaps.AddRange(audioSourceBitmaps);
-                videoOwnedBitmaps.AddRange(audioOwnedBitmaps);
-                audioFiltered.Clear();
-                audioSizes.Clear();
-                audioSourceBitmaps.Clear();
-                audioOwnedBitmaps.Clear();
+                var panel = group.Panel;
+                var marginPercent = Math.Clamp(panel.MarginPercent, MinBadgeMarginPercent, MaxBadgeMarginPercent);
+                var badgeMargin = (int)(image.Width * marginPercent / 100f);
+                var gapPercent = Math.Max(0f, panel.GapPercent);
+                var gap = group.Sizes.Count > 0 ? (int)(group.Sizes.Average(s => s.Height) * gapPercent / 100f) : 0;
+
+                // Reverse order if needed
+                if (ShouldReverseOrder(panel.Layout, panel.Position))
+                {
+                    group.Filtered.Reverse();
+                    group.Sizes.Reverse();
+                    group.SourceBitmaps.Reverse();
+                }
+
+                var priorExtent = priorExtents[panel.Position];
+                group.Positions = CalculateStackedPositions(image.Width, image.Height, group.Sizes, panel.Position, badgeMargin, gap, panel.Layout, priorExtent);
+
+                // Update prior extent for this corner
+                var groupExtent = GroupVerticalExtent(group.Sizes, gap, panel.Layout);
+                priorExtents[panel.Position] += groupExtent;
             }
-
-            // Reverse after merge so the full combined list is reversed together
-            if (ShouldReverseOrder(videoLayout, videoPosition))
-            {
-                videoFiltered.Reverse();
-                videoSizes.Reverse();
-                videoSourceBitmaps.Reverse();
-            }
-
-            if (!audioIsSameAsVideo && ShouldReverseOrder(audioLayout, audioPosition))
-            {
-                audioFiltered.Reverse();
-                audioSizes.Reverse();
-                audioSourceBitmaps.Reverse();
-            }
-
-            if (!languageIsSameAsAudio && ShouldReverseOrder(languageLayout, languagePosition))
-            {
-                languageFiltered.Reverse();
-                languageSizes.Reverse();
-                languageSourceBitmaps.Reverse();
-            }
-
-            // Calculate margin in pixels from percentage of image width
-            var badgeMargin = (int)(image.Width * marginPercent / 100f);
-
-            // Calculate gap: percentage of average badge height per group
-            int ComputeGap(List<SKSizeI> sizes) =>
-                sizes.Count > 0 ? (int)(sizes.Average(s => s.Height) * gapPercent / 100f) : 0;
-
-            // Calculate vertical extent of a badge group (always height-based for stacking rows)
-            int GroupVerticalExtent(List<SKSizeI> sizes, int groupGap, BadgeLayout lay) =>
-                sizes.Count == 0 ? 0 : lay == BadgeLayout.Horizontal
-                    ? sizes.Max(s => s.Height) + groupGap
-                    : sizes.Sum(s => s.Height) + (sizes.Count - 1) * groupGap + groupGap;
-
-            // Calculate stacking positions, offsetting groups that share the same corner
-            var videoGap = ComputeGap(videoSizes);
-            var videoPositions = videoSizes.Count > 0
-                ? CalculateStackedPositions(image.Width, image.Height, videoSizes, videoPosition, badgeMargin, videoGap, videoLayout)
-                : new List<SKPointI>();
-
-            // Audio: offset vertically if same corner as video
-            var audioGap = ComputeGap(audioSizes);
-            var audioPriorExtent = (audioPosition == videoPosition)
-                ? GroupVerticalExtent(videoSizes, videoGap, videoLayout) : 0;
-            var audioPositions = audioSizes.Count > 0
-                ? CalculateStackedPositions(image.Width, image.Height, audioSizes, audioPosition, badgeMargin, audioGap, audioLayout, audioPriorExtent)
-                : new List<SKPointI>();
-
-            // Language: offset vertically if same corner as video and/or audio
-            var languageGap = ComputeGap(languageSizes);
-            var languagePriorExtent = 0;
-            if (languagePosition == videoPosition)
-            {
-                languagePriorExtent += GroupVerticalExtent(videoSizes, videoGap, videoLayout);
-            }
-
-            if (languagePosition == audioPosition)
-            {
-                languagePriorExtent += GroupVerticalExtent(audioSizes, audioGap, audioLayout);
-            }
-
-            var languagePositions = languageSizes.Count > 0
-                ? CalculateStackedPositions(image.Width, image.Height, languageSizes, languagePosition, badgeMargin, languageGap, languageLayout, languagePriorExtent)
-                : new List<SKPointI>();
 
             // Draw badges onto image
             using var surface = SKSurface.Create(new SKImageInfo(image.Width, image.Height));
@@ -336,14 +225,14 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             using var paint = new SKPaint { IsAntialias = true };
             var sampling = new SKSamplingOptions(SKCubicResampler.Mitchell);
 
-            // Render each group with its own style
-            RenderBadgeGroup(canvas, videoFiltered, videoSourceBitmaps, videoPositions, videoSizes, videoUseText, settings, paint, sampling);
-            RenderBadgeGroup(canvas, audioFiltered, audioSourceBitmaps, audioPositions, audioSizes, audioUseText, settings, paint, sampling);
-            RenderBadgeGroup(canvas, languageFiltered, languageSourceBitmaps, languagePositions, languageSizes, languageUseText, settings, paint, sampling);
+            foreach (var group in allPanelGroups)
+            {
+                var useText = group.Panel.Style == BadgeStyle.Text;
+                RenderBadgeGroup(canvas, group.Filtered, group.SourceBitmaps, group.Positions, group.Sizes, useText, group.Panel, group.ImageConfig, paint, sampling);
+            }
 
             canvas.Flush();
 
-            // Encode to configured format
             using var resultImage = surface.Snapshot();
             var outputFormat = config.OutputFormat;
             var encodeFormat = outputFormat == OutputImageFormat.WebP ? SKEncodedImageFormat.Webp : SKEncodedImageFormat.Jpeg;
@@ -358,63 +247,40 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         }
         finally
         {
-            // Dispose SVG-rasterized bitmaps (owned by this call, not the cache)
-            foreach (var bmp in videoOwnedBitmaps) bmp.Dispose();
-            foreach (var bmp in audioOwnedBitmaps) bmp.Dispose();
-            foreach (var bmp in languageOwnedBitmaps) bmp.Dispose();
+            foreach (var bmp in allOwnedBitmaps) bmp.Dispose();
         }
     }
 
-    /// <inheritdoc />
-    public bool ShouldShowBadge(BadgeInfo badge)
+    private sealed class PanelRenderGroup
     {
-        var config = Plugin.Instance?.Configuration;
-        if (config == null || !config.Enabled)
-        {
-            return false;
-        }
+        public BadgePanelSettings Panel { get; set; } = null!;
+        public List<BadgeInfo> Filtered { get; set; } = new();
+        public List<SKSizeI> Sizes { get; set; } = new();
+        public List<SKBitmap> SourceBitmaps { get; set; } = new();
+        public List<SKPointI> Positions { get; set; } = new();
+        public ImageTypeConfig ImageConfig { get; set; } = null!;
+    }
 
-        return badge.Category switch
+    private static List<(BadgePanelSettings Panel, string Name)> GetOrderedPanels(ImageTypeConfig imageConfig)
+    {
+        var panels = new List<(BadgePanelSettings Panel, string Name)>
         {
-            BadgeCategory.Resolution => badge.BadgeKey switch
-            {
-                "4k" => config.Show4K,
-                "1080p" => config.Show1080p,
-                "720p" => config.Show720p,
-                "sd" => config.ShowSD,
-                _ => false
-            },
-            BadgeCategory.Hdr => badge.BadgeKey switch
-            {
-                "hdr" => config.ShowGenericHdr,
-                "hdr10" => config.ShowHdr10,
-                "hdr10plus" => config.ShowHdr10Plus,
-                "dv" => config.ShowDolbyVision,
-                "hlg" => config.ShowHlg,
-                _ => false
-            },
-            BadgeCategory.VideoCodec => badge.BadgeKey switch
-            {
-                "h264" => config.ShowH264,
-                "hevc" => config.ShowHevc,
-                "av1" => config.ShowAv1,
-                "vp9" => config.ShowVp9,
-                _ => false
-            },
-            BadgeCategory.ThreeD => config.Show3D,
-            BadgeCategory.Audio => badge.BadgeKey switch
-            {
-                "atmos" => config.ShowDolbyAtmos,
-                "dtsx" => config.ShowDtsX,
-                "truehd" => config.ShowTrueHD,
-                "dtshdma" => config.ShowDtsHdMa,
-                "7.1" or "5.1" or "stereo" => config.ShowChannelBadge,
-                _ => false
-            },
-            BadgeCategory.Language => true,
-            BadgeCategory.Subtitle => true,
-            _ => false
+            (imageConfig.ResolutionPanel, "Resolution"),
+            (imageConfig.HdrPanel, "HDR"),
+            (imageConfig.CodecPanel, "Codec"),
+            (imageConfig.AudioPanel, "Audio"),
+            (imageConfig.LanguagePanel, "Language")
         };
+        panels.Sort((a, b) => a.Panel.Order.CompareTo(b.Panel.Order));
+        return panels;
+    }
+
+    private static int GroupVerticalExtent(List<SKSizeI> sizes, int gap, BadgeLayout layout)
+    {
+        if (sizes.Count == 0) return 0;
+        return layout == BadgeLayout.Horizontal
+            ? sizes.Max(s => s.Height) + gap
+            : sizes.Sum(s => s.Height) + (sizes.Count - 1) * gap + gap;
     }
 
     /// <inheritdoc />
@@ -450,10 +316,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             foreach (var badgeInfo in badges)
             {
                 var text = GetBadgeDisplayText(badgeInfo.BadgeKey);
-                if (string.IsNullOrEmpty(text))
-                {
-                    continue;
-                }
+                if (string.IsNullOrEmpty(text)) continue;
 
                 filtered.Add(badgeInfo);
                 sizes.Add(new SKSizeI(badgeWidth, badgeHeight));
@@ -470,12 +333,8 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
 
                 if (string.IsNullOrEmpty(resourceFileName))
                 {
-                    // No image resource — fall back to text rendering for this badge
                     var text = GetBadgeDisplayText(badgeInfo.BadgeKey);
-                    if (string.IsNullOrEmpty(text))
-                    {
-                        continue;
-                    }
+                    if (string.IsNullOrEmpty(text)) continue;
 
                     var badgeHeight = Math.Max(1, (int)(badgeWidth * 0.5));
                     filtered.Add(badgeInfo);
@@ -483,7 +342,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                     continue;
                 }
 
-                // Try SVG cache first
                 if (_svgCache.TryGetValue(resourceFileName, out var svgBytes))
                 {
                     var ratio = GetSvgAspectRatio(svgBytes);
@@ -498,7 +356,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                         continue;
                     }
 
-                    // SVG rasterization failed — fall back to text
                     var fallbackText = GetBadgeDisplayText(badgeInfo.BadgeKey);
                     if (!string.IsNullOrEmpty(fallbackText))
                     {
@@ -511,7 +368,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                     continue;
                 }
 
-                // Try raster cache
                 if (_rasterCache.TryGetValue(resourceFileName, out var rasterBitmap) && rasterBitmap != null)
                 {
                     var badgeHeight = Math.Max(1, (int)(rasterBitmap.Height * ((double)badgeWidth / rasterBitmap.Width)));
@@ -546,10 +402,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         using var stream = new MemoryStream(svgBytes);
         svg.Load(stream);
         var picture = svg.Picture;
-        if (picture == null)
-        {
-            return null;
-        }
+        if (picture == null) return null;
 
         var bitmap = new SKBitmap(targetWidth, targetHeight, SKColorType.Rgba8888, SKAlphaType.Premul);
         using var canvas = new SKCanvas(bitmap);
@@ -586,12 +439,10 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 }
             }
 
-            // Try width/height attributes
             var widthAttr = root.Attribute("width")?.Value;
             var heightAttr = root.Attribute("height")?.Value;
             if (!string.IsNullOrEmpty(widthAttr) && !string.IsNullOrEmpty(heightAttr))
             {
-                // Strip "px" suffix if present
                 widthAttr = widthAttr.Replace("px", string.Empty);
                 heightAttr = heightAttr.Replace("px", string.Empty);
                 if (float.TryParse(widthAttr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var w2) &&
@@ -607,7 +458,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             // Fallback
         }
 
-        return 2f; // Default 2:1 ratio
+        return 2f;
     }
 
     private void LoadBadges()
@@ -620,7 +471,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         var assetsMarker = ".Assets.";
         var badgeBaseNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        // Collect all badge base names from embedded resources (both .svg and .png)
         foreach (var resourceName in resourceNames)
         {
             var assetsIdx = resourceName.IndexOf(assetsMarker, StringComparison.OrdinalIgnoreCase);
@@ -642,7 +492,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             var svgFileName = baseName + ".svg";
             var pngFileName = baseName + ".png";
 
-            // 1. Check custom badges: SVG > PNG > JPG
             if (customDir != null)
             {
                 var customSvg = Path.Combine(customDir, svgFileName);
@@ -661,7 +510,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                     }
                 }
 
-                // Custom PNG
                 var customPng = Path.Combine(customDir, pngFileName);
                 if (File.Exists(customPng))
                 {
@@ -682,7 +530,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                     }
                 }
 
-                // Custom JPG/JPEG
                 var foundJpeg = false;
                 foreach (var ext in new[] { ".jpg", ".jpeg" })
                 {
@@ -711,7 +558,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 if (foundJpeg) continue;
             }
 
-            // 2. Embedded SVG
             var svgResourceName = resourceNames.FirstOrDefault(r =>
                 r.IndexOf(assetsMarker, StringComparison.OrdinalIgnoreCase) >= 0 &&
                 r.EndsWith(svgFileName, StringComparison.OrdinalIgnoreCase));
@@ -736,7 +582,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 }
             }
 
-            // 3. Fallback: embedded PNG
             var pngResourceName = resourceNames.FirstOrDefault(r =>
                 r.IndexOf(assetsMarker, StringComparison.OrdinalIgnoreCase) >= 0 &&
                 r.EndsWith(pngFileName, StringComparison.OrdinalIgnoreCase));
@@ -762,7 +607,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                     _logger.LogError(ex, "[JellyTag] Failed to load embedded PNG badge: {FileName}", pngFileName);
                 }
             }
-
         }
 
         _logger.LogInformation("[JellyTag] Badge loading complete. SVG: {SvgCount}, Raster: {RasterCount}", _svgCache.Count, _rasterCache.Count);
@@ -774,7 +618,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         var pixelBytes = bitmap.GetPixelSpan();
         var bitmapWidth = bitmap.Width;
         var bytesPerPixel = bitmap.BytesPerPixel;
-        // Alpha is at offset 3 for BGRA/RGBA pixel formats
         var alphaOffset = 3;
 
         for (int y = 0; y < bitmap.Height; y++)
@@ -792,10 +635,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             }
         }
 
-        if (maxX < minX || maxY < minY)
-        {
-            return bitmap;
-        }
+        if (maxX < minX || maxY < minY) return bitmap;
 
         var trimWidth = maxX - minX + 1;
         var trimHeight = maxY - minY + 1;
@@ -812,11 +652,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
     private static string? GetCustomBadgeDir()
     {
         var dataFolder = Plugin.Instance?.DataFolderPath;
-        if (string.IsNullOrEmpty(dataFolder))
-        {
-            return null;
-        }
-
+        if (string.IsNullOrEmpty(dataFolder)) return null;
         return Path.Combine(dataFolder, "custom-badges");
     }
 
@@ -831,10 +667,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         BadgeLayout layout, int priorExtent = 0)
     {
         var positions = new List<SKPointI>();
-        if (badges.Count == 0)
-        {
-            return positions;
-        }
+        if (badges.Count == 0) return positions;
 
         if (layout == BadgeLayout.Horizontal)
         {
@@ -845,25 +678,15 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             switch (position)
             {
                 case BadgePosition.TopLeft:
-                    startX = margin;
-                    startY = margin + priorExtent;
-                    break;
+                    startX = margin; startY = margin + priorExtent; break;
                 case BadgePosition.TopRight:
-                    startX = Math.Max(0, imageWidth - totalWidth - margin);
-                    startY = margin + priorExtent;
-                    break;
+                    startX = Math.Max(0, imageWidth - totalWidth - margin); startY = margin + priorExtent; break;
                 case BadgePosition.BottomLeft:
-                    startX = margin;
-                    startY = Math.Max(0, imageHeight - maxHeight - margin - priorExtent);
-                    break;
+                    startX = margin; startY = Math.Max(0, imageHeight - maxHeight - margin - priorExtent); break;
                 case BadgePosition.BottomRight:
-                    startX = Math.Max(0, imageWidth - totalWidth - margin);
-                    startY = Math.Max(0, imageHeight - maxHeight - margin - priorExtent);
-                    break;
+                    startX = Math.Max(0, imageWidth - totalWidth - margin); startY = Math.Max(0, imageHeight - maxHeight - margin - priorExtent); break;
                 default:
-                    startX = margin;
-                    startY = margin + priorExtent;
-                    break;
+                    startX = margin; startY = margin + priorExtent; break;
             }
 
             var currentX = startX;
@@ -883,25 +706,15 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             switch (position)
             {
                 case BadgePosition.TopLeft:
-                    startX = margin;
-                    startY = margin + priorExtent;
-                    break;
+                    startX = margin; startY = margin + priorExtent; break;
                 case BadgePosition.TopRight:
-                    startX = Math.Max(0, imageWidth - maxWidth - margin);
-                    startY = margin + priorExtent;
-                    break;
+                    startX = Math.Max(0, imageWidth - maxWidth - margin); startY = margin + priorExtent; break;
                 case BadgePosition.BottomLeft:
-                    startX = margin;
-                    startY = Math.Max(0, imageHeight - totalHeight - margin - priorExtent);
-                    break;
+                    startX = margin; startY = Math.Max(0, imageHeight - totalHeight - margin - priorExtent); break;
                 case BadgePosition.BottomRight:
-                    startX = Math.Max(0, imageWidth - maxWidth - margin);
-                    startY = Math.Max(0, imageHeight - totalHeight - margin - priorExtent);
-                    break;
+                    startX = Math.Max(0, imageWidth - maxWidth - margin); startY = Math.Max(0, imageHeight - totalHeight - margin - priorExtent); break;
                 default:
-                    startX = margin;
-                    startY = margin + priorExtent;
-                    break;
+                    startX = margin; startY = margin + priorExtent; break;
             }
 
             var currentY = startY;
@@ -929,11 +742,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
     {
         var config = Plugin.Instance?.Configuration;
         var customText = config?.CustomBadgeTexts?.FirstOrDefault(x => string.Equals(x.Key, badgeKey, StringComparison.OrdinalIgnoreCase))?.Text;
-        if (!string.IsNullOrEmpty(customText))
-        {
-            return customText;
-        }
-
+        if (!string.IsNullOrEmpty(customText)) return customText;
         return BadgeDisplayText.TryGetValue(badgeKey, out var text) ? text : badgeKey.ToUpperInvariant();
     }
 
@@ -962,72 +771,43 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         return new SKColor(0, 0, 0, alpha);
     }
 
-    private static (string bg, string text) ResolveCategoryColors(BadgeCategory category, ImageTypeSettings settings)
+    /// <summary>
+    /// Resolves colors for a badge, checking per-badge-type overrides in the panel first.
+    /// </summary>
+    private static (string bg, string text, byte opacity, int cornerRadius) ResolveBadgeStyle(BadgeInfo badge, BadgePanelSettings panel, ImageTypeConfig imageConfig)
     {
-        var bgColor = category switch
+        var bgColor = panel.TextBgColor ?? "#000000";
+        var textColor = panel.TextColor ?? "#FFFFFF";
+        var opacity = (byte)Math.Clamp(panel.TextBgOpacity, 0, 255);
+        var cornerRadius = Math.Clamp(panel.TextCornerRadius, 0, 50);
+
+        // VOST override for subtitle badges
+        if (badge.Category == BadgeCategory.Subtitle)
         {
-            BadgeCategory.VideoCodec =>
-                settings.CodecBadgeBgColor ?? settings.VideoBadgeBgColor ?? settings.TextBadgeBgColor ?? "#000000",
-            BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.ThreeD =>
-                settings.VideoBadgeBgColor ?? settings.TextBadgeBgColor ?? "#000000",
-            BadgeCategory.Audio =>
-                settings.AudioBadgeBgColor ?? settings.TextBadgeBgColor ?? "#000000",
-            BadgeCategory.Language =>
-                settings.LanguageBadgeBgColor ?? settings.TextBadgeBgColor ?? "#000000",
-            BadgeCategory.Subtitle =>
-                settings.SubtitleBadgeBgColor ?? settings.TextBadgeBgColor ?? "#000000",
-            _ => settings.TextBadgeBgColor ?? "#000000"
-        };
-        var textColor = category switch
+            if (!string.IsNullOrEmpty(imageConfig.VostBgColor)) bgColor = imageConfig.VostBgColor;
+            if (!string.IsNullOrEmpty(imageConfig.VostTextColor)) textColor = imageConfig.VostTextColor;
+            if (imageConfig.VostBgOpacity > 0) opacity = (byte)Math.Clamp(imageConfig.VostBgOpacity, 0, 255);
+            if (imageConfig.VostCornerRadius >= 0) cornerRadius = Math.Clamp(imageConfig.VostCornerRadius, 0, 50);
+        }
+
+        // Per-badge-type overrides
+        var typeOverride = panel.BadgeTypeOverrides?.FirstOrDefault(o => string.Equals(o.BadgeKey, badge.BadgeKey, StringComparison.OrdinalIgnoreCase));
+        if (typeOverride != null)
         {
-            BadgeCategory.VideoCodec =>
-                settings.CodecBadgeTextColor ?? settings.VideoBadgeTextColor ?? settings.TextBadgeTextColor ?? "#FFFFFF",
-            BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.ThreeD =>
-                settings.VideoBadgeTextColor ?? settings.TextBadgeTextColor ?? "#FFFFFF",
-            BadgeCategory.Audio =>
-                settings.AudioBadgeTextColor ?? settings.TextBadgeTextColor ?? "#FFFFFF",
-            BadgeCategory.Language =>
-                settings.LanguageBadgeTextColor ?? settings.TextBadgeTextColor ?? "#FFFFFF",
-            BadgeCategory.Subtitle =>
-                settings.SubtitleBadgeTextColor ?? settings.TextBadgeTextColor ?? "#FFFFFF",
-            _ => settings.TextBadgeTextColor ?? "#FFFFFF"
-        };
-        return (bgColor, textColor);
+            if (!string.IsNullOrEmpty(typeOverride.BgColor)) bgColor = typeOverride.BgColor;
+            if (!string.IsNullOrEmpty(typeOverride.TextColor)) textColor = typeOverride.TextColor;
+            if (typeOverride.BgOpacity.HasValue) opacity = (byte)Math.Clamp(typeOverride.BgOpacity.Value, 0, 255);
+            if (typeOverride.CornerRadius.HasValue) cornerRadius = Math.Clamp(typeOverride.CornerRadius.Value, 0, 50);
+        }
+
+        return (bgColor, textColor, opacity, cornerRadius);
     }
 
-    private static byte ResolveCategoryOpacity(BadgeCategory category, ImageTypeSettings settings)
-    {
-        var raw = category switch
-        {
-            BadgeCategory.VideoCodec => settings.CodecTextBadgeBgOpacity > 0 ? settings.CodecTextBadgeBgOpacity : settings.TextBadgeBgOpacity,
-            BadgeCategory.Audio => settings.AudioTextBadgeBgOpacity > 0 ? settings.AudioTextBadgeBgOpacity : settings.TextBadgeBgOpacity,
-            BadgeCategory.Language => settings.LanguageTextBadgeBgOpacity > 0 ? settings.LanguageTextBadgeBgOpacity : settings.TextBadgeBgOpacity,
-            BadgeCategory.Subtitle => settings.SubtitleTextBadgeBgOpacity > 0 ? settings.SubtitleTextBadgeBgOpacity : settings.TextBadgeBgOpacity,
-            _ => settings.TextBadgeBgOpacity
-        };
-        return (byte)Math.Clamp(raw, 0, 255);
-    }
-
-    private static int ResolveCategoryCornerRadius(BadgeCategory category, ImageTypeSettings settings)
-    {
-        var raw = category switch
-        {
-            BadgeCategory.VideoCodec => settings.CodecTextBadgeCornerRadius >= 0 ? settings.CodecTextBadgeCornerRadius : settings.TextBadgeCornerRadius,
-            BadgeCategory.Audio => settings.AudioTextBadgeCornerRadius >= 0 ? settings.AudioTextBadgeCornerRadius : settings.TextBadgeCornerRadius,
-            BadgeCategory.Language => settings.LanguageTextBadgeCornerRadius >= 0 ? settings.LanguageTextBadgeCornerRadius : settings.TextBadgeCornerRadius,
-            BadgeCategory.Subtitle => settings.SubtitleTextBadgeCornerRadius >= 0 ? settings.SubtitleTextBadgeCornerRadius : settings.TextBadgeCornerRadius,
-            _ => settings.TextBadgeCornerRadius
-        };
-        return Math.Clamp(raw, 0, 50);
-    }
-
-    private static void RenderTextBadges(SKCanvas canvas, List<BadgeInfo> badges, List<SKPointI> positions, List<SKSizeI> sizes, ImageTypeSettings settings)
+    private static void RenderTextBadges(SKCanvas canvas, List<BadgeInfo> badges, List<SKPointI> positions, List<SKSizeI> sizes, BadgePanelSettings panel, ImageTypeConfig imageConfig)
     {
         for (int i = 0; i < badges.Count; i++)
         {
-            var (bgHex, textHex) = ResolveCategoryColors(badges[i].Category, settings);
-            var bgAlpha = ResolveCategoryOpacity(badges[i].Category, settings);
-            var cornerRadiusPct = ResolveCategoryCornerRadius(badges[i].Category, settings);
+            var (bgHex, textHex, bgAlpha, cornerRadiusPct) = ResolveBadgeStyle(badges[i], panel, imageConfig);
             var bgColor = ParseHexColor(bgHex, bgAlpha);
             var textColor = SKColor.TryParse(textHex, out var tc) ? tc : SKColors.White;
 
@@ -1045,7 +825,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             var padding = width * 0.1f;
             var availableWidth = width - (2 * padding);
 
-            // Start at 70% of height, then adjust by ratio if too wide
             var fontSize = height * 0.7f;
             var font = new SKFont(SKTypeface.Default, fontSize);
             font.Edging = SKFontEdging.SubpixelAntialias;
@@ -1071,17 +850,16 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
     private static void RenderBadgeGroup(
         SKCanvas canvas, List<BadgeInfo> filtered, List<SKBitmap> sourceBitmaps,
         List<SKPointI> positions, List<SKSizeI> sizes, bool useText,
-        ImageTypeSettings settings, SKPaint paint, SKSamplingOptions sampling)
+        BadgePanelSettings panel, ImageTypeConfig imageConfig, SKPaint paint, SKSamplingOptions sampling)
     {
         if (filtered.Count == 0) return;
 
         if (useText)
         {
-            RenderTextBadges(canvas, filtered, positions, sizes, settings);
+            RenderTextBadges(canvas, filtered, positions, sizes, panel, imageConfig);
         }
         else
         {
-            // In image mode, render bitmaps for badges that have them, text fallback for others
             int bitmapIdx = 0;
             var textBadges = new List<BadgeInfo>();
             var textPositions = new List<SKPointI>();
@@ -1106,7 +884,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
 
             if (textBadges.Count > 0)
             {
-                RenderTextBadges(canvas, textBadges, textPositions, textSizes, settings);
+                RenderTextBadges(canvas, textBadges, textPositions, textSizes, panel, imageConfig);
             }
         }
     }
@@ -1118,15 +896,9 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>
-    /// Releases unmanaged and optionally managed resources.
-    /// </summary>
     protected virtual void Dispose(bool disposing)
     {
-        if (_disposed)
-        {
-            return;
-        }
+        if (_disposed) return;
 
         if (disposing)
         {

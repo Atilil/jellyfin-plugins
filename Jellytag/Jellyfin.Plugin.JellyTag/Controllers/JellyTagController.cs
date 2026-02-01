@@ -78,23 +78,9 @@ public partial class JellyTagController : ControllerBase
         return Ok(new
         {
             Enabled = config?.Enabled ?? false,
-            Show4K = config?.Show4K ?? false,
-            Show1080p = config?.Show1080p ?? false,
-            Show720p = config?.Show720p ?? false,
-            ShowSD = config?.ShowSD ?? false,
-            ShowHdr10 = config?.ShowHdr10 ?? false,
-            ShowHdr10Plus = config?.ShowHdr10Plus ?? false,
-            ShowDolbyVision = config?.ShowDolbyVision ?? false,
-            ShowHlg = config?.ShowHlg ?? false,
-            ShowGenericHdr = config?.ShowGenericHdr ?? false,
-            Show3D = config?.Show3D ?? false,
-            ShowDolbyAtmos = config?.ShowDolbyAtmos ?? false,
-            ShowDtsX = config?.ShowDtsX ?? false,
-            ShowTrueHD = config?.ShowTrueHD ?? false,
-            ShowDtsHdMa = config?.ShowDtsHdMa ?? false,
-            ShowChannelBadge = config?.ShowChannelBadge ?? false,
-            LanguageBadgeMode = config?.LanguageBadgeMode.ToString() ?? "None",
-            ShowSubtitleIndicator = config?.ShowSubtitleIndicator ?? false,
+            PosterEnabled = config?.PosterConfig?.Enabled ?? false,
+            ThumbnailEnabled = config?.ThumbnailConfig?.Enabled ?? false,
+            ThumbnailSameAsPoster = config?.ThumbnailSameAsPoster ?? false,
             OutputFormat = config?.OutputFormat.ToString() ?? "Jpeg"
         });
     }

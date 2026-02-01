@@ -20,9 +20,6 @@ public class QualityDetectionService : IQualityDetectionService
     private readonly ConcurrentDictionary<Guid, (List<BadgeInfo> Badges, DateTime CachedAt)> _badgeCache = new();
     private static readonly TimeSpan BadgeCacheTtl = TimeSpan.FromMinutes(5);
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="QualityDetectionService"/> class.
-    /// </summary>
     public QualityDetectionService(
         ILibraryManager libraryManager,
         ILogger<QualityDetectionService> logger)
@@ -44,33 +41,14 @@ public class QualityDetectionService : IQualityDetectionService
         return GetQualityFromItem(item);
     }
 
-    /// <summary>
-    /// Determines the video quality based on resolution.
-    /// </summary>
     public static VideoQuality DetermineQuality(int width, int height)
     {
         var maxDimension = Math.Max(width, height);
 
-        if (maxDimension >= 3840)
-        {
-            return VideoQuality.UHD4K;
-        }
-
-        if (maxDimension >= 1920)
-        {
-            return VideoQuality.FHD1080p;
-        }
-
-        if (maxDimension >= 1280)
-        {
-            return VideoQuality.HD720p;
-        }
-
-        if (maxDimension > 0)
-        {
-            return VideoQuality.SD;
-        }
-
+        if (maxDimension >= 3840) return VideoQuality.UHD4K;
+        if (maxDimension >= 1920) return VideoQuality.FHD1080p;
+        if (maxDimension >= 1280) return VideoQuality.HD720p;
+        if (maxDimension > 0) return VideoQuality.SD;
         return VideoQuality.Unknown;
     }
 
@@ -99,10 +77,7 @@ public class QualityDetectionService : IQualityDetectionService
                 if (q != VideoQuality.Unknown && (bestQuality == VideoQuality.Unknown || q > bestQuality))
                 {
                     bestQuality = q;
-                    if (bestQuality == VideoQuality.UHD4K)
-                    {
-                        break;
-                    }
+                    if (bestQuality == VideoQuality.UHD4K) break;
                 }
             }
         }
@@ -216,6 +191,7 @@ public class QualityDetectionService : IQualityDetectionService
                     }
                 }
 
+                // HDR detection - always detect, filtering happens in ShouldShowBadge
                 var hdrBadge = DetectHdr(videoStream);
                 if (hdrBadge != null)
                 {
@@ -265,7 +241,7 @@ public class QualityDetectionService : IQualityDetectionService
                 badges.AddRange(audioBadges);
             }
 
-            // Language detection
+            // Language detection - always detect all, filtering by mode happens in ShouldShowBadge
             var allStreams = mediaSource?.MediaStreams;
             if (allStreams != null)
             {
@@ -300,27 +276,22 @@ public class QualityDetectionService : IQualityDetectionService
         return KnownFlagCodes.Contains(normalized) ? $"flag-{normalized.ToLowerInvariant()}.svg" : string.Empty;
     }
 
+    /// <summary>
+    /// Detects all language and subtitle badges. Always detects all languages;
+    /// filtering by mode (DefaultOnly/All) is done in ShouldShowBadge.
+    /// </summary>
     private static List<BadgeInfo> DetectLanguages(List<MediaStream> allStreams)
     {
         var badges = new List<BadgeInfo>();
-        var config = Plugin.Instance?.Configuration;
-        if (config == null || config.LanguageBadgeMode == Configuration.LanguageBadgeMode.None)
-        {
-            return badges;
-        }
-
         var audioStreams = allStreams.Where(s => s.Type == MediaStreamType.Audio).ToList();
-        if (audioStreams.Count == 0)
-        {
-            return badges;
-        }
+        if (audioStreams.Count == 0) return badges;
 
         var addedLanguages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        if (config.LanguageBadgeMode == Configuration.LanguageBadgeMode.DefaultOnly)
+        // Detect all audio languages
+        foreach (var stream in audioStreams)
         {
-            var defaultStream = audioStreams.FirstOrDefault(s => s.IsDefault) ?? audioStreams[0];
-            var lang = defaultStream.Language;
+            var lang = stream.Language;
             if (!string.IsNullOrEmpty(lang) && addedLanguages.Add(lang))
             {
                 var langLower = lang.ToLowerInvariant();
@@ -332,47 +303,27 @@ public class QualityDetectionService : IQualityDetectionService
                 });
             }
         }
-        else // All
+
+        // VOST indicators - always detect, filtering happens in ShouldShowBadge
+        var audioLanguages = new HashSet<string>(
+            audioStreams.Where(s => !string.IsNullOrEmpty(s.Language)).Select(s => s.Language!.ToLowerInvariant()),
+            StringComparer.OrdinalIgnoreCase);
+
+        var subtitleStreams = allStreams.Where(s => s.Type == MediaStreamType.Subtitle).ToList();
+        foreach (var sub in subtitleStreams)
         {
-            foreach (var stream in audioStreams)
+            var subLang = sub.Language?.ToLowerInvariant();
+            if (!string.IsNullOrEmpty(subLang) && !audioLanguages.Contains(subLang))
             {
-                var lang = stream.Language;
-                if (!string.IsNullOrEmpty(lang) && addedLanguages.Add(lang))
+                var key = "vost" + subLang;
+                if (addedLanguages.Add(key))
                 {
-                    var langLower = lang.ToLowerInvariant();
                     badges.Add(new BadgeInfo
                     {
-                        Category = BadgeCategory.Language,
-                        BadgeKey = langLower,
-                        ResourceFileName = GetFlagResourceFileName(langLower)
+                        Category = BadgeCategory.Subtitle,
+                        BadgeKey = key,
+                        ResourceFileName = string.Empty
                     });
-                }
-            }
-        }
-
-        // VOSTFR indicator
-        if (config.ShowSubtitleIndicator)
-        {
-            var audioLanguages = new HashSet<string>(
-                audioStreams.Where(s => !string.IsNullOrEmpty(s.Language)).Select(s => s.Language!.ToLowerInvariant()),
-                StringComparer.OrdinalIgnoreCase);
-
-            var subtitleStreams = allStreams.Where(s => s.Type == MediaStreamType.Subtitle).ToList();
-            foreach (var sub in subtitleStreams)
-            {
-                var subLang = sub.Language?.ToLowerInvariant();
-                if (!string.IsNullOrEmpty(subLang) && !audioLanguages.Contains(subLang))
-                {
-                    var key = "vost" + subLang;
-                    if (addedLanguages.Add(key))
-                    {
-                        badges.Add(new BadgeInfo
-                        {
-                            Category = BadgeCategory.Subtitle,
-                            BadgeKey = key,
-                            ResourceFileName = string.Empty
-                        });
-                    }
                 }
             }
         }
@@ -382,32 +333,9 @@ public class QualityDetectionService : IQualityDetectionService
 
     private static BadgeInfo? DetectHdr(MediaStream videoStream)
     {
-        var config = Plugin.Instance?.Configuration;
-
-        // If generic HDR mode is enabled, return a single "hdr" badge for any HDR content
-        if (config?.ShowGenericHdr == true)
-        {
-            var range = videoStream.VideoRange;
-            var rt = videoStream.VideoRangeType;
-            if (range == VideoRange.HDR || rt is VideoRangeType.HDR10 or VideoRangeType.HDR10Plus
-                or VideoRangeType.HLG or VideoRangeType.DOVI or VideoRangeType.DOVIWithHDR10
-                or VideoRangeType.DOVIWithHLG or VideoRangeType.DOVIWithSDR or VideoRangeType.DOVIWithEL
-                or VideoRangeType.DOVIWithHDR10Plus or VideoRangeType.DOVIWithELHDR10Plus)
-            {
-                return new BadgeInfo
-                {
-                    Category = BadgeCategory.Hdr,
-                    BadgeKey = "hdr",
-                    ResourceFileName = "badge-hdr.svg"
-                };
-            }
-
-            return null;
-        }
-
         var rangeType = videoStream.VideoRangeType;
 
-        // Dolby Vision variants
+        // Dolby Vision variants (highest priority)
         if (rangeType is VideoRangeType.DOVI
             or VideoRangeType.DOVIWithHDR10
             or VideoRangeType.DOVIWithHLG
@@ -416,56 +344,27 @@ public class QualityDetectionService : IQualityDetectionService
             or VideoRangeType.DOVIWithHDR10Plus
             or VideoRangeType.DOVIWithELHDR10Plus)
         {
-            return new BadgeInfo
-            {
-                Category = BadgeCategory.Hdr,
-                BadgeKey = "dv",
-                ResourceFileName = "badge-dv.svg"
-            };
+            return new BadgeInfo { Category = BadgeCategory.Hdr, BadgeKey = "dv", ResourceFileName = "badge-dv.svg" };
         }
 
-        // HDR10+
         if (rangeType == VideoRangeType.HDR10Plus)
         {
-            return new BadgeInfo
-            {
-                Category = BadgeCategory.Hdr,
-                BadgeKey = "hdr10plus",
-                ResourceFileName = "badge-hdr10plus.svg"
-            };
+            return new BadgeInfo { Category = BadgeCategory.Hdr, BadgeKey = "hdr10plus", ResourceFileName = "badge-hdr10plus.svg" };
         }
 
-        // HLG
         if (rangeType == VideoRangeType.HLG)
         {
-            return new BadgeInfo
-            {
-                Category = BadgeCategory.Hdr,
-                BadgeKey = "hlg",
-                ResourceFileName = "badge-hlg.svg"
-            };
+            return new BadgeInfo { Category = BadgeCategory.Hdr, BadgeKey = "hlg", ResourceFileName = "badge-hlg.svg" };
         }
 
-        // HDR10
         if (rangeType == VideoRangeType.HDR10)
         {
-            return new BadgeInfo
-            {
-                Category = BadgeCategory.Hdr,
-                BadgeKey = "hdr10",
-                ResourceFileName = "badge-hdr10.svg"
-            };
+            return new BadgeInfo { Category = BadgeCategory.Hdr, BadgeKey = "hdr10", ResourceFileName = "badge-hdr10.svg" };
         }
 
-        // Fallback to VideoRange
         if (videoStream.VideoRange == VideoRange.HDR)
         {
-            return new BadgeInfo
-            {
-                Category = BadgeCategory.Hdr,
-                BadgeKey = "hdr10",
-                ResourceFileName = "badge-hdr10.svg"
-            };
+            return new BadgeInfo { Category = BadgeCategory.Hdr, BadgeKey = "hdr10", ResourceFileName = "badge-hdr10.svg" };
         }
 
         return null;
@@ -484,12 +383,8 @@ public class QualityDetectionService : IQualityDetectionService
             var profile = stream.Profile?.ToUpperInvariant() ?? string.Empty;
             var channels = stream.Channels ?? 0;
 
-            if (channels > bestChannels)
-            {
-                bestChannels = channels;
-            }
+            if (channels > bestChannels) bestChannels = channels;
 
-            // Priority: Atmos > TrueHD > DTS-X > DTS-HD MA > EAC3 > AC3 > DTS
             int priority = -1;
             BadgeInfo? candidate = null;
 
@@ -513,16 +408,6 @@ public class QualityDetectionService : IQualityDetectionService
                 priority = 4;
                 candidate = new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "dtshdma", ResourceFileName = "badge-dtshdma.svg" };
             }
-            else if (codec is "EAC3" or "AC3")
-            {
-                priority = 1;
-                // No specific badge for AC3, channel badge will cover it
-            }
-            else if (codec == "DTS")
-            {
-                priority = 0;
-                // No specific badge for plain DTS
-            }
 
             if (candidate != null && priority > codecPriority)
             {
@@ -531,24 +416,14 @@ public class QualityDetectionService : IQualityDetectionService
             }
         }
 
-        if (codecBadge != null)
-        {
-            badges.Add(codecBadge);
-        }
+        if (codecBadge != null) badges.Add(codecBadge);
 
-        // Channel layout badge
         if (bestChannels >= 8)
-        {
             badges.Add(new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "7.1", ResourceFileName = "badge-7_1.svg" });
-        }
         else if (bestChannels >= 6)
-        {
             badges.Add(new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "5.1", ResourceFileName = "badge-5_1.svg" });
-        }
         else if (bestChannels >= 2)
-        {
             badges.Add(new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "stereo", ResourceFileName = "badge-stereo.svg" });
-        }
 
         return badges;
     }
@@ -572,10 +447,7 @@ public class QualityDetectionService : IQualityDetectionService
             var mediaSources = video.GetMediaSources(false);
             var mediaSource = mediaSources?.FirstOrDefault();
             var videoStream = mediaSource?.MediaStreams?.FirstOrDefault(s => s.Type == MediaStreamType.Video);
-            if (videoStream == null)
-            {
-                return VideoQuality.Unknown;
-            }
+            if (videoStream == null) return VideoQuality.Unknown;
 
             var width = videoStream.Width ?? 0;
             var height = videoStream.Height ?? 0;

@@ -8,15 +8,15 @@ namespace Jellyfin.Plugin.JellyTag.Services;
 public interface IImageOverlayService
 {
     /// <summary>
-    /// Adds multiple badge overlays to an image, stacking them according to layout settings.
-    /// Returns the result stream and the content type (e.g. "image/jpeg" or "image/webp").
+    /// Adds multiple badge overlays to an image using per-panel configuration.
+    /// Returns the result stream and the content type.
     /// </summary>
-    Task<(Stream Stream, string ContentType)> AddBadgeOverlaysAsync(Stream originalImage, List<BadgeInfo> badges, ImageTypeSettings settings);
+    Task<(Stream Stream, string ContentType)> AddBadgeOverlaysAsync(Stream originalImage, List<BadgeInfo> badges, ImageTypeConfig imageConfig);
 
     /// <summary>
-    /// Determines if a badge should be shown based on its info and configuration.
+    /// Determines if a badge should be shown based on the image type config panels.
     /// </summary>
-    bool ShouldShowBadge(BadgeInfo badge);
+    bool ShouldShowBadge(BadgeInfo badge, ImageTypeConfig imageConfig);
 
     /// <summary>
     /// Reloads all badge images from resources and custom badges directory.

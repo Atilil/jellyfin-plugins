@@ -12,28 +12,21 @@ namespace Jellyfin.Plugin.JellyTag.Middleware;
 
 /// <summary>
 /// Middleware that intercepts Jellyfin image requests and adds quality badge overlays.
-/// This works for ALL clients (web, mobile, TV, Kodi) since it operates at the HTTP level.
 /// </summary>
 public partial class ImageOverlayMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ImageOverlayMiddleware> _logger;
 
-    [GeneratedRegex(@"^/Items/([0-9a-f]{32}|[0-9a-f-]{36})/Images/(Primary|Thumb|Backdrop)(/\d+)?$", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"^/Items/([0-9a-f]{32}|[0-9a-f-]{36})/Images/(Primary|Thumb)(/\d+)?$", RegexOptions.IgnoreCase)]
     private static partial Regex ImagePathRegex();
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ImageOverlayMiddleware"/> class.
-    /// </summary>
     public ImageOverlayMiddleware(RequestDelegate next, ILogger<ImageOverlayMiddleware> logger)
     {
         _next = next;
         _logger = logger;
     }
 
-    /// <summary>
-    /// Processes the HTTP request, intercepting image requests to add badge overlays.
-    /// </summary>
     public async Task InvokeAsync(
         HttpContext context,
         IQualityDetectionService qualityService,
@@ -62,6 +55,9 @@ public partial class ImageOverlayMiddleware
             return;
         }
 
+        // Run migration if needed
+        config.MigrateFromLegacy();
+
         var itemIdStr = match.Groups[1].Value;
         var imageType = match.Groups[2].Value;
 
@@ -84,9 +80,8 @@ public partial class ImageOverlayMiddleware
             return;
         }
 
-        // Episodes use Thumbnail settings for Primary images (they are landscape thumbnails, not posters)
-        var imageSettings = GetImageTypeSettings(config, imageType, item);
-        if (imageSettings == null || !imageSettings.Enabled)
+        var imageConfig = GetImageTypeConfig(config, imageType, item);
+        if (imageConfig == null || !imageConfig.Enabled)
         {
             await _next(context).ConfigureAwait(false);
             return;
@@ -97,7 +92,7 @@ public partial class ImageOverlayMiddleware
         _logger.LogDebug("[JellyTag] DetectAllBadges for {Item}: {Count} badges found: {Badges}",
             item.Name, allBadges.Count, string.Join(", ", allBadges.Select(b => $"{b.Category}:{b.BadgeKey}")));
 
-        var visibleBadges = allBadges.Where(b => overlayService.ShouldShowBadge(b)).ToList();
+        var visibleBadges = allBadges.Where(b => overlayService.ShouldShowBadge(b, imageConfig)).ToList();
         _logger.LogDebug("[JellyTag] Visible badges after filter: {Count}: {Badges}",
             visibleBadges.Count, string.Join(", ", visibleBadges.Select(b => b.BadgeKey)));
 
@@ -107,7 +102,6 @@ public partial class ImageOverlayMiddleware
             return;
         }
 
-        // Build composite badge key for caching
         var badgeKey = string.Join("_", visibleBadges.Select(b => b.BadgeKey));
         _logger.LogInformation("[JellyTag] Applying {Count} badges to {Item}: {BadgeKey}", visibleBadges.Count, item.Name, badgeKey);
 
@@ -115,7 +109,6 @@ public partial class ImageOverlayMiddleware
         var tag = context.Request.Query["tag"].FirstOrDefault() ?? item.DateModified.Ticks.ToString();
         var imageTag = $"{tag}_{imageType}_{query}";
 
-        // Check cache
         var cachedImage = await cacheService.GetCachedImageAsync(itemId, badgeKey, imageTag).ConfigureAwait(false);
         if (cachedImage != null)
         {
@@ -130,7 +123,6 @@ public partial class ImageOverlayMiddleware
             return;
         }
 
-        // Capture the original response
         var originalBody = context.Response.Body;
         using var capturedBody = new MemoryStream();
         context.Response.Body = capturedBody;
@@ -151,7 +143,7 @@ public partial class ImageOverlayMiddleware
             (Stream resultStream, string contentType) result;
             try
             {
-                result = await overlayService.AddBadgeOverlaysAsync(capturedBody, visibleBadges, imageSettings).ConfigureAwait(false);
+                result = await overlayService.AddBadgeOverlaysAsync(capturedBody, visibleBadges, imageConfig).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -163,11 +155,9 @@ public partial class ImageOverlayMiddleware
 
             await using (result.resultStream.ConfigureAwait(false))
             {
-                // Cache the result
                 result.resultStream.Position = 0;
                 await cacheService.CacheImageAsync(itemId, badgeKey, imageTag, result.resultStream).ConfigureAwait(false);
 
-                // Write to response
                 result.resultStream.Position = 0;
                 context.Response.ContentType = result.contentType;
                 context.Response.ContentLength = result.resultStream.Length;
@@ -180,15 +170,13 @@ public partial class ImageOverlayMiddleware
         }
     }
 
-    private static ImageTypeSettings? GetImageTypeSettings(PluginConfiguration config, string imageType, BaseItem item)
+    private static ImageTypeConfig? GetImageTypeConfig(PluginConfiguration config, string imageType, BaseItem item)
     {
         return imageType.ToUpperInvariant() switch
         {
-            // Episode Primary images are landscape thumbnails, not portrait posters
-            "PRIMARY" when item is Episode => config.ThumbnailSettings,
-            "PRIMARY" => config.PosterSettings,
-            "THUMB" => config.ThumbnailSettings,
-            "BACKDROP" => config.BackdropSettings,
+            "PRIMARY" when item is Episode => config.ThumbnailSameAsPoster ? config.PosterConfig : config.ThumbnailConfig,
+            "PRIMARY" => config.PosterConfig,
+            "THUMB" => config.ThumbnailSameAsPoster ? config.PosterConfig : config.ThumbnailConfig,
             _ => null
         };
     }
