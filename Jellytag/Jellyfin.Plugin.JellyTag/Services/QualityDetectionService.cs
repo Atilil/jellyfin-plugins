@@ -51,17 +51,17 @@ public class QualityDetectionService : IQualityDetectionService
     {
         var maxDimension = Math.Max(width, height);
 
-        if (maxDimension >= 2160)
+        if (maxDimension >= 3840)
         {
             return VideoQuality.UHD4K;
         }
 
-        if (maxDimension >= 1080)
+        if (maxDimension >= 1920)
         {
             return VideoQuality.FHD1080p;
         }
 
-        if (maxDimension >= 720)
+        if (maxDimension >= 1280)
         {
             return VideoQuality.HD720p;
         }
@@ -234,7 +234,7 @@ public class QualityDetectionService : IQualityDetectionService
                 {
                     Category = BadgeCategory.ThreeD,
                     BadgeKey = "3d",
-                    ResourceFileName = "badge-3d.png"
+                    ResourceFileName = "badge-3d.svg"
                 });
             }
 
@@ -360,7 +360,7 @@ public class QualityDetectionService : IQualityDetectionService
                 {
                     Category = BadgeCategory.Hdr,
                     BadgeKey = "hdr",
-                    ResourceFileName = "badge-hdr.png"
+                    ResourceFileName = "badge-hdr.svg"
                 };
             }
 
@@ -382,7 +382,7 @@ public class QualityDetectionService : IQualityDetectionService
             {
                 Category = BadgeCategory.Hdr,
                 BadgeKey = "dv",
-                ResourceFileName = "badge-dv.png"
+                ResourceFileName = "badge-dv.svg"
             };
         }
 
@@ -393,7 +393,7 @@ public class QualityDetectionService : IQualityDetectionService
             {
                 Category = BadgeCategory.Hdr,
                 BadgeKey = "hdr10plus",
-                ResourceFileName = "badge-hdr10plus.png"
+                ResourceFileName = "badge-hdr10plus.svg"
             };
         }
 
@@ -404,7 +404,7 @@ public class QualityDetectionService : IQualityDetectionService
             {
                 Category = BadgeCategory.Hdr,
                 BadgeKey = "hlg",
-                ResourceFileName = "badge-hlg.png"
+                ResourceFileName = "badge-hlg.svg"
             };
         }
 
@@ -415,7 +415,7 @@ public class QualityDetectionService : IQualityDetectionService
             {
                 Category = BadgeCategory.Hdr,
                 BadgeKey = "hdr10",
-                ResourceFileName = "badge-hdr10.png"
+                ResourceFileName = "badge-hdr10.svg"
             };
         }
 
@@ -426,7 +426,7 @@ public class QualityDetectionService : IQualityDetectionService
             {
                 Category = BadgeCategory.Hdr,
                 BadgeKey = "hdr10",
-                ResourceFileName = "badge-hdr10.png"
+                ResourceFileName = "badge-hdr10.svg"
             };
         }
 
@@ -458,22 +458,22 @@ public class QualityDetectionService : IQualityDetectionService
             if (profile.Contains("ATMOS"))
             {
                 priority = 7;
-                candidate = new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "atmos", ResourceFileName = "badge-atmos.png" };
+                candidate = new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "atmos", ResourceFileName = "badge-atmos.svg" };
             }
             else if (codec == "TRUEHD")
             {
                 priority = 6;
-                candidate = new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "truehd", ResourceFileName = "badge-truehd.png" };
+                candidate = new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "truehd", ResourceFileName = "badge-truehd.svg" };
             }
             else if (profile.Contains("DTS:X") || profile.Contains("DTS-X") || profile.Contains("DTSX"))
             {
                 priority = 5;
-                candidate = new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "dtsx", ResourceFileName = "badge-dtsx.png" };
+                candidate = new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "dtsx", ResourceFileName = "badge-dtsx.svg" };
             }
             else if (profile.Contains("DTS-HD MA") || profile.Contains("DTS-HD MASTER") || (codec == "DTS" && profile.Contains("MA")))
             {
                 priority = 4;
-                candidate = new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "dtshdma", ResourceFileName = "badge-dtshdma.png" };
+                candidate = new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "dtshdma", ResourceFileName = "badge-dtshdma.svg" };
             }
             else if (codec is "EAC3" or "AC3")
             {
@@ -501,15 +501,15 @@ public class QualityDetectionService : IQualityDetectionService
         // Channel layout badge
         if (bestChannels >= 8)
         {
-            badges.Add(new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "7.1", ResourceFileName = "badge-7_1.png" });
+            badges.Add(new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "7.1", ResourceFileName = "badge-7_1.svg" });
         }
         else if (bestChannels >= 6)
         {
-            badges.Add(new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "5.1", ResourceFileName = "badge-5_1.png" });
+            badges.Add(new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "5.1", ResourceFileName = "badge-5_1.svg" });
         }
         else if (bestChannels >= 2)
         {
-            badges.Add(new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "stereo", ResourceFileName = "badge-stereo.png" });
+            badges.Add(new BadgeInfo { Category = BadgeCategory.Audio, BadgeKey = "stereo", ResourceFileName = "badge-stereo.svg" });
         }
 
         return badges;
@@ -519,10 +519,10 @@ public class QualityDetectionService : IQualityDetectionService
     {
         return quality switch
         {
-            VideoQuality.UHD4K => new BadgeInfo { Category = BadgeCategory.Resolution, BadgeKey = "4k", ResourceFileName = "badge-4k.png" },
-            VideoQuality.FHD1080p => new BadgeInfo { Category = BadgeCategory.Resolution, BadgeKey = "1080p", ResourceFileName = "badge-1080p.png" },
-            VideoQuality.HD720p => new BadgeInfo { Category = BadgeCategory.Resolution, BadgeKey = "720p", ResourceFileName = "badge-720p.png" },
-            VideoQuality.SD => new BadgeInfo { Category = BadgeCategory.Resolution, BadgeKey = "sd", ResourceFileName = "badge-sd.png" },
+            VideoQuality.UHD4K => new BadgeInfo { Category = BadgeCategory.Resolution, BadgeKey = "4k", ResourceFileName = "badge-4k.svg" },
+            VideoQuality.FHD1080p => new BadgeInfo { Category = BadgeCategory.Resolution, BadgeKey = "1080p", ResourceFileName = "badge-1080p.svg" },
+            VideoQuality.HD720p => new BadgeInfo { Category = BadgeCategory.Resolution, BadgeKey = "720p", ResourceFileName = "badge-720p.svg" },
+            VideoQuality.SD => new BadgeInfo { Category = BadgeCategory.Resolution, BadgeKey = "sd", ResourceFileName = "badge-sd.svg" },
             _ => new BadgeInfo { Category = BadgeCategory.Resolution, BadgeKey = "unknown", ResourceFileName = string.Empty }
         };
     }

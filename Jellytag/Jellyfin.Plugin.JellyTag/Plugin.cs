@@ -51,7 +51,10 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
             new PluginPageInfo
             {
                 Name = Name,
-                EmbeddedResourcePath = $"{GetType().Namespace}.Configuration.configPage.html"
+                EmbeddedResourcePath = $"{GetType().Namespace}.Configuration.configPage.html",
+                EnableInMainMenu = true,
+                MenuSection = "Extensions",
+                MenuIcon = "style"
             }
         };
     }

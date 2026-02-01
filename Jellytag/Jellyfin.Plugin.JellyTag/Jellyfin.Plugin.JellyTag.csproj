@@ -21,10 +21,12 @@
     <PackageReference Include="SkiaSharp" Version="3.116.*">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
+    <PackageReference Include="Svg.Skia" Version="3.4.1" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Configuration/configPage.html" />
+    <EmbeddedResource Include="Assets/*.svg" />
     <EmbeddedResource Include="Assets/*.png" />
   </ItemGroup>
 

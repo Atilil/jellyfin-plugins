@@ -1,7 +1,9 @@
 using System.Reflection;
+using System.Xml.Linq;
 using Jellyfin.Plugin.JellyTag.Configuration;
 using Microsoft.Extensions.Logging;
 using SkiaSharp;
+using Svg.Skia;
 
 namespace Jellyfin.Plugin.JellyTag.Services;
 
@@ -11,7 +13,8 @@ namespace Jellyfin.Plugin.JellyTag.Services;
 public class ImageOverlayService : IImageOverlayService, IDisposable
 {
     private readonly ILogger<ImageOverlayService> _logger;
-    private readonly Dictionary<string, SKBitmap?> _badgeCache = new();
+    private readonly Dictionary<string, byte[]> _svgCache = new();
+    private readonly Dictionary<string, SKBitmap?> _rasterCache = new();
     private readonly SemaphoreSlim _badgeLock = new(1, 1);
     private bool _badgesLoaded;
     private bool _disposed;
@@ -20,6 +23,8 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
     private const int MaxBadgeSizePercent = 50;
     private const float MinBadgeMarginPercent = 0f;
     private const float MaxBadgeMarginPercent = 20f;
+
+    private static readonly string[] SupportedCustomExtensions = { ".svg", ".png", ".jpg", ".jpeg" };
 
     private static readonly Dictionary<string, string> BadgeDisplayText = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -109,7 +114,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         var audioBadgeSizePercent = Math.Clamp(settings.AudioBadgeSizePercent > 0 ? settings.AudioBadgeSizePercent : settings.BadgeSizePercent, MinBadgeSizePercent, MaxBadgeSizePercent);
         var marginPercent = Math.Clamp(settings.BadgeMarginPercent, MinBadgeMarginPercent, MaxBadgeMarginPercent);
         var gapPercent = Math.Max(0f, settings.BadgeGapPercent);
-        var jpegQuality = Math.Clamp(config.JpegQuality, 50, 100);
+        var jpegQuality = Math.Clamp(config.JpegQuality, 1, 100);
 
         using var image = SKBitmap.Decode(originalImage);
         if (image == null)
@@ -146,25 +151,28 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         var videoSizes = new List<SKSizeI>();
         var videoSourceBitmaps = new List<SKBitmap>();
         var videoFiltered = new List<BadgeInfo>();
+        var videoOwnedBitmaps = new List<SKBitmap>();
 
         var audioSizes = new List<SKSizeI>();
         var audioSourceBitmaps = new List<SKBitmap>();
         var audioFiltered = new List<BadgeInfo>();
+        var audioOwnedBitmaps = new List<SKBitmap>();
 
         var languageSizes = new List<SKSizeI>();
         var languageSourceBitmaps = new List<SKBitmap>();
         var languageFiltered = new List<BadgeInfo>();
+        var languageOwnedBitmaps = new List<SKBitmap>();
 
         var languageBadgeSizePercent = Math.Clamp(settings.LanguageBadgeSizePercent > 0 ? settings.LanguageBadgeSizePercent : audioBadgeSizePercent, MinBadgeSizePercent, MaxBadgeSizePercent);
 
         try
         {
             // Prepare video badges
-            await PrepareBadgeGroup(videoBadges, videoBadgeSizePercent, image.Width, useTextStyle, false, videoSizes, videoSourceBitmaps, videoFiltered).ConfigureAwait(false);
+            await PrepareBadgeGroup(videoBadges, videoBadgeSizePercent, image.Width, useTextStyle, false, videoSizes, videoSourceBitmaps, videoFiltered, videoOwnedBitmaps).ConfigureAwait(false);
             // Prepare audio badges
-            await PrepareBadgeGroup(audioBadges, audioBadgeSizePercent, image.Width, useTextStyle, true, audioSizes, audioSourceBitmaps, audioFiltered).ConfigureAwait(false);
+            await PrepareBadgeGroup(audioBadges, audioBadgeSizePercent, image.Width, useTextStyle, true, audioSizes, audioSourceBitmaps, audioFiltered, audioOwnedBitmaps).ConfigureAwait(false);
             // Prepare language badges (always text mode since ResourceFileName is empty)
-            await PrepareBadgeGroup(languageBadges, languageBadgeSizePercent, image.Width, true, true, languageSizes, languageSourceBitmaps, languageFiltered).ConfigureAwait(false);
+            await PrepareBadgeGroup(languageBadges, languageBadgeSizePercent, image.Width, true, true, languageSizes, languageSourceBitmaps, languageFiltered, languageOwnedBitmaps).ConfigureAwait(false);
 
             if (videoSizes.Count == 0 && audioSizes.Count == 0 && languageSizes.Count == 0)
             {
@@ -181,9 +189,11 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 audioFiltered.AddRange(languageFiltered);
                 audioSizes.AddRange(languageSizes);
                 audioSourceBitmaps.AddRange(languageSourceBitmaps);
+                audioOwnedBitmaps.AddRange(languageOwnedBitmaps);
                 languageFiltered.Clear();
                 languageSizes.Clear();
                 languageSourceBitmaps.Clear();
+                languageOwnedBitmaps.Clear();
             }
 
             // When "Same as video", merge audio into the video group
@@ -192,9 +202,11 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 videoFiltered.AddRange(audioFiltered);
                 videoSizes.AddRange(audioSizes);
                 videoSourceBitmaps.AddRange(audioSourceBitmaps);
+                videoOwnedBitmaps.AddRange(audioOwnedBitmaps);
                 audioFiltered.Clear();
                 audioSizes.Clear();
                 audioSourceBitmaps.Clear();
+                audioOwnedBitmaps.Clear();
             }
 
             // Reverse after merge so the full combined list is reversed together
@@ -328,7 +340,10 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         }
         finally
         {
-            // sourceBadges are references to the cache, don't dispose them
+            // Dispose SVG-rasterized bitmaps (owned by this call, not the cache)
+            foreach (var bmp in videoOwnedBitmaps) bmp.Dispose();
+            foreach (var bmp in audioOwnedBitmaps) bmp.Dispose();
+            foreach (var bmp in languageOwnedBitmaps) bmp.Dispose();
         }
     }
 
@@ -381,12 +396,13 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         _badgeLock.Wait();
         try
         {
-            foreach (var badge in _badgeCache.Values)
+            foreach (var badge in _rasterCache.Values)
             {
                 badge?.Dispose();
             }
 
-            _badgeCache.Clear();
+            _rasterCache.Clear();
+            _svgCache.Clear();
             _badgesLoaded = false;
         }
         finally
@@ -397,7 +413,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
 
     private async Task PrepareBadgeGroup(
         List<BadgeInfo> badges, int sizePercent, int imageWidth, bool useTextStyle, bool isAudio,
-        List<SKSizeI> sizes, List<SKBitmap> sourceBitmaps, List<BadgeInfo> filtered)
+        List<SKSizeI> sizes, List<SKBitmap> sourceBitmaps, List<BadgeInfo> filtered, List<SKBitmap> ownedBitmaps)
     {
         if (useTextStyle)
         {
@@ -418,31 +434,49 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         }
         else
         {
+            await EnsureBadgesLoaded().ConfigureAwait(false);
+
             foreach (var badgeInfo in badges)
             {
-                var badgeBitmap = await GetBadgeByFileNameAsync(badgeInfo.ResourceFileName).ConfigureAwait(false);
-                if (badgeBitmap == null)
+                var resourceFileName = badgeInfo.ResourceFileName;
+                if (string.IsNullOrEmpty(resourceFileName))
                 {
                     continue;
                 }
 
                 var badgeWidth = Math.Max(1, (int)(imageWidth * (sizePercent / 100.0)));
-                var badgeHeight = Math.Max(1, (int)(badgeBitmap.Height * ((double)badgeWidth / badgeBitmap.Width)));
 
-                sourceBitmaps.Add(badgeBitmap);
-                filtered.Add(badgeInfo);
-                sizes.Add(new SKSizeI(badgeWidth, badgeHeight));
+                // Try SVG cache first
+                if (_svgCache.TryGetValue(resourceFileName, out var svgBytes))
+                {
+                    var ratio = GetSvgAspectRatio(svgBytes);
+                    var badgeHeight = Math.Max(1, (int)(badgeWidth / ratio));
+                    var rasterized = RasterizeSvg(svgBytes, badgeWidth, badgeHeight);
+                    if (rasterized != null)
+                    {
+                        sourceBitmaps.Add(rasterized);
+                        ownedBitmaps.Add(rasterized);
+                        filtered.Add(badgeInfo);
+                        sizes.Add(new SKSizeI(badgeWidth, badgeHeight));
+                        continue;
+                    }
+                }
+
+                // Also try without extension change (for .png key in svg cache when resourceFileName is .svg)
+                // Try raster cache
+                if (_rasterCache.TryGetValue(resourceFileName, out var rasterBitmap) && rasterBitmap != null)
+                {
+                    var badgeHeight = Math.Max(1, (int)(rasterBitmap.Height * ((double)badgeWidth / rasterBitmap.Width)));
+                    sourceBitmaps.Add(rasterBitmap);
+                    filtered.Add(badgeInfo);
+                    sizes.Add(new SKSizeI(badgeWidth, badgeHeight));
+                }
             }
         }
     }
 
-    private async Task<SKBitmap?> GetBadgeByFileNameAsync(string resourceFileName)
+    private async Task EnsureBadgesLoaded()
     {
-        if (string.IsNullOrEmpty(resourceFileName))
-        {
-            return null;
-        }
-
         await _badgeLock.WaitAsync().ConfigureAwait(false);
         try
         {
@@ -451,8 +485,6 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 LoadBadges();
                 _badgesLoaded = true;
             }
-
-            return _badgeCache.GetValueOrDefault(resourceFileName);
         }
         finally
         {
@@ -460,7 +492,75 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         }
     }
 
+    private static SKBitmap? RasterizeSvg(byte[] svgBytes, int targetWidth, int targetHeight)
+    {
+        using var svg = new SKSvg();
+        using var stream = new MemoryStream(svgBytes);
+        svg.Load(stream);
+        var picture = svg.Picture;
+        if (picture == null)
+        {
+            return null;
+        }
 
+        var bitmap = new SKBitmap(targetWidth, targetHeight, SKColorType.Rgba8888, SKAlphaType.Premul);
+        using var canvas = new SKCanvas(bitmap);
+        canvas.Clear(SKColors.Transparent);
+
+        var scaleX = targetWidth / picture.CullRect.Width;
+        var scaleY = targetHeight / picture.CullRect.Height;
+        canvas.Scale((float)scaleX, (float)scaleY);
+        canvas.DrawPicture(picture);
+        canvas.Flush();
+
+        return bitmap;
+    }
+
+    private static float GetSvgAspectRatio(byte[] svgBytes)
+    {
+        try
+        {
+            using var stream = new MemoryStream(svgBytes);
+            var doc = XDocument.Load(stream);
+            var root = doc.Root;
+            if (root == null) return 2f;
+
+            var viewBox = root.Attribute("viewBox")?.Value;
+            if (!string.IsNullOrEmpty(viewBox))
+            {
+                var parts = viewBox.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length == 4 &&
+                    float.TryParse(parts[2], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var w) &&
+                    float.TryParse(parts[3], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var h) &&
+                    h > 0)
+                {
+                    return w / h;
+                }
+            }
+
+            // Try width/height attributes
+            var widthAttr = root.Attribute("width")?.Value;
+            var heightAttr = root.Attribute("height")?.Value;
+            if (!string.IsNullOrEmpty(widthAttr) && !string.IsNullOrEmpty(heightAttr))
+            {
+                // Strip "px" suffix if present
+                widthAttr = widthAttr.Replace("px", string.Empty);
+                heightAttr = heightAttr.Replace("px", string.Empty);
+                if (float.TryParse(widthAttr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var w2) &&
+                    float.TryParse(heightAttr, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var h2) &&
+                    h2 > 0)
+                {
+                    return w2 / h2;
+                }
+            }
+        }
+        catch
+        {
+            // Fallback
+        }
+
+        return 2f; // Default 2:1 ratio
+    }
 
     private void LoadBadges()
     {
@@ -469,52 +569,122 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
 
         _logger.LogInformation("[JellyTag] Loading badges. Available resources: {Resources}", string.Join(", ", resourceNames));
 
-        // Build a set of badge base names from all embedded resources (both .svg and .png)
         var assetsMarker = ".Assets.";
         var badgeBaseNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        // Collect all badge base names from embedded resources (both .svg and .png)
         foreach (var resourceName in resourceNames)
         {
             var assetsIdx = resourceName.IndexOf(assetsMarker, StringComparison.OrdinalIgnoreCase);
-            if (assetsIdx < 0)
-            {
-                continue;
-            }
+            if (assetsIdx < 0) continue;
 
             var fileName = resourceName[(assetsIdx + assetsMarker.Length)..];
-            if (fileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+            if (fileName.EndsWith(".svg", StringComparison.OrdinalIgnoreCase) ||
+                fileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
             {
                 var baseName = Path.GetFileNameWithoutExtension(fileName);
                 badgeBaseNames.Add(baseName);
             }
         }
 
+        var customDir = GetCustomBadgeDir();
+
         foreach (var baseName in badgeBaseNames)
         {
+            var svgFileName = baseName + ".svg";
             var pngFileName = baseName + ".png";
 
-            // Check for custom badge override first
-            var customPngPath = GetCustomBadgePath(pngFileName);
+            // 1. Check custom badges: SVG > PNG > JPG
+            if (customDir != null)
+            {
+                var customSvg = Path.Combine(customDir, svgFileName);
+                if (File.Exists(customSvg))
+                {
+                    try
+                    {
+                        var bytes = File.ReadAllBytes(customSvg);
+                        _svgCache[svgFileName] = bytes;
+                        _logger.LogInformation("[JellyTag] Loaded custom SVG badge: {FileName}", svgFileName);
+                        continue;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "[JellyTag] Failed to load custom SVG badge: {Path}", customSvg);
+                    }
+                }
 
-            if (customPngPath != null && File.Exists(customPngPath))
+                // Custom PNG
+                var customPng = Path.Combine(customDir, pngFileName);
+                if (File.Exists(customPng))
+                {
+                    try
+                    {
+                        var customBadge = SKBitmap.Decode(customPng);
+                        if (customBadge != null)
+                        {
+                            customBadge = TrimTransparent(customBadge);
+                            _rasterCache[svgFileName] = customBadge;
+                            _logger.LogInformation("[JellyTag] Loaded custom PNG badge: {FileName}", pngFileName);
+                            continue;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "[JellyTag] Failed to load custom PNG badge: {Path}", customPng);
+                    }
+                }
+
+                // Custom JPG/JPEG
+                foreach (var ext in new[] { ".jpg", ".jpeg" })
+                {
+                    var customJpg = Path.Combine(customDir, baseName + ext);
+                    if (File.Exists(customJpg))
+                    {
+                        try
+                        {
+                            var customBadge = SKBitmap.Decode(customJpg);
+                            if (customBadge != null)
+                            {
+                                customBadge = TrimTransparent(customBadge);
+                                _rasterCache[svgFileName] = customBadge;
+                                _logger.LogInformation("[JellyTag] Loaded custom JPEG badge: {FileName}", baseName + ext);
+                                goto nextBadge;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "[JellyTag] Failed to load custom JPEG badge: {Path}", customJpg);
+                        }
+                    }
+                }
+            }
+
+            // 2. Embedded SVG
+            var svgResourceName = resourceNames.FirstOrDefault(r =>
+                r.IndexOf(assetsMarker, StringComparison.OrdinalIgnoreCase) >= 0 &&
+                r.EndsWith(svgFileName, StringComparison.OrdinalIgnoreCase));
+
+            if (svgResourceName != null)
             {
                 try
                 {
-                    var customBadge = SKBitmap.Decode(customPngPath);
-                    if (customBadge != null)
+                    using var stream = assembly.GetManifestResourceStream(svgResourceName);
+                    if (stream != null)
                     {
-                        customBadge = TrimTransparent(customBadge);
-                        _badgeCache[pngFileName] = customBadge;
-                        _logger.LogInformation("[JellyTag] Loaded custom badge override: {FileName}", pngFileName);
+                        using var ms = new MemoryStream();
+                        stream.CopyTo(ms);
+                        _svgCache[svgFileName] = ms.ToArray();
+                        _logger.LogInformation("[JellyTag] Loaded embedded SVG badge: {FileName}", svgFileName);
                         continue;
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "[JellyTag] Failed to load custom badge: {Path}, falling back to embedded", customPngPath);
+                    _logger.LogError(ex, "[JellyTag] Failed to load embedded SVG badge: {FileName}", svgFileName);
                 }
             }
 
-            // Load embedded PNG
+            // 3. Fallback: embedded PNG
             var pngResourceName = resourceNames.FirstOrDefault(r =>
                 r.IndexOf(assetsMarker, StringComparison.OrdinalIgnoreCase) >= 0 &&
                 r.EndsWith(pngFileName, StringComparison.OrdinalIgnoreCase));
@@ -530,21 +700,22 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                         if (badge != null)
                         {
                             badge = TrimTransparent(badge);
-                            _badgeCache[pngFileName] = badge;
-                            _logger.LogInformation("[JellyTag] Loaded badge {FileName}: {Width}x{Height}", pngFileName, badge.Width, badge.Height);
+                            _rasterCache[svgFileName] = badge;
+                            _logger.LogInformation("[JellyTag] Loaded embedded PNG fallback: {FileName}", pngFileName);
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "[JellyTag] Failed to load badge: {FileName}", pngFileName);
+                    _logger.LogError(ex, "[JellyTag] Failed to load embedded PNG badge: {FileName}", pngFileName);
                 }
             }
+
+            nextBadge:;
         }
 
-        _logger.LogInformation("[JellyTag] Badge loading complete. Loaded {Count} badges", _badgeCache.Count);
+        _logger.LogInformation("[JellyTag] Badge loading complete. SVG: {SvgCount}, Raster: {RasterCount}", _svgCache.Count, _rasterCache.Count);
     }
-
 
     private static SKBitmap TrimTransparent(SKBitmap bitmap)
     {
@@ -587,7 +758,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         return trimmed;
     }
 
-    private static string? GetCustomBadgePath(string fileName)
+    private static string? GetCustomBadgeDir()
     {
         var dataFolder = Plugin.Instance?.DataFolderPath;
         if (string.IsNullOrEmpty(dataFolder))
@@ -595,7 +766,14 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             return null;
         }
 
-        return Path.Combine(dataFolder, "custom-badges", fileName);
+        return Path.Combine(dataFolder, "custom-badges");
+    }
+
+    private static string? GetCustomBadgePath(string fileName)
+    {
+        var dir = GetCustomBadgeDir();
+        if (dir == null) return null;
+        return Path.Combine(dir, fileName);
     }
 
     private static bool ShouldReverseOrder(BadgeLayout layout, BadgePosition position) =>
@@ -817,12 +995,13 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
 
         if (disposing)
         {
-            foreach (var badge in _badgeCache.Values)
+            foreach (var badge in _rasterCache.Values)
             {
                 badge?.Dispose();
             }
 
-            _badgeCache.Clear();
+            _rasterCache.Clear();
+            _svgCache.Clear();
             _badgeLock.Dispose();
         }
 

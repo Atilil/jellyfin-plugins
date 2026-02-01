@@ -10,7 +10,7 @@
             .jellytag-grid {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 0;
+                gap: 0 1em;
             }
             .jellytag-section {
                 border: 1px solid rgba(255,255,255,.12);
@@ -133,10 +133,6 @@
                     </div>
 
                     <div class="verticalSection">
-                        <p>JellyTag adds quality, HDR and audio badges to your media posters, thumbnails and backdrops.</p>
-                    </div>
-
-                    <div class="verticalSection">
                         <h3 class="sectionTitle">General</h3>
 
                         <div class="checkboxContainer checkboxContainer-withDescription">
@@ -144,7 +140,6 @@
                                 <input id="Enabled" name="Enabled" type="checkbox" is="emby-checkbox" />
                                 <span>Enable JellyTag</span>
                             </label>
-                            <div class="fieldDescription">Enable or disable the plugin globally.</div>
                         </div>
                     </div>
 
@@ -182,7 +177,7 @@
                     </details>
 
                     <details class="jellytag-section">
-                        <summary>HDR Badges</summary>
+                        <summary>HDR / 3D Badges</summary>
                         <div class="jellytag-section-body">
                             <div class="jellytag-grid">
                                 <div class="checkboxContainer checkboxContainer-withDescription">
@@ -209,6 +204,12 @@
                                         <span>HLG</span>
                                     </label>
                                 </div>
+                                <div class="checkboxContainer checkboxContainer-withDescription">
+                                    <label class="emby-checkbox-label">
+                                        <input id="Show3D" name="Show3D" type="checkbox" is="emby-checkbox" />
+                                        <span>3D</span>
+                                    </label>
+                                </div>
                             </div>
                             <div class="checkboxContainer checkboxContainer-withDescription">
                                 <label class="emby-checkbox-label">
@@ -216,19 +217,6 @@
                                     <span>Use generic HDR badge</span>
                                 </label>
                                 <div class="fieldDescription">Show a single "HDR" badge instead of specific HDR format badges (HDR10, DV, etc.).</div>
-                            </div>
-                        </div>
-                    </details>
-
-                    <details class="jellytag-section">
-                        <summary>3D Badge</summary>
-                        <div class="jellytag-section-body">
-                            <div class="checkboxContainer checkboxContainer-withDescription">
-                                <label class="emby-checkbox-label">
-                                    <input id="Show3D" name="Show3D" type="checkbox" is="emby-checkbox" />
-                                    <span>3D Content</span>
-                                </label>
-                                <div class="fieldDescription">Show badge for 3D content.</div>
                             </div>
                         </div>
                     </details>
@@ -281,14 +269,14 @@
                                     <option value="DefaultOnly">Default Only</option>
                                     <option value="All">All</option>
                                 </select>
-                                <div class="fieldDescription">None = disabled, Default Only = show badge for default audio language, All = show all distinct audio languages.</div>
+                                <div class="fieldDescription">Default Only = show badge for default Jellyfin audio language.</div>
                             </div>
                             <div class="checkboxContainer checkboxContainer-withDescription">
                                 <label class="emby-checkbox-label">
                                     <input id="ShowSubtitleIndicator" name="ShowSubtitleIndicator" type="checkbox" is="emby-checkbox" />
-                                    <span>Show VOSTFR indicator</span>
+                                    <span>Show VOST* indicator</span>
                                 </label>
-                                <div class="fieldDescription">Show VOSTFR indicator when default language has no audio track but subtitles exist.</div>
+                                <div class="fieldDescription">Show VOST* indicator when a language has subtitles but no audio track.</div>
                             </div>
                         </div>
                     </details>
@@ -377,14 +365,8 @@
                                     </details>
                                 </div>
                                 <div class="inputContainer">
-                                    <label class="inputLabel inputLabelUnfocused" for="PosterSize">Video Badge Size (%)</label>
+                                    <label class="inputLabel inputLabelUnfocused" for="PosterSize">Badge Size (%)</label>
                                     <input id="PosterSize" type="number" min="5" max="50" step="1" is="emby-input" />
-                                    <div class="fieldDescription">Resolution/HDR badge width as % of image width.</div>
-                                </div>
-                                <div class="inputContainer">
-                                    <label class="inputLabel inputLabelUnfocused" for="PosterAudioSize">Audio Badge Size (%)</label>
-                                    <input id="PosterAudioSize" type="number" min="5" max="50" step="1" is="emby-input" />
-                                    <div class="fieldDescription">Audio badge width as % of image width.</div>
                                 </div>
                                 <div class="inputContainer">
                                     <label class="inputLabel inputLabelUnfocused" for="PosterMargin">Margin (%)</label>
@@ -393,7 +375,6 @@
                                 <div class="inputContainer">
                                     <label class="inputLabel inputLabelUnfocused" for="PosterGap">Gap between badges (%)</label>
                                     <input id="PosterGap" type="number" min="0" max="50" step="1" is="emby-input" />
-                                    <div class="fieldDescription">Spacing between stacked badges.</div>
                                 </div>
                                 <details class="jellytag-sub">
                                     <summary>Audio Override</summary>
@@ -416,6 +397,10 @@
                                                 <option value="Vertical">Vertical</option>
                                             </select>
                                         </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="PosterAudioSize">Audio Badge Size (%)</label>
+                                            <input id="PosterAudioSize" type="number" min="5" max="50" step="1" is="emby-input" />
+                                        </div>
                                     </div>
                                 </details>
                                 <details class="jellytag-sub">
@@ -425,6 +410,7 @@
                                             <label class="inputLabel inputLabelUnfocused" for="PosterLanguagePosition">Language Position</label>
                                             <select id="PosterLanguagePosition" is="emby-select">
                                                 <option value="">Same as audio</option>
+                                                <option value="SameAsVideo">Same as video</option>
                                                 <option value="TopLeft">Top Left</option>
                                                 <option value="TopRight">Top Right</option>
                                                 <option value="BottomLeft">Bottom Left</option>
@@ -530,12 +516,8 @@
                                     </details>
                                 </div>
                                 <div class="inputContainer">
-                                    <label class="inputLabel inputLabelUnfocused" for="ThumbSize">Video Badge Size (%)</label>
+                                    <label class="inputLabel inputLabelUnfocused" for="ThumbSize">Badge Size (%)</label>
                                     <input id="ThumbSize" type="number" min="5" max="50" step="1" is="emby-input" />
-                                </div>
-                                <div class="inputContainer">
-                                    <label class="inputLabel inputLabelUnfocused" for="ThumbAudioSize">Audio Badge Size (%)</label>
-                                    <input id="ThumbAudioSize" type="number" min="5" max="50" step="1" is="emby-input" />
                                 </div>
                                 <div class="inputContainer">
                                     <label class="inputLabel inputLabelUnfocused" for="ThumbMargin">Margin (%)</label>
@@ -566,6 +548,10 @@
                                                 <option value="Vertical">Vertical</option>
                                             </select>
                                         </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="ThumbAudioSize">Audio Badge Size (%)</label>
+                                            <input id="ThumbAudioSize" type="number" min="5" max="50" step="1" is="emby-input" />
+                                        </div>
                                     </div>
                                 </details>
                                 <details class="jellytag-sub">
@@ -575,6 +561,7 @@
                                             <label class="inputLabel inputLabelUnfocused" for="ThumbLanguagePosition">Language Position</label>
                                             <select id="ThumbLanguagePosition" is="emby-select">
                                                 <option value="">Same as audio</option>
+                                                <option value="SameAsVideo">Same as video</option>
                                                 <option value="TopLeft">Top Left</option>
                                                 <option value="TopRight">Top Right</option>
                                                 <option value="BottomLeft">Bottom Left</option>
@@ -680,12 +667,8 @@
                                     </details>
                                 </div>
                                 <div class="inputContainer">
-                                    <label class="inputLabel inputLabelUnfocused" for="BackdropSize">Video Badge Size (%)</label>
+                                    <label class="inputLabel inputLabelUnfocused" for="BackdropSize">Badge Size (%)</label>
                                     <input id="BackdropSize" type="number" min="5" max="50" step="1" is="emby-input" />
-                                </div>
-                                <div class="inputContainer">
-                                    <label class="inputLabel inputLabelUnfocused" for="BackdropAudioSize">Audio Badge Size (%)</label>
-                                    <input id="BackdropAudioSize" type="number" min="5" max="50" step="1" is="emby-input" />
                                 </div>
                                 <div class="inputContainer">
                                     <label class="inputLabel inputLabelUnfocused" for="BackdropMargin">Margin (%)</label>
@@ -716,6 +699,10 @@
                                                 <option value="Vertical">Vertical</option>
                                             </select>
                                         </div>
+                                        <div class="inputContainer">
+                                            <label class="inputLabel inputLabelUnfocused" for="BackdropAudioSize">Audio Badge Size (%)</label>
+                                            <input id="BackdropAudioSize" type="number" min="5" max="50" step="1" is="emby-input" />
+                                        </div>
                                     </div>
                                 </details>
                                 <details class="jellytag-sub">
@@ -725,6 +712,7 @@
                                             <label class="inputLabel inputLabelUnfocused" for="BackdropLanguagePosition">Language Position</label>
                                             <select id="BackdropLanguagePosition" is="emby-select">
                                                 <option value="">Same as audio</option>
+                                                <option value="SameAsVideo">Same as video</option>
                                                 <option value="TopLeft">Top Left</option>
                                                 <option value="TopRight">Top Right</option>
                                                 <option value="BottomLeft">Bottom Left</option>
@@ -828,13 +816,13 @@
 
                     <!-- Performance -->
                     <details class="jellytag-section">
-                        <summary>&#x26A1; Performance</summary>
+                        <summary>Performance</summary>
                         <div class="jellytag-section-body">
 
                             <div class="inputContainer">
                                 <label class="inputLabel inputLabelUnfocused" for="CacheDurationHours">Cache Duration (hours)</label>
                                 <input id="CacheDurationHours" type="number" min="1" max="720" step="1" is="emby-input" />
-                                <div class="fieldDescription">How long to cache modified images (1-720 hours).</div>
+                                <div class="fieldDescription">(1-720 hours)</div>
                             </div>
 
                             <div class="inputContainer">
@@ -843,19 +831,17 @@
                                     <option value="Jpeg">JPEG</option>
                                     <option value="WebP">WebP (experimental)</option>
                                 </select>
-                                <div class="fieldDescription">WebP produces smaller files but may not be supported by all clients (Streamyfin, Fladder, etc.). If images stop displaying on some clients, switch back to JPEG.</div>
+                                <div class="fieldDescription">WebP is experimental, feedbacks are welcome.</div>
                             </div>
 
                             <div id="JpegQualityContainer" class="inputContainer">
                                 <label class="inputLabel inputLabelUnfocused" for="JpegQuality">JPEG Quality</label>
-                                <input id="JpegQuality" type="number" min="50" max="100" step="1" is="emby-input" />
-                                <div class="fieldDescription">Output image quality (50-100).</div>
+                                <input id="JpegQuality" type="number" min="1" max="100" step="1" is="emby-input" />
                             </div>
 
                             <div id="WebPQualityContainer" class="inputContainer" style="display:none;">
                                 <label class="inputLabel inputLabelUnfocused" for="WebPQuality">WebP Quality</label>
                                 <input id="WebPQuality" type="number" min="1" max="100" step="1" is="emby-input" />
-                                <div class="fieldDescription">WebP output quality (1-100).</div>
                             </div>
 
                             <div id="CacheStatsInfo" class="fieldDescription" style="margin-top:.5em;"></div>
@@ -864,22 +850,22 @@
 
                     <!-- Custom Badge Upload -->
                     <details class="jellytag-section">
-                        <summary>&#x1F3A8; Custom Badges</summary>
+                        <summary>Custom Badges</summary>
                         <div class="jellytag-section-body">
-                            <div class="fieldDescription" style="margin-bottom: 1em;">Click a badge to upload a custom PNG replacement. Click the reset button to revert to the default.</div>
+                            <div class="fieldDescription" style="margin-bottom: 1em;">Click a badge to upload a custom replacement (SVG, PNG or JPEG). Click the reset button to revert to the default.</div>
                             <div id="BadgeGallery" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:12px;"></div>
-                            <input id="CustomBadgeFile" type="file" accept="image/png" style="display:none;" />
+                            <input id="CustomBadgeFile" type="file" accept="image/svg+xml,image/png,image/jpeg" style="display:none;" />
                         </div>
                     </details>
 
-                    <div class="verticalSection" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:1em;">
-                        <button is="emby-button" type="submit" class="raised button-submit block">
+                    <div class="verticalSection" style="margin-top:1em;">
+                        <button is="emby-button" type="submit" class="raised button-submit block" style="width:100%;">
                             <span>Save</span>
                         </button>
-                        <button id="ClearCache" type="button" is="emby-button" class="raised button-warning">
+                        <button id="ClearCache" type="button" is="emby-button" class="raised button-warning block" style="width:100%; margin-top:.5em;">
                             <span>Clear Image Cache</span>
                         </button>
-                        <button id="ResetAllSettings" type="button" is="emby-button" class="raised" style="background:#888;">
+                        <button id="ResetAllSettings" type="button" is="emby-button" class="raised block" style="background:#888; width:100%; margin-top:.5em;">
                             <span>Reset All Settings to Default</span>
                         </button>
                     </div>
@@ -893,7 +879,6 @@
             };
 
             // Toggle text badge fields visibility based on BadgeStyle select
-            // emby-select may not fire standard 'change'; listen to multiple events
             function setupBadgeStyleToggle(selectEl) {
                 var targetId = selectEl.getAttribute('data-textfields');
                 if (!targetId) return;
@@ -908,7 +893,6 @@
                 }
                 selectEl.addEventListener('change', toggle);
                 selectEl.addEventListener('input', toggle);
-                // Jellyfin web uses a MutationObserver-compatible approach
                 var obs = new MutationObserver(toggle);
                 obs.observe(selectEl, { attributes: true, attributeFilter: ['data-value'] });
                 toggle();
@@ -1006,6 +990,12 @@
                 });
             }
 
+            // Helper to resolve "SameAsVideo" language position to the video position value
+            function resolveLanguagePosition(langVal, videoVal) {
+                if (langVal === 'SameAsVideo') return videoVal;
+                return langVal || null;
+            }
+
             document.querySelector('#JellyTagConfigPage')
                 .addEventListener('pageshow', function () {
                     Dashboard.showLoadingMsg();
@@ -1018,7 +1008,7 @@
                         document.querySelector('#Show720p').checked = config.Show720p;
                         document.querySelector('#ShowSD').checked = config.ShowSD;
 
-                        // HDR
+                        // HDR / 3D
                         document.querySelector('#ShowHdr10').checked = config.ShowHdr10;
                         document.querySelector('#ShowHdr10Plus').checked = config.ShowHdr10Plus;
                         document.querySelector('#ShowDolbyVision').checked = config.ShowDolbyVision;
@@ -1058,7 +1048,12 @@
                         document.querySelector('#PosterAudioTextColor').value = config.PosterSettings.AudioBadgeTextColor || '#FFFFFF';
                         document.querySelector('#PosterLanguageBgColor').value = config.PosterSettings.LanguageBadgeBgColor || '#000000';
                         document.querySelector('#PosterLanguageTextColor').value = config.PosterSettings.LanguageBadgeTextColor || '#FFFFFF';
-                        document.querySelector('#PosterLanguagePosition').value = config.PosterSettings.LanguageBadgePosition || '';
+                        // Language position: map video position back to "SameAsVideo" UI value
+                        var posterLangPos = config.PosterSettings.LanguageBadgePosition || '';
+                        if (posterLangPos && posterLangPos === config.PosterSettings.BadgePosition) {
+                            // Could be explicit same — keep as-is unless user set SameAsVideo
+                        }
+                        document.querySelector('#PosterLanguagePosition').value = posterLangPos;
                         document.querySelector('#PosterLanguageLayout').value = config.PosterSettings.LanguageBadgeLayout || '';
                         document.querySelector('#PosterLanguageSize').value = config.PosterSettings.LanguageBadgeSizePercent;
 
@@ -1153,7 +1148,7 @@
                         config.Show720p = document.querySelector('#Show720p').checked;
                         config.ShowSD = document.querySelector('#ShowSD').checked;
 
-                        // HDR
+                        // HDR / 3D
                         config.ShowHdr10 = document.querySelector('#ShowHdr10').checked;
                         config.ShowHdr10Plus = document.querySelector('#ShowHdr10Plus').checked;
                         config.ShowDolbyVision = document.querySelector('#ShowDolbyVision').checked;
@@ -1193,7 +1188,7 @@
                             AudioBadgeTextColor: document.querySelector('#PosterAudioTextColor').value || null,
                             LanguageBadgeBgColor: document.querySelector('#PosterLanguageBgColor').value || null,
                             LanguageBadgeTextColor: document.querySelector('#PosterLanguageTextColor').value || null,
-                            LanguageBadgePosition: document.querySelector('#PosterLanguagePosition').value || null,
+                            LanguageBadgePosition: resolveLanguagePosition(document.querySelector('#PosterLanguagePosition').value, document.querySelector('#PosterPosition').value),
                             LanguageBadgeLayout: document.querySelector('#PosterLanguageLayout').value || null,
                             LanguageBadgeSizePercent: parseInt(document.querySelector('#PosterLanguageSize').value, 10)
                         };
@@ -1218,7 +1213,7 @@
                             AudioBadgeTextColor: document.querySelector('#ThumbAudioTextColor').value || null,
                             LanguageBadgeBgColor: document.querySelector('#ThumbLanguageBgColor').value || null,
                             LanguageBadgeTextColor: document.querySelector('#ThumbLanguageTextColor').value || null,
-                            LanguageBadgePosition: document.querySelector('#ThumbLanguagePosition').value || null,
+                            LanguageBadgePosition: resolveLanguagePosition(document.querySelector('#ThumbLanguagePosition').value, document.querySelector('#ThumbPosition').value),
                             LanguageBadgeLayout: document.querySelector('#ThumbLanguageLayout').value || null,
                             LanguageBadgeSizePercent: parseInt(document.querySelector('#ThumbLanguageSize').value, 10)
                         };
@@ -1243,7 +1238,7 @@
                             AudioBadgeTextColor: document.querySelector('#BackdropAudioTextColor').value || null,
                             LanguageBadgeBgColor: document.querySelector('#BackdropLanguageBgColor').value || null,
                             LanguageBadgeTextColor: document.querySelector('#BackdropLanguageTextColor').value || null,
-                            LanguageBadgePosition: document.querySelector('#BackdropLanguagePosition').value || null,
+                            LanguageBadgePosition: resolveLanguagePosition(document.querySelector('#BackdropLanguagePosition').value, document.querySelector('#BackdropPosition').value),
                             LanguageBadgeLayout: document.querySelector('#BackdropLanguageLayout').value || null,
                             LanguageBadgeSizePercent: parseInt(document.querySelector('#BackdropLanguageSize').value, 10)
                         };
@@ -1330,7 +1325,6 @@
                         }).then(function () {
                             Dashboard.hideLoadingMsg();
                             Dashboard.alert('Settings reset to defaults. Reloading...');
-                            // Reload the page to pick up fresh config
                             window.location.reload();
                         }).catch(function () {
                             Dashboard.hideLoadingMsg();

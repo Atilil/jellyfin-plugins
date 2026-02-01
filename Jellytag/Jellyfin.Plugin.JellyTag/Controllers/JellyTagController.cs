@@ -18,6 +18,8 @@ public partial class JellyTagController : ControllerBase
     private readonly IImageOverlayService _overlayService;
     private readonly IQualityDetectionService _qualityService;
 
+    private static readonly string[] SupportedBadgeExtensions = { ".svg", ".png", ".jpg", ".jpeg" };
+
     [GeneratedRegex(@"^[a-zA-Z0-9._-]+$")]
     private static partial Regex SafeBadgeKeyRegex();
 
@@ -119,21 +121,21 @@ public partial class JellyTagController : ControllerBase
 
         var fileName = quality.ToLower() switch
         {
-            "4k" => "badge-4k.png",
-            "1080p" => "badge-1080p.png",
-            "720p" => "badge-720p.png",
-            "sd" => "badge-sd.png",
-            "hdr10" => "badge-hdr10.png",
-            "hdr10plus" => "badge-hdr10plus.png",
-            "dv" => "badge-dv.png",
-            "hlg" => "badge-hlg.png",
-            "atmos" => "badge-atmos.png",
-            "dtsx" => "badge-dtsx.png",
-            "truehd" => "badge-truehd.png",
-            "dtshdma" => "badge-dtshdma.png",
-            "5.1" => "badge-5_1.png",
-            "7.1" => "badge-7_1.png",
-            "stereo" => "badge-stereo.png",
+            "4k" => "badge-4k.svg",
+            "1080p" => "badge-1080p.svg",
+            "720p" => "badge-720p.svg",
+            "sd" => "badge-sd.svg",
+            "hdr10" => "badge-hdr10.svg",
+            "hdr10plus" => "badge-hdr10plus.svg",
+            "dv" => "badge-dv.svg",
+            "hlg" => "badge-hlg.svg",
+            "atmos" => "badge-atmos.svg",
+            "dtsx" => "badge-dtsx.svg",
+            "truehd" => "badge-truehd.svg",
+            "dtshdma" => "badge-dtshdma.svg",
+            "5.1" => "badge-5_1.svg",
+            "7.1" => "badge-7_1.svg",
+            "stereo" => "badge-stereo.svg",
             _ => null
         };
 
@@ -148,11 +150,13 @@ public partial class JellyTagController : ControllerBase
         if (stream == null)
             return NotFound("Stream is null");
 
-        return File(stream, "image/png");
+        var contentType = fileName.EndsWith(".svg", StringComparison.OrdinalIgnoreCase) ? "image/svg+xml" : "image/png";
+        return File(stream, contentType);
     }
 
     /// <summary>
-    /// Uploads a custom badge PNG to override the default badge for a given key.
+    /// Uploads a custom badge to override the default badge for a given key.
+    /// Accepts PNG, JPEG, and SVG files.
     /// </summary>
     [HttpPost("CustomBadge/{badgeKey}")]
     [Authorize(Policy = "RequiresElevation")]
@@ -170,9 +174,17 @@ public partial class JellyTagController : ControllerBase
             return BadRequest("No file uploaded");
         }
 
-        if (!file.ContentType.Equals("image/png", StringComparison.OrdinalIgnoreCase))
+        var extension = file.ContentType.ToLowerInvariant() switch
         {
-            return BadRequest("Only PNG files are accepted");
+            "image/png" => ".png",
+            "image/jpeg" => ".jpg",
+            "image/svg+xml" => ".svg",
+            _ => null
+        };
+
+        if (extension == null)
+        {
+            return BadRequest("Only PNG, JPEG, and SVG files are accepted");
         }
 
         var dataFolder = Plugin.Instance?.DataFolderPath;
@@ -184,7 +196,18 @@ public partial class JellyTagController : ControllerBase
         var customDir = Path.Combine(dataFolder, "custom-badges");
         Directory.CreateDirectory(customDir);
 
-        var fileName = $"badge-{badgeKey}.png";
+        // Delete existing custom badges for this key (all extensions)
+        var fileKey = badgeKey.Replace('.', '_');
+        foreach (var ext in SupportedBadgeExtensions)
+        {
+            var existing = Path.Combine(customDir, $"badge-{fileKey}{ext}");
+            if (System.IO.File.Exists(existing))
+            {
+                System.IO.File.Delete(existing);
+            }
+        }
+
+        var fileName = $"badge-{fileKey}{extension}";
         var filePath = Path.Combine(customDir, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
@@ -219,15 +242,24 @@ public partial class JellyTagController : ControllerBase
             return NotFound();
         }
 
-        var fileName = $"badge-{badgeKey}.png";
-        var filePath = Path.Combine(dataFolder, "custom-badges", fileName);
+        var fileKey = badgeKey.Replace('.', '_');
+        var customDir = Path.Combine(dataFolder, "custom-badges");
+        var found = false;
 
-        if (!System.IO.File.Exists(filePath))
+        foreach (var ext in SupportedBadgeExtensions)
+        {
+            var filePath = Path.Combine(customDir, $"badge-{fileKey}{ext}");
+            if (System.IO.File.Exists(filePath))
+            {
+                System.IO.File.Delete(filePath);
+                found = true;
+            }
+        }
+
+        if (!found)
         {
             return NotFound("Custom badge not found");
         }
-
-        System.IO.File.Delete(filePath);
 
         _overlayService.ReloadBadges();
         _cacheService.ClearCache();
@@ -254,8 +286,10 @@ public partial class JellyTagController : ControllerBase
             return Ok(Array.Empty<string>());
         }
 
-        var files = Directory.GetFiles(customDir, "badge-*.png")
+        var files = Directory.GetFiles(customDir, "badge-*.*")
+            .Where(f => SupportedBadgeExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
             .Select(f => Path.GetFileNameWithoutExtension(f).Replace("badge-", string.Empty))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
         return Ok(files);
@@ -263,6 +297,7 @@ public partial class JellyTagController : ControllerBase
 
     /// <summary>
     /// Serves a badge preview image. Returns custom badge if present, otherwise embedded default.
+    /// Order: custom (svg > png > jpg) → embedded (svg > png).
     /// </summary>
     [HttpGet("BadgePreview/{badgeKey}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -277,29 +312,56 @@ public partial class JellyTagController : ControllerBase
         // Normalize dots to underscores for file lookup (e.g. "5.1" -> "5_1")
         var fileKey = badgeKey.Replace('.', '_');
 
-        // Check custom badge first
+        // Check custom badges first: SVG > PNG > JPG > JPEG
         var dataFolder = Plugin.Instance?.DataFolderPath;
         if (!string.IsNullOrEmpty(dataFolder))
         {
-            var customPath = Path.Combine(dataFolder, "custom-badges", $"badge-{fileKey}.png");
-            if (System.IO.File.Exists(customPath))
+            var customDir = Path.Combine(dataFolder, "custom-badges");
+            foreach (var ext in SupportedBadgeExtensions)
             {
-                return PhysicalFile(customPath, "image/png");
+                var customPath = Path.Combine(customDir, $"badge-{fileKey}{ext}");
+                if (System.IO.File.Exists(customPath))
+                {
+                    var ct = ext switch
+                    {
+                        ".svg" => "image/svg+xml",
+                        ".png" => "image/png",
+                        _ => "image/jpeg"
+                    };
+                    return PhysicalFile(customPath, ct);
+                }
             }
         }
 
-        // Fall back to embedded resource
+        // Fall back to embedded resources: SVG > PNG
         var assembly = Assembly.GetExecutingAssembly();
-        var resourceName = assembly.GetManifestResourceNames()
-            .FirstOrDefault(r => r.EndsWith($"badge-{fileKey}.png", StringComparison.OrdinalIgnoreCase));
+        var resourceNames = assembly.GetManifestResourceNames();
 
-        if (resourceName == null)
+        // Try SVG first
+        var svgResourceName = resourceNames
+            .FirstOrDefault(r => r.EndsWith($"badge-{fileKey}.svg", StringComparison.OrdinalIgnoreCase));
+        if (svgResourceName != null)
         {
-            return NotFound();
+            var stream = assembly.GetManifestResourceStream(svgResourceName);
+            if (stream != null)
+            {
+                return File(stream, "image/svg+xml");
+            }
         }
 
-        var stream = assembly.GetManifestResourceStream(resourceName);
-        return File(stream!, "image/png");
+        // Then PNG
+        var pngResourceName = resourceNames
+            .FirstOrDefault(r => r.EndsWith($"badge-{fileKey}.png", StringComparison.OrdinalIgnoreCase));
+        if (pngResourceName != null)
+        {
+            var stream = assembly.GetManifestResourceStream(pngResourceName);
+            if (stream != null)
+            {
+                return File(stream, "image/png");
+            }
+        }
+
+        return NotFound();
     }
 
     /// <summary>

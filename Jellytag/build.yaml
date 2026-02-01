@@ -1,7 +1,7 @@
 name: "JellyTag"
 guid: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
 version: "1.0.0.0"
-targetAbi: "10.11.0.0"
+targetAbi: "10.10.0.0"
 framework: "net9.0"
 owner: "JellyTag"
 overview: "Adds quality badges (4K, 1080p, etc.) to media posters and thumbnails."
