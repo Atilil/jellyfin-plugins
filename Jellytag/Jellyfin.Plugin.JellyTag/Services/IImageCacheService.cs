@@ -35,6 +35,12 @@ public interface IImageCacheService
     void InvalidateCache(Guid itemId);
 
     /// <summary>
+    /// Gets the cache directory path.
+    /// </summary>
+    /// <returns>The absolute path to the cache directory.</returns>
+    string GetCacheDirectory();
+
+    /// <summary>
     /// Gets cache statistics.
     /// </summary>
     /// <returns>A tuple of (FileCount, TotalSizeBytes, OldestEntry, NewestEntry).</returns>

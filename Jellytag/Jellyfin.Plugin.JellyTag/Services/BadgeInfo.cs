@@ -26,6 +26,11 @@ public enum BadgeCategory
     ThreeD,
 
     /// <summary>
+    /// Video codec badge (HEVC, AV1, VP9).
+    /// </summary>
+    VideoCodec,
+
+    /// <summary>
     /// Language badge (audio language).
     /// </summary>
     Language,

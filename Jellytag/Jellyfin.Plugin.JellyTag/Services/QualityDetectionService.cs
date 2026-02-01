@@ -221,6 +221,21 @@ public class QualityDetectionService : IQualityDetectionService
                 {
                     badges.Add(hdrBadge);
                 }
+
+                // Video codec detection
+                var codec = videoStream.Codec?.ToLowerInvariant() ?? string.Empty;
+                if (codec is "hevc" or "h265")
+                {
+                    badges.Add(new BadgeInfo { Category = BadgeCategory.VideoCodec, BadgeKey = "hevc", ResourceFileName = string.Empty });
+                }
+                else if (codec == "av1")
+                {
+                    badges.Add(new BadgeInfo { Category = BadgeCategory.VideoCodec, BadgeKey = "av1", ResourceFileName = string.Empty });
+                }
+                else if (codec == "vp9")
+                {
+                    badges.Add(new BadgeInfo { Category = BadgeCategory.VideoCodec, BadgeKey = "vp9", ResourceFileName = string.Empty });
+                }
             }
 
             // 3D detection
@@ -262,14 +277,17 @@ public class QualityDetectionService : IQualityDetectionService
 
     private static readonly Dictionary<string, string> LangCodeToFlag = new(StringComparer.OrdinalIgnoreCase)
     {
-        { "fre", "fra" }, { "ger", "deu" }, { "dut", "nld" }, { "cze", "ces" }, { "rum", "ron" }, { "chi", "zho" }
+        { "fre", "fra" }, { "ger", "deu" }, { "dut", "nld" }, { "cze", "ces" }, { "rum", "ron" }, { "chi", "zho" },
+        { "gre", "ell" }, { "may", "msa" }, { "tgl", "fil" }, { "slo", "slk" }, { "baq", "eus" }, { "wel", "cym" }
     };
 
     private static readonly HashSet<string> KnownFlagCodes = new(StringComparer.OrdinalIgnoreCase)
     {
         "fra", "eng", "jpn", "deu", "spa", "ita", "por", "kor", "zho", "rus",
         "nld", "ara", "hin", "tha", "pol", "tur", "swe", "dan", "nor", "fin",
-        "ces", "hun", "ron", "ukr", "vie", "heb"
+        "ces", "hun", "ron", "ukr", "vie", "heb",
+        "ell", "ind", "msa", "fil", "hrv", "srp", "bul", "slk", "lit", "lav",
+        "est", "cat", "eus", "glg", "cym"
     };
 
     private static string GetFlagResourceFileName(string langCode)

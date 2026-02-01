@@ -1,5 +1,7 @@
 using System.Reflection;
+using System.Text.Json;
 using System.Text.RegularExpressions;
+using Jellyfin.Plugin.JellyTag.Configuration;
 using Jellyfin.Plugin.JellyTag.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -376,6 +378,72 @@ public partial class JellyTagController : ControllerBase
         }
 
         return NotFound();
+    }
+
+    /// <summary>
+    /// Exports the plugin configuration as a JSON file.
+    /// </summary>
+    [HttpGet("ExportConfig")]
+    [Authorize(Policy = "RequiresElevation")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public IActionResult ExportConfig()
+    {
+        var plugin = Plugin.Instance;
+        if (plugin == null)
+        {
+            return BadRequest("Plugin not loaded");
+        }
+
+        var json = JsonSerializer.SerializeToUtf8Bytes(plugin.Configuration, new JsonSerializerOptions { WriteIndented = true });
+        return File(json, "application/json", "jellytag-config.json");
+    }
+
+    /// <summary>
+    /// Imports a plugin configuration from a JSON file.
+    /// </summary>
+    [HttpPost("ImportConfig")]
+    [Authorize(Policy = "RequiresElevation")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ImportConfig(IFormFile file)
+    {
+        var plugin = Plugin.Instance;
+        if (plugin == null)
+        {
+            return BadRequest("Plugin not loaded");
+        }
+
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest("No file uploaded");
+        }
+
+        const long maxFileSize = 1 * 1024 * 1024; // 1 MB
+        if (file.Length > maxFileSize)
+        {
+            return BadRequest("File too large. Maximum size is 1 MB.");
+        }
+
+        try
+        {
+            using var stream = file.OpenReadStream();
+            var imported = await JsonSerializer.DeserializeAsync<PluginConfiguration>(stream).ConfigureAwait(false);
+            if (imported == null)
+            {
+                return BadRequest("Invalid configuration file");
+            }
+
+            plugin.UpdateConfiguration(imported);
+            _cacheService.ClearCache();
+            _qualityService.ClearBadgeCache();
+            _overlayService.ReloadBadges();
+
+            return NoContent();
+        }
+        catch (JsonException)
+        {
+            return BadRequest("Invalid JSON format");
+        }
     }
 
     /// <summary>

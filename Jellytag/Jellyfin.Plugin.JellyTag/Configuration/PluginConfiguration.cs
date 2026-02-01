@@ -295,6 +295,11 @@ public class PluginConfiguration : BasePluginConfiguration
         // HDR generic
         ShowGenericHdr = false;
 
+        // Video codec badges
+        ShowHevc = false;
+        ShowAv1 = false;
+        ShowVp9 = false;
+
         // 3D
         Show3D = true;
 
@@ -442,6 +447,21 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets a value indicating whether to use a generic HDR badge instead of specific HDR format badges.
     /// </summary>
     public bool ShowGenericHdr { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show HEVC/H.265 codec badges.
+    /// </summary>
+    public bool ShowHevc { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show AV1 codec badges.
+    /// </summary>
+    public bool ShowAv1 { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show VP9 codec badges.
+    /// </summary>
+    public bool ShowVp9 { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to show 3D badges.

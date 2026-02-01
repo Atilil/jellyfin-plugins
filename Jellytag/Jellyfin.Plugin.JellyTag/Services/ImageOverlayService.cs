@@ -92,7 +92,50 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         { "vostchi", "VOSTZH" },
         { "vostrus", "VOSTR" },
         { "vostnld", "VOSTNL" },
-        { "vostdut", "VOSTNL" }
+        { "vostdut", "VOSTNL" },
+        { "hevc", "HEVC" },
+        { "av1", "AV1" },
+        { "vp9", "VP9" },
+        { "ell", "GR" },
+        { "gre", "GR" },
+        { "ind", "ID" },
+        { "msa", "MS" },
+        { "tgl", "TL" },
+        { "fil", "TL" },
+        { "hrv", "HR" },
+        { "srp", "SR" },
+        { "bul", "BG" },
+        { "slk", "SK" },
+        { "slo", "SK" },
+        { "lit", "LT" },
+        { "lav", "LV" },
+        { "est", "ET" },
+        { "cat", "CA" },
+        { "eus", "EU" },
+        { "baq", "EU" },
+        { "glg", "GL" },
+        { "cym", "CY" },
+        { "wel", "CY" },
+        { "vostell", "VOSTGR" },
+        { "vostgre", "VOSTGR" },
+        { "vostind", "VOSTID" },
+        { "vostmsa", "VOSTMS" },
+        { "vosttgl", "VOSTTL" },
+        { "vostfil", "VOSTTL" },
+        { "vosthrv", "VOSTHR" },
+        { "vostsrp", "VOSTSR" },
+        { "vostbul", "VOSTBG" },
+        { "vostslk", "VOSTSK" },
+        { "vostslo", "VOSTSK" },
+        { "vostlit", "VOSTLT" },
+        { "vostlav", "VOSTLV" },
+        { "vostest", "VOSTET" },
+        { "vostcat", "VOSTCA" },
+        { "vosteus", "VOSTEU" },
+        { "vostbaq", "VOSTEU" },
+        { "vostglg", "VOSTGL" },
+        { "vostcym", "VOSTCY" },
+        { "vostwel", "VOSTCY" }
     };
 
     /// <summary>
@@ -130,7 +173,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         }
 
         // Split badges into video (Resolution+Hdr), audio, and language groups
-        var videoBadges = badges.Where(b => b.Category is BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.ThreeD).ToList();
+        var videoBadges = badges.Where(b => b.Category is BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.VideoCodec or BadgeCategory.ThreeD).ToList();
         var audioBadges = badges.Where(b => b.Category == BadgeCategory.Audio).ToList();
         var languageBadges = badges.Where(b => b.Category is BadgeCategory.Language or BadgeCategory.Subtitle).ToList();
 
@@ -347,6 +390,13 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 "hdr10plus" => config.ShowHdr10Plus,
                 "dv" => config.ShowDolbyVision,
                 "hlg" => config.ShowHlg,
+                _ => false
+            },
+            BadgeCategory.VideoCodec => badge.BadgeKey switch
+            {
+                "hevc" => config.ShowHevc,
+                "av1" => config.ShowAv1,
+                "vp9" => config.ShowVp9,
                 _ => false
             },
             BadgeCategory.ThreeD => config.Show3D,
@@ -914,7 +964,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
     {
         var bgColor = category switch
         {
-            BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.ThreeD =>
+            BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.VideoCodec or BadgeCategory.ThreeD =>
                 settings.VideoBadgeBgColor ?? settings.TextBadgeBgColor ?? "#000000",
             BadgeCategory.Audio =>
                 settings.AudioBadgeBgColor ?? settings.TextBadgeBgColor ?? "#000000",
@@ -926,7 +976,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         };
         var textColor = category switch
         {
-            BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.ThreeD =>
+            BadgeCategory.Resolution or BadgeCategory.Hdr or BadgeCategory.VideoCodec or BadgeCategory.ThreeD =>
                 settings.VideoBadgeTextColor ?? settings.TextBadgeTextColor ?? "#FFFFFF",
             BadgeCategory.Audio =>
                 settings.AudioBadgeTextColor ?? settings.TextBadgeTextColor ?? "#FFFFFF",
