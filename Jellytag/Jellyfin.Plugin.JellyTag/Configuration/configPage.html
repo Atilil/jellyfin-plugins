@@ -20,6 +20,11 @@
             .jellytag-sub > summary::before { content: '\25B6'; font-size: .55em; transition: transform .2s ease; }
             .jellytag-sub[open] > summary::before { transform: rotate(90deg); }
             .jellytag-sub-body { padding: .5em 1em 1em; }
+            .jellytag-sub > summary { position: relative; padding-right: 4.5em; }
+            .panel-arrows { position: absolute; right: .6em; top: 50%; transform: translateY(-50%); display: flex; gap: .25em; }
+            .panel-arrows button { background: rgba(255,255,255,.15); border: none; color: #fff; width: 26px; height: 26px; border-radius: .2em; cursor: pointer; font-size: .85em; line-height: 26px; text-align: center; padding: 0; }
+            .panel-arrows button:hover { background: rgba(0,164,220,.6); }
+            .panel-arrows button:disabled { opacity: .3; cursor: default; }
             .hidden { display: none !important; }
             .jellytag-text-box { padding: .6em; border: 1px solid rgba(255,255,255,.08); border-radius: .3em; margin-top: .5em; }
             .jellytag-rgba { display: flex; gap: .5em; align-items: center; }
@@ -260,10 +265,17 @@
         var POS_OPTS = [{v:'TopLeft',l:'Top Left'},{v:'TopRight',l:'Top Right'},{v:'BottomLeft',l:'Bottom Left'},{v:'BottomRight',l:'Bottom Right'}];
         var LAYOUT_OPTS = [{v:'Vertical',l:'Vertical'},{v:'Horizontal',l:'Horizontal'}];
 
+        function arrowBtns() {
+            return '<span class="panel-arrows">' +
+                '<button type="button" class="panel-move-up" title="Move up" onclick="movePanelUp(this)">&#9650;</button>' +
+                '<button type="button" class="panel-move-down" title="Move down" onclick="movePanelDown(this)">&#9660;</button>' +
+                '</span>';
+        }
+
         function panelHTML(p, panelId) {
             var def = PANEL_DEFS[panelId];
             var k = p + panelId;
-            var h = '<details class="jellytag-sub"><summary>' + def.title + '</summary><div class="jellytag-sub-body">';
+            var h = '<details class="jellytag-sub" data-panel-id="' + panelId + '"><summary>' + def.title + arrowBtns() + '</summary><div class="jellytag-sub-body">';
             h += chk(k + 'Enabled', 'Enable');
             h += '<div id="' + k + 'Settings">';
 
@@ -303,7 +315,7 @@
 
         function langPanelHTML(p) {
             var k = p + 'Lang';
-            var h = '<details class="jellytag-sub"><summary>Language Badges</summary><div class="jellytag-sub-body">';
+            var h = '<details class="jellytag-sub" data-panel-id="Lang"><summary>Language Badges' + arrowBtns() + '</summary><div class="jellytag-sub-body">';
             h += chk(k + 'Enabled', 'Enable');
             h += '<div id="' + k + 'Settings">';
             h += sel(k + 'Position', 'Position', POS_OPTS);
@@ -333,6 +345,50 @@
 
         function generatePanels(prefix) {
             return panelHTML(prefix, 'Res') + panelHTML(prefix, 'Hdr') + panelHTML(prefix, 'Codec') + panelHTML(prefix, 'Audio') + langPanelHTML(prefix);
+        }
+
+        // ===== Panel reordering =====
+        function movePanelUp(btn) {
+            var panel = btn.closest('.jellytag-sub');
+            var prev = panel.previousElementSibling;
+            if (prev && prev.classList.contains('jellytag-sub')) {
+                panel.parentNode.insertBefore(panel, prev);
+                updateArrowStates(panel.parentNode);
+            }
+        }
+        function movePanelDown(btn) {
+            var panel = btn.closest('.jellytag-sub');
+            var next = panel.nextElementSibling;
+            if (next && next.classList.contains('jellytag-sub')) {
+                panel.parentNode.insertBefore(next, panel);
+                updateArrowStates(panel.parentNode);
+            }
+        }
+        function updateArrowStates(container) {
+            var panels = container.querySelectorAll(':scope > .jellytag-sub');
+            panels.forEach(function(p, i) {
+                var up = p.querySelector('.panel-move-up');
+                var down = p.querySelector('.panel-move-down');
+                if (up) up.disabled = (i === 0);
+                if (down) down.disabled = (i === panels.length - 1);
+            });
+        }
+        function sortPanelsByOrder(container, orderMap) {
+            var panels = Array.from(container.querySelectorAll(':scope > .jellytag-sub'));
+            panels.sort(function(a, b) {
+                var oa = orderMap[a.getAttribute('data-panel-id')] || 0;
+                var ob = orderMap[b.getAttribute('data-panel-id')] || 0;
+                return oa - ob;
+            });
+            panels.forEach(function(p) { container.appendChild(p); });
+            updateArrowStates(container);
+        }
+        function getPanelOrder(container) {
+            var order = {};
+            container.querySelectorAll(':scope > .jellytag-sub').forEach(function(p, i) {
+                order[p.getAttribute('data-panel-id')] = i;
+            });
+            return order;
         }
 
         // ===== Override state management =====
@@ -583,6 +639,16 @@
             loadPanelConfig(prefix, 'Codec', itc.CodecPanel);
             loadPanelConfig(prefix, 'Audio', itc.AudioPanel);
             loadLangConfig(prefix, itc.LanguagePanel, itc);
+            // Sort panels by Order
+            var orderMap = {
+                Res: (itc.ResolutionPanel || {}).Order || 0,
+                Hdr: (itc.HdrPanel || {}).Order || 0,
+                Codec: (itc.CodecPanel || {}).Order || 0,
+                Audio: (itc.AudioPanel || {}).Order || 0,
+                Lang: (itc.LanguagePanel || {}).Order || 0
+            };
+            var container = document.getElementById(prefix + 'Panels');
+            if (container) sortPanelsByOrder(container, orderMap);
         }
 
         // ===== Config saving =====
@@ -627,6 +693,8 @@
 
         function collectLangConfig(prefix) {
             var k = prefix + 'Lang';
+            var container = document.getElementById(prefix + 'Panels');
+            var order = container ? getPanelOrder(container) : {Lang:4};
             return {
                 Enabled: q(k + 'Enabled').checked,
                 Position: q(k + 'Position').value,
@@ -636,7 +704,7 @@
                 SizePercent: parseInt(q(k + 'Size').value, 10) || 15,
                 MarginPercent: parseFloat(q(k + 'Margin').value) || 2.5,
                 Style: q(k + 'Style').value,
-                Order: 4,
+                Order: order.Lang != null ? order.Lang : 4,
                 TextBgColor: q(k + 'BgColor').value,
                 TextBgOpacity: parseInt(q(k + 'BgOpacity').value, 10) || 0,
                 TextColor: q(k + 'TextColor').value,
@@ -648,12 +716,14 @@
 
         function collectImageTypeConfig(prefix) {
             var k = prefix + 'Lang';
+            var container = document.getElementById(prefix + 'Panels');
+            var order = container ? getPanelOrder(container) : {Res:0,Hdr:1,Codec:2,Audio:3,Lang:4};
             return {
                 Enabled: q(prefix + 'Enabled').checked,
-                ResolutionPanel: collectPanelConfig(prefix, 'Res', 0),
-                HdrPanel: collectPanelConfig(prefix, 'Hdr', 1),
-                CodecPanel: collectPanelConfig(prefix, 'Codec', 2),
-                AudioPanel: collectPanelConfig(prefix, 'Audio', 3),
+                ResolutionPanel: collectPanelConfig(prefix, 'Res', order.Res || 0),
+                HdrPanel: collectPanelConfig(prefix, 'Hdr', order.Hdr || 0),
+                CodecPanel: collectPanelConfig(prefix, 'Codec', order.Codec || 0),
+                AudioPanel: collectPanelConfig(prefix, 'Audio', order.Audio || 0),
                 LanguagePanel: collectLangConfig(prefix),
                 ShowVostIndicator: q(k + 'Vost').checked,
                 VostBgColor: q(k + 'VostBgColor').value || null,

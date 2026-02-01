@@ -17,13 +17,3 @@ publish_out/
 # NuGet
 *.nupkg
 
-# Review / AI-generated docs (not source)
-*-review.md
-claude-opus-review.md
-codex-review.md
-gemini-review.md
-jellytag-review.md
-code-review.md
-CODE_REVIEW.md
-GEMINI.md
-AGENTS.md
