@@ -32,7 +32,7 @@
         "changelog": "v2: Multi-category badges (resolution, HDR, codec, audio, language, VOST), per-panel config, SVG rendering with SkiaSharp, custom badge upload, live preview, library filtering, config export/import",
         "targetAbi": "10.11.0.0",
         "sourceUrl": "https://github.com/Atilil/jellyfin-plugins/releases/download/jellytag-2.0.0.0/jellytag-2.0.0.0.zip",
-        "checksum": "95630aa1fbd007050b6de75116ae0661",
+        "checksum": "19e9d99c4848c413f7cf918754c67b03",
         "timestamp": "2026-02-02T00:00:00Z"
       },
       {
