@@ -28,6 +28,14 @@
     "imageUrl": "https://raw.githubusercontent.com/Atilil/jellyfin-plugins/main/Jellytag/Jellyfin.Plugin.JellyTag/JellyTag.png",
     "versions": [
       {
+        "version": "2.0.2.0",
+        "changelog": "Fix: exclude SkiaSharp native assets that caused plugin loading crash, pin Jellyfin packages to 10.11.0 for full 10.11.x compatibility",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/Atilil/jellyfin-plugins/releases/download/jellytag-2.0.2.0/jellytag-2.0.2.0.zip",
+        "checksum": "36407dc2a752ad89c57c7d6c3d343433",
+        "timestamp": "2026-02-02T00:00:00Z"
+      },
+      {
         "version": "2.0.1.0",
         "changelog": "Fix: support Jellyfin base URL configuration, fix resolution detection thresholds",
         "targetAbi": "10.11.0.0",
