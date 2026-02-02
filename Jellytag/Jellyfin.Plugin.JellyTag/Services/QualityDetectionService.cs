@@ -47,9 +47,9 @@ public class QualityDetectionService : IQualityDetectionService
     {
         var maxDimension = Math.Max(width, height);
 
-        if (maxDimension >= 3840) return VideoQuality.UHD4K;
-        if (maxDimension >= 1920) return VideoQuality.FHD1080p;
-        if (maxDimension >= 1280) return VideoQuality.HD720p;
+        if (maxDimension >= 3800) return VideoQuality.UHD4K;
+        if (maxDimension >= 1900) return VideoQuality.FHD1080p;
+        if (maxDimension >= 1260) return VideoQuality.HD720p;
         if (maxDimension > 0) return VideoQuality.SD;
         return VideoQuality.Unknown;
     }
