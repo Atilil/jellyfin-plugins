@@ -282,11 +282,22 @@ public class QualityDetectionService : IQualityDetectionService
     {
         "fra", "eng", "jpn", "deu", "spa", "ita", "por", "kor", "zho", "rus",
         "nld", "ara", "hin", "tha", "pol", "tur", "swe", "dan", "nor", "fin",
-        "ces", "hun", "ron", "ukr", "vie", "heb"
+        "ces", "hun", "ron", "ukr", "vie", "heb", "can"
+    };
+
+    private static readonly Dictionary<string, string> FrenchVariantFlags = new(StringComparer.OrdinalIgnoreCase)
+    {
+        { "vff", "fra" },
+        { "vfi", "fra" },
+        { "vq", "can" }
     };
 
     private static string GetFlagResourceFileName(string langCode)
     {
+        if (FrenchVariantFlags.TryGetValue(langCode, out var variantFlag))
+        {
+            return KnownFlagCodes.Contains(variantFlag) ? $"flag-{variantFlag.ToLowerInvariant()}.svg" : string.Empty;
+        }
         var normalized = LangCodeToFlag.TryGetValue(langCode, out var mapped) ? mapped : langCode;
         return KnownFlagCodes.Contains(normalized) ? $"flag-{normalized.ToLowerInvariant()}.svg" : string.Empty;
     }
@@ -307,14 +318,29 @@ public class QualityDetectionService : IQualityDetectionService
         foreach (var stream in audioStreams)
         {
             var lang = stream.Language;
-            if (!string.IsNullOrEmpty(lang) && addedLanguages.Add(lang))
+            if (lang == null) continue;
+
+            var langLower = lang.ToLowerInvariant();
+            var displayTitle = stream.DisplayTitle?.ToUpperInvariant() ?? "";
+
+            // Detect French variants
+            string? variant = null;
+            if (displayTitle.Contains("VFQ"))
+                variant = "vq";
+            else if (displayTitle.Contains("VFF") || displayTitle.Contains("VFR") || displayTitle.Contains("VFI"))
+                variant = "vff";
+
+            var badgeKey = variant != null && (langLower == "fre" || langLower == "fra" || langLower == "fr")
+                ? variant
+                : langLower;
+
+            if (addedLanguages.Add(badgeKey))
             {
-                var langLower = lang.ToLowerInvariant();
                 badges.Add(new BadgeInfo
                 {
                     Category = BadgeCategory.Language,
-                    BadgeKey = langLower,
-                    ResourceFileName = GetFlagResourceFileName(langLower)
+                    BadgeKey = badgeKey,
+                    ResourceFileName = GetFlagResourceFileName(badgeKey)
                 });
             }
         }

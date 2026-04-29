@@ -40,6 +40,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         { "swe", "SV" }, { "dan", "DA" }, { "nor", "NO" }, { "fin", "FI" },
         { "ces", "CS" }, { "cze", "CS" }, { "hun", "HU" }, { "ron", "RO" },
         { "rum", "RO" }, { "ukr", "UK" }, { "vie", "VI" }, { "heb", "HE" },
+        { "vq", "FR-QC" }, { "vff", "FR" },
         { "vostfra", "VOSTFR" }, { "vostfre", "VOSTFR" }, { "vosteng", "VOSTEN" },
         { "vostjpn", "VOSTJP" }, { "vostdeu", "VOSTDE" }, { "vostger", "VOSTDE" },
         { "vostspa", "VOSTES" }, { "vostita", "VOSTIT" }, { "vostpor", "VOSTPT" },
