@@ -282,7 +282,8 @@ public class QualityDetectionService : IQualityDetectionService
     {
         "fra", "eng", "jpn", "deu", "spa", "ita", "por", "kor", "zho", "rus",
         "nld", "ara", "hin", "tha", "pol", "tur", "swe", "dan", "nor", "fin",
-        "ces", "hun", "ron", "ukr", "vie", "heb"
+        "ces", "hun", "ron", "ukr", "vie", "heb", "ell", "msa", "fil", "slk", "eus", "cym",
+        "cmn", "yue", "nan"
     };
 
     private static string GetFlagResourceFileName(string langCode)

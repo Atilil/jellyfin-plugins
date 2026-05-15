@@ -36,9 +36,9 @@
             .badge-card .badge-label { margin-top: .4em; font-size: .85em; text-align: center; }
             .badge-card .badge-reset { position: absolute; top: 4px; right: 4px; background: #c62828; color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; cursor: pointer; display: none; padding: 0; }
             .badge-card.custom .badge-reset { display: block; }
-            .jellytag-config-layout { display: block; margin-right: 350px; }
+            .jellytag-config-layout { display: grid; grid-template-columns: minmax(0, 1fr) 322px; gap: 16px; align-items: start; }
             .jellytag-config-layout > form { min-width: 0; }
-            .jellytag-preview-panel { position: fixed; top: 4.5em; width: 322px; max-height: calc(100vh - 5.5em); overflow-y: auto; border: 1px solid rgba(255,255,255,.12); border-radius: .4em; background: rgba(20,20,20,.95); padding: 1em; z-index: 50; }
+            .jellytag-preview-panel { position: sticky; top: 4.5em; width: 322px; max-height: calc(100vh - 5.5em); overflow-y: auto; border: 1px solid rgba(255,255,255,.12); border-radius: .4em; background: rgba(20,20,20,.95); padding: 1em; }
             .jellytag-preview-panel h3 { margin: 0 0 .8em; font-size: 1.1em; }
             .jellytag-preview-panel .preview-search-wrap { position: relative; margin-bottom: 1em; }
             .jellytag-preview-panel .preview-search-wrap input { width: 100%; box-sizing: border-box; }
@@ -52,7 +52,7 @@
             .jellytag-preview-panel .preview-spinner { display: none; text-align: center; color: #aaa; padding: .5em 0; font-size: .9em; }
             .jellytag-preview-panel .preview-error { display: none; color: #e57373; font-size: .85em; margin-top: .5em; }
             @media (max-width: 1000px) {
-                .jellytag-config-layout { margin-right: 0; }
+                .jellytag-config-layout { display: block; }
                 .jellytag-preview-panel { position: static; width: 100%; max-width: 100%; max-height: none; margin-bottom: 1em; }
             }
         </style>
@@ -931,17 +931,6 @@
             loadCacheStats();
             toggleOutputQuality();
 
-            var panel = document.querySelector('.jellytag-preview-panel');
-            var form = document.querySelector('#JellyTagConfigForm');
-            if (panel && form) {
-                function positionPanel() {
-                    if (window.innerWidth <= 1000) { panel.style.left = ''; return; }
-                    var rect = form.getBoundingClientRect();
-                    panel.style.left = (rect.right + 16) + 'px';
-                }
-                positionPanel();
-                window.addEventListener('resize', positionPanel);
-            }
         });
 
         // ===== Form Submit =====
@@ -950,9 +939,13 @@
             Dashboard.showLoadingMsg();
             ApiClient.getPluginConfiguration(JellyTagConfig.pluginUniqueId).then(function(config) {
                 collectConfigFromForm(config);
-                ApiClient.updatePluginConfiguration(JellyTagConfig.pluginUniqueId, config).then(function() {
+                return ApiClient.updatePluginConfiguration(JellyTagConfig.pluginUniqueId, config).then(function() {
                     Dashboard.processPluginConfigurationUpdateResult();
                 });
+            }).catch(function(err) {
+                console.error('[JellyTag] Failed to save configuration:', err);
+                Dashboard.hideLoadingMsg();
+                Dashboard.alert('Failed to save JellyTag configuration: ' + (err && err.message ? err.message : err));
             });
             return false;
         });

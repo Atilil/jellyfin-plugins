@@ -26,13 +26,46 @@ JellyTag automatically overlays quality badges (resolution, HDR, codec, audio, l
 
 ## Installation
 
-1. In Jellyfin, go to **Dashboard** → **Plugins** → **Repositories**
-2. Add a new repository with this URL:
+This plugin lives in the `nothing2obvi/jellyfin-plugins` repository under:
+
+```
+https://github.com/nothing2obvi/jellyfin-plugins/tree/main/Jellytag
+```
+
+### Install from the Jellyfin plugin catalog
+
+1. In Jellyfin, go to **Dashboard** -> **Plugins** -> **Repositories**
+2. Add the `nothing2obvi/jellyfin-plugins` repository manifest:
    ```
-   https://raw.githubusercontent.com/Atilil/jellyfin-plugins/main/manifest.json
+   https://raw.githubusercontent.com/nothing2obvi/jellyfin-plugins/main/manifest.json
    ```
-3. Go to **Catalog**, find **JellyTag** and install it
+3. Go to **Catalog**, find **JellyTag**, and install it
 4. Restart Jellyfin
+
+If the manifest for this fork is hosted inside the JellyTag project folder instead of the repository root, use:
+
+```
+https://raw.githubusercontent.com/nothing2obvi/jellyfin-plugins/main/Jellytag/manifest.json
+```
+
+### Manual install
+
+1. Download or build the JellyTag release ZIP from:
+   ```
+   https://github.com/nothing2obvi/jellyfin-plugins/tree/main/Jellytag
+   ```
+2. Stop Jellyfin
+3. Create a plugin folder named `JellyTag` in your Jellyfin plugins directory
+4. Extract the release ZIP contents into that folder
+5. Start Jellyfin again
+
+Common plugin folder locations:
+
+| System | Plugin folder |
+|--------|---------------|
+| Linux package installs | `/var/lib/jellyfin/plugins/JellyTag` |
+| Docker | `/config/plugins/JellyTag` |
+| Windows | `%ProgramData%\Jellyfin\Server\plugins\JellyTag` |
 
 ## Configuration
 
@@ -75,6 +108,12 @@ You can replace any default badge with your own image or customize the text labe
 - **Via the API**: `POST /JellyTag/CustomBadge/{badgeKey}` to upload, `DELETE` to revert to default
 
 Custom badges are stored in the plugin data folder and survive updates.
+
+## Language Flags
+
+Language badges use SVG assets named `flag-{code}.svg`. German audio tracks are supported through `flag-deu.svg`; JellyTag also maps the alternate `ger` code to `deu`.
+
+This fork includes SVG flags for all language codes currently allowed by the detector, including English, German, French, Spanish, Italian, Portuguese, Japanese, Korean, Chinese, Mandarin, Cantonese, Southern Min, Dutch, Arabic, Hindi, Thai, Polish, Turkish, Swedish, Danish, Norwegian, Finnish, Czech, Hungarian, Romanian, Ukrainian, Vietnamese, Hebrew, Greek, Malay, Filipino, Slovak, Basque, and Welsh.
 
 ## How It Works
 

@@ -1,1 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60"><rect width="90" height="60" fill="#E30A17"/><circle cx="33" cy="30" r="15" fill="#fff"/><circle cx="37" cy="30" r="12" fill="#E30A17"/><polygon points="52,30 47,32.5 48.5,28 45,25.5 49.5,25.5 52,20 54.5,25.5 59,25.5 55.5,28 57,32.5" fill="#fff"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 -30000 90000 60000">
+	<title>Flag of Turkey</title>
+	<path fill="#e30a17" d="m0-30000h90000v60000H0z"/>
+	<path fill="#fff" d="m41750 0 13568-4408-8386 11541V-7133l8386 11541zm925 8021a15000 15000 0 1 1 0-16042 12000 12000 0 1 0 0 16042z"/>
+</svg>
