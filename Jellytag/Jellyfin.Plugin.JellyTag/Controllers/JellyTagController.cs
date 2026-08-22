@@ -188,7 +188,7 @@ public partial class JellyTagController : ControllerBase
             return BadRequest("Only PNG, JPEG, and SVG files are accepted");
         }
 
-        var dataFolder = Plugin.Instance?.DataFolderPath;
+        var dataFolder = Plugin.Instance?.BadgeFolderPath;
         if (string.IsNullOrEmpty(dataFolder))
         {
             return BadRequest("Plugin data folder not available");
@@ -237,7 +237,7 @@ public partial class JellyTagController : ControllerBase
             return BadRequest("Invalid badge key");
         }
 
-        var dataFolder = Plugin.Instance?.DataFolderPath;
+        var dataFolder = Plugin.Instance?.BadgeFolderPath;
         if (string.IsNullOrEmpty(dataFolder))
         {
             return NotFound();
@@ -276,7 +276,7 @@ public partial class JellyTagController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult GetCustomBadges()
     {
-        var dataFolder = Plugin.Instance?.DataFolderPath;
+        var dataFolder = Plugin.Instance?.BadgeFolderPath;
         if (string.IsNullOrEmpty(dataFolder))
         {
             return Ok(Array.Empty<string>());
@@ -316,7 +316,7 @@ public partial class JellyTagController : ControllerBase
         var fileKey = badgeKey.Replace('.', '_');
 
         // Check custom badges first: SVG > PNG > JPG > JPEG
-        var dataFolder = Plugin.Instance?.DataFolderPath;
+        var dataFolder = Plugin.Instance?.BadgeFolderPath;
         if (!string.IsNullOrEmpty(dataFolder))
         {
             var customDir = Path.Combine(dataFolder, "custom-badges");

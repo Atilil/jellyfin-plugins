@@ -669,7 +669,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
 
     private static string? GetCustomBadgeDir()
     {
-        var dataFolder = Plugin.Instance?.DataFolderPath;
+        var dataFolder = Plugin.Instance?.BadgeFolderPath;
         if (string.IsNullOrEmpty(dataFolder)) return null;
         return Path.Combine(dataFolder, "custom-badges");
     }
