@@ -38,7 +38,12 @@ public enum BadgeCategory
     /// <summary>
     /// Subtitle indicator badge (VOSTFR, VOSTEN, etc.).
     /// </summary>
-    Subtitle
+    Subtitle,
+
+    /// <summary>
+    /// Video length badge (e.g. "1h 52m").
+    /// </summary>
+    Runtime
 }
 
 /// <summary>
@@ -60,4 +65,9 @@ public class BadgeInfo
     /// Gets or sets the embedded resource file name (e.g. "badge-4k.png").
     /// </summary>
     public string ResourceFileName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets literal text to render for dynamic badges (e.g. "1h 52m"). Takes precedence over key-based text.
+    /// </summary>
+    public string? DisplayText { get; set; }
 }

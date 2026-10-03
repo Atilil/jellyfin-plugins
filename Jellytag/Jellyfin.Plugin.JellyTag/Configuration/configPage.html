@@ -244,6 +244,11 @@
                 badges: [{id:'Atmos',key:'atmos',label:'Dolby Atmos'},{id:'DtsX',key:'dtsx',label:'DTS:X'},{id:'TrueHD',key:'truehd',label:'Dolby TrueHD'},{id:'DtsHdMa',key:'dtshdma',label:'DTS-HD MA'},{id:'Channel',key:'channel',label:'Channel Layout (7.1/5.1/Stereo)'}],
                 hasShowMode: true,
                 showModeOptions: [{v:'Highest',l:'Highest only'},{v:'All',l:'All'}]
+            },
+            Runtime: {
+                title: 'Video Length (optional)',
+                badges: [{id:'Runtime',key:'runtime',label:'Show video length (e.g. 1h 52m)'}],
+                hasShowMode: false
             }
         };
 
@@ -358,7 +363,7 @@
         }
 
         function generatePanels(prefix) {
-            return panelHTML(prefix, 'Res') + panelHTML(prefix, 'Hdr') + panelHTML(prefix, 'Codec') + panelHTML(prefix, 'Audio') + langPanelHTML(prefix);
+            return panelHTML(prefix, 'Res') + panelHTML(prefix, 'Hdr') + panelHTML(prefix, 'Codec') + panelHTML(prefix, 'Audio') + langPanelHTML(prefix) + panelHTML(prefix, 'Runtime');
         }
 
         // ===== Panel reordering =====
@@ -568,7 +573,7 @@
         }
 
         function setupAllToggles(prefix) {
-            ['Res', 'Hdr', 'Codec', 'Audio'].forEach(function(pid) {
+            ['Res', 'Hdr', 'Codec', 'Audio', 'Runtime'].forEach(function(pid) {
                 setupEnableToggle(prefix + pid);
                 setupStyleToggle(prefix + pid);
                 setupBadgeSelToggle(prefix + pid);
@@ -652,6 +657,7 @@
             loadPanelConfig(prefix, 'Hdr', itc.HdrPanel);
             loadPanelConfig(prefix, 'Codec', itc.CodecPanel);
             loadPanelConfig(prefix, 'Audio', itc.AudioPanel);
+            loadPanelConfig(prefix, 'Runtime', itc.RuntimePanel);
             loadLangConfig(prefix, itc.LanguagePanel, itc);
             // Sort panels by Order
             var orderMap = {
@@ -659,7 +665,8 @@
                 Hdr: (itc.HdrPanel || {}).Order || 0,
                 Codec: (itc.CodecPanel || {}).Order || 0,
                 Audio: (itc.AudioPanel || {}).Order || 0,
-                Lang: (itc.LanguagePanel || {}).Order || 0
+                Lang: (itc.LanguagePanel || {}).Order || 0,
+                Runtime: (itc.RuntimePanel || {}).Order || 5
             };
             var container = document.getElementById(prefix + 'Panels');
             if (container) sortPanelsByOrder(container, orderMap);
@@ -731,7 +738,7 @@
         function collectImageTypeConfig(prefix) {
             var k = prefix + 'Lang';
             var container = document.getElementById(prefix + 'Panels');
-            var order = container ? getPanelOrder(container) : {Res:0,Hdr:1,Codec:2,Audio:3,Lang:4};
+            var order = container ? getPanelOrder(container) : {Res:0,Hdr:1,Codec:2,Audio:3,Lang:4,Runtime:5};
             return {
                 Enabled: q(prefix + 'Enabled').checked,
                 ResolutionPanel: collectPanelConfig(prefix, 'Res', order.Res || 0),
@@ -739,6 +746,7 @@
                 CodecPanel: collectPanelConfig(prefix, 'Codec', order.Codec || 0),
                 AudioPanel: collectPanelConfig(prefix, 'Audio', order.Audio || 0),
                 LanguagePanel: collectLangConfig(prefix),
+                RuntimePanel: collectPanelConfig(prefix, 'Runtime', order.Runtime != null ? order.Runtime : 5),
                 ShowVostIndicator: q(k + 'Vost').checked,
                 VostBgColor: q(k + 'VostBgColor').value || null,
                 VostTextColor: q(k + 'VostTextColor').value || null,

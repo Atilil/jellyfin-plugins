@@ -77,6 +77,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             BadgeCategory.VideoCodec => imageConfig.CodecPanel,
             BadgeCategory.Audio => imageConfig.AudioPanel,
             BadgeCategory.Language or BadgeCategory.Subtitle => imageConfig.LanguagePanel,
+            BadgeCategory.Runtime => imageConfig.RuntimePanel,
             _ => imageConfig.ResolutionPanel
         };
     }
@@ -275,7 +276,8 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             (imageConfig.HdrPanel, "HDR"),
             (imageConfig.CodecPanel, "Codec"),
             (imageConfig.AudioPanel, "Audio"),
-            (imageConfig.LanguagePanel, "Language")
+            (imageConfig.LanguagePanel, "Language"),
+            (imageConfig.RuntimePanel, "Runtime")
         };
         panels.Sort((a, b) => a.Panel.Order.CompareTo(b.Panel.Order));
         return panels;
@@ -321,7 +323,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
 
             foreach (var badgeInfo in badges)
             {
-                var text = GetBadgeDisplayText(badgeInfo.BadgeKey);
+                var text = GetBadgeDisplayText(badgeInfo);
                 if (string.IsNullOrEmpty(text)) continue;
 
                 filtered.Add(badgeInfo);
@@ -339,7 +341,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
 
                 if (string.IsNullOrEmpty(resourceFileName))
                 {
-                    var text = GetBadgeDisplayText(badgeInfo.BadgeKey);
+                    var text = GetBadgeDisplayText(badgeInfo);
                     if (string.IsNullOrEmpty(text)) continue;
 
                     var badgeHeight = Math.Max(1, (int)(badgeWidth * 0.5));
@@ -362,7 +364,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                         continue;
                     }
 
-                    var fallbackText = GetBadgeDisplayText(badgeInfo.BadgeKey);
+                    var fallbackText = GetBadgeDisplayText(badgeInfo);
                     if (!string.IsNullOrEmpty(fallbackText))
                     {
                         var fbHeight = Math.Max(1, (int)(badgeWidth * 0.5));
@@ -384,7 +386,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
                 else
                 {
                     // Resource not found in any cache — fall back to text badge
-                    var fallbackText = GetBadgeDisplayText(badgeInfo.BadgeKey);
+                    var fallbackText = GetBadgeDisplayText(badgeInfo);
                     if (!string.IsNullOrEmpty(fallbackText))
                     {
                         var fbHeight = Math.Max(1, (int)(badgeWidth * 0.5));
@@ -756,6 +758,11 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         return positions;
     }
 
+    private static string GetBadgeDisplayText(BadgeInfo badge)
+    {
+        return !string.IsNullOrEmpty(badge.DisplayText) ? badge.DisplayText : GetBadgeDisplayText(badge.BadgeKey);
+    }
+
     private static string GetBadgeDisplayText(string badgeKey)
     {
         var config = Plugin.Instance?.Configuration;
@@ -832,7 +839,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             using var bgPaint = new SKPaint { IsAntialias = true, Color = bgColor, Style = SKPaintStyle.Fill };
             using var textPaint = new SKPaint { IsAntialias = true, Color = textColor, Style = SKPaintStyle.Fill };
 
-            var text = GetBadgeDisplayText(badges[i].BadgeKey);
+            var text = GetBadgeDisplayText(badges[i]);
             var width = sizes[i].Width;
             var height = sizes[i].Height;
             var rect = SKRect.Create(positions[i].X, positions[i].Y, width, height);

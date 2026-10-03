@@ -9,6 +9,7 @@ JellyTag automatically overlays quality badges (resolution, HDR, codec, audio, l
 ## Features
 
 - **Multi-category badges**: Resolution, HDR, Video Codec, Audio, Language flags, and VOST indicator
+- **Optional video length tag**: Show the runtime (e.g. `1h 52m`) as a text badge on movies and episodes — disabled by default, enable it in the *Video Length* panel
 - **Universal client support**: Server-side rendering via HTTP middleware — works on all Jellyfin clients
 - **Per-image-type configuration**: Independent settings for posters and thumbnails (position, size, layout, style)
 - **Per-panel customization**: Each badge category has its own panel with position, layout, ordering, colors, and display mode (highest only or all)

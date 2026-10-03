@@ -101,6 +101,17 @@ public class ImageTypeConfig
     public BadgePanelSettings AudioPanel { get; set; } = new();
     public BadgePanelSettings LanguagePanel { get; set; } = new();
 
+    // Optional video length panel: off by default so existing setups are unchanged
+    public BadgePanelSettings RuntimePanel { get; set; } = CreateDefaultRuntimePanel(15);
+
+    public static BadgePanelSettings CreateDefaultRuntimePanel(int sizePercent) => new()
+    {
+        Enabled = false, Order = 5, Position = BadgePosition.BottomRight,
+        Layout = BadgeLayout.Vertical, SizePercent = sizePercent, MarginPercent = 2.5f, GapPercent = 10f,
+        Style = BadgeStyle.Text,
+        EnabledBadges = new List<string> { "runtime" }
+    };
+
     // VOST settings (attached to Language panel)
     public bool ShowVostIndicator { get; set; } = true;
     public string? VostBgColor { get; set; }
@@ -427,6 +438,8 @@ public class PluginConfiguration : BasePluginConfiguration
             Style = BadgeStyle.Image,
             EnabledBadges = new List<string>()
         };
+
+        config.RuntimePanel = ImageTypeConfig.CreateDefaultRuntimePanel(10);
 
         config.ShowVostIndicator = true;
         config.VostBgOpacity = 255;

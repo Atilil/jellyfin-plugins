@@ -234,6 +234,22 @@ public class QualityDetectionService : IQualityDetectionService
                 }
             }
 
+            // Runtime detection (only for actual movies/episodes, not series/season aggregates)
+            if (includeResolution)
+            {
+                var runtimeText = FormatRuntime(video.RunTimeTicks);
+                if (runtimeText != null)
+                {
+                    badges.Add(new BadgeInfo
+                    {
+                        Category = BadgeCategory.Runtime,
+                        BadgeKey = "runtime",
+                        ResourceFileName = string.Empty,
+                        DisplayText = runtimeText
+                    });
+                }
+            }
+
             // 3D detection
             if (video.Video3DFormat.HasValue)
             {
@@ -269,6 +285,21 @@ public class QualityDetectionService : IQualityDetectionService
         {
             _logger.LogWarning(ex, "Failed to detect badges for video: {ItemName}", video.Name);
         }
+    }
+
+    /// <summary>
+    /// Formats a runtime as "1h 52m" (or "45m" under an hour). Returns null when unknown or under a minute.
+    /// </summary>
+    internal static string? FormatRuntime(long? runTimeTicks)
+    {
+        if (runTimeTicks is not > 0) return null;
+
+        var totalMinutes = (int)Math.Round(TimeSpan.FromTicks(runTimeTicks.Value).TotalMinutes);
+        if (totalMinutes <= 0) return null;
+
+        var hours = totalMinutes / 60;
+        var minutes = totalMinutes % 60;
+        return hours > 0 ? $"{hours}h {minutes:00}m" : $"{minutes}m";
     }
 
     private static readonly Dictionary<string, string> LangCodeToFlag = new(StringComparer.OrdinalIgnoreCase)

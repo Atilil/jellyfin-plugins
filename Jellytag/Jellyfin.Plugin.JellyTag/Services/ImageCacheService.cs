@@ -232,6 +232,7 @@ public class ImageCacheService : IImageCacheService
         AppendPanelFingerprint(sb, c.CodecPanel);
         AppendPanelFingerprint(sb, c.AudioPanel);
         AppendPanelFingerprint(sb, c.LanguagePanel);
+        AppendPanelFingerprint(sb, c.RuntimePanel);
         sb.Append(c.ShowVostIndicator).Append(c.VostBgColor ?? "n").Append(c.VostTextColor ?? "n");
         sb.Append(c.VostBgOpacity).Append(c.VostCornerRadius).Append('|');
     }
