@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using Jellyfin.Data.Enums;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Model.Dto;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Querying;
 using Microsoft.Extensions.Logging;
@@ -190,54 +191,33 @@ public class QualityDetectionService : IQualityDetectionService
     {
         try
         {
-            var mediaSources = video.GetMediaSources(false);
-            var mediaSource = mediaSources?.FirstOrDefault();
-            var videoStream = mediaSource?.MediaStreams?.FirstOrDefault(s => s.Type == MediaStreamType.Video);
+            // GetMediaSources returns one entry per version (merged / alternate versions),
+            // so scan all of them instead of only the first.
+            var mediaSources = video.GetMediaSources(false) ?? new List<MediaSourceInfo>();
 
-            if (videoStream != null)
+            var merged = new List<BadgeInfo>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            void AddUnique(BadgeInfo badge)
             {
-                if (includeResolution)
+                if (seen.Add($"{badge.Category}:{badge.BadgeKey}"))
                 {
-                    var width = videoStream.Width ?? 0;
-                    var height = videoStream.Height ?? 0;
-                    var quality = DetermineQuality(width, height);
-                    if (quality != VideoQuality.Unknown)
-                    {
-                        badges.Add(CreateResolutionBadge(quality));
-                    }
-                }
-
-                // HDR detection - always detect, filtering happens in ShouldShowBadge
-                var hdrBadge = DetectHdr(videoStream);
-                if (hdrBadge != null)
-                {
-                    badges.Add(hdrBadge);
-                }
-
-                // Video codec detection
-                var codec = videoStream.Codec?.ToLowerInvariant() ?? string.Empty;
-                if (codec is "h264" or "avc")
-                {
-                    badges.Add(new BadgeInfo { Category = BadgeCategory.VideoCodec, BadgeKey = "h264", ResourceFileName = "badge-h264.svg" });
-                }
-                else if (codec is "hevc" or "h265")
-                {
-                    badges.Add(new BadgeInfo { Category = BadgeCategory.VideoCodec, BadgeKey = "hevc", ResourceFileName = "badge-hevc.svg" });
-                }
-                else if (codec == "av1")
-                {
-                    badges.Add(new BadgeInfo { Category = BadgeCategory.VideoCodec, BadgeKey = "av1", ResourceFileName = "badge-av1.svg" });
-                }
-                else if (codec == "vp9")
-                {
-                    badges.Add(new BadgeInfo { Category = BadgeCategory.VideoCodec, BadgeKey = "vp9", ResourceFileName = "badge-vp9.svg" });
+                    merged.Add(badge);
                 }
             }
 
-            // 3D detection
+            foreach (var mediaSource in mediaSources)
+            {
+                foreach (var badge in DetectBadgesFromMediaSource(mediaSource, includeResolution))
+                {
+                    AddUnique(badge);
+                }
+            }
+
+            // 3D detection (item-level)
             if (video.Video3DFormat.HasValue)
             {
-                badges.Add(new BadgeInfo
+                AddUnique(new BadgeInfo
                 {
                     Category = BadgeCategory.ThreeD,
                     BadgeKey = "3d",
@@ -245,30 +225,105 @@ public class QualityDetectionService : IQualityDetectionService
                 });
             }
 
-            // Audio detection - prefer the default audio track
-            var allAudioStreams = mediaSource?.MediaStreams?.Where(s => s.Type == MediaStreamType.Audio).ToList();
-            if (allAudioStreams != null && allAudioStreams.Count > 0)
-            {
-                var defaultStream = allAudioStreams.FirstOrDefault(s => s.IsDefault);
-                var streamsToAnalyze = defaultStream != null
-                    ? new List<MediaStream> { defaultStream }
-                    : new List<MediaStream> { allAudioStreams[0] };
-                var audioBadges = DetectAudio(streamsToAnalyze);
-                badges.AddRange(audioBadges);
-            }
+            // A subtitle-only language (VOST) is redundant if another version has it as audio.
+            var audioLanguages = new HashSet<string>(
+                merged.Where(b => b.Category == BadgeCategory.Language).Select(b => b.BadgeKey),
+                StringComparer.OrdinalIgnoreCase);
+            merged.RemoveAll(b => b.Category == BadgeCategory.Subtitle
+                && b.BadgeKey.Length > 4
+                && audioLanguages.Contains(b.BadgeKey.Substring(4)));
 
-            // Language detection - always detect all, filtering by mode happens in ShouldShowBadge
-            var allStreams = mediaSource?.MediaStreams;
-            if (allStreams != null)
+            // Order best-first so the "Highest" display mode keeps the best badge across versions.
+            // OrderBy is stable, so languages keep the order of the primary version first.
+            badges.AddRange(merged.OrderBy(GetBadgeRank));
+
+            if (mediaSources.Count > 1)
             {
-                var langBadges = DetectLanguages(allStreams.ToList());
-                badges.AddRange(langBadges);
+                _logger.LogDebug("Merged badges from {Count} versions of {ItemName}", mediaSources.Count, video.Name);
             }
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to detect badges for video: {ItemName}", video.Name);
         }
+    }
+
+    private static int GetBadgeRank(BadgeInfo badge)
+    {
+        return badge.Category switch
+        {
+            BadgeCategory.Resolution => badge.BadgeKey switch { "4k" => 0, "1080p" => 1, "720p" => 2, "sd" => 3, _ => 4 },
+            BadgeCategory.Hdr => badge.BadgeKey switch { "dv" => 0, "hdr10plus" => 1, "hlg" => 2, "hdr10" => 3, _ => 4 },
+            BadgeCategory.ThreeD => 10,
+            BadgeCategory.Audio => badge.BadgeKey switch
+            {
+                "atmos" => 0, "truehd" => 1, "dtsx" => 2, "dtshdma" => 3,
+                "7.1" => 4, "5.1" => 5, "stereo" => 6, _ => 7
+            },
+            _ => 0
+        };
+    }
+
+    private static List<BadgeInfo> DetectBadgesFromMediaSource(MediaSourceInfo mediaSource, bool includeResolution)
+    {
+        var badges = new List<BadgeInfo>();
+        var streams = mediaSource.MediaStreams;
+        if (streams == null || streams.Count == 0)
+        {
+            return badges;
+        }
+
+        var videoStream = streams.FirstOrDefault(s => s.Type == MediaStreamType.Video);
+        if (videoStream != null)
+        {
+            if (includeResolution)
+            {
+                var quality = DetermineQuality(videoStream.Width ?? 0, videoStream.Height ?? 0);
+                if (quality != VideoQuality.Unknown)
+                {
+                    badges.Add(CreateResolutionBadge(quality));
+                }
+            }
+
+            // HDR detection - always detect, filtering happens in ShouldShowBadge
+            var hdrBadge = DetectHdr(videoStream);
+            if (hdrBadge != null)
+            {
+                badges.Add(hdrBadge);
+            }
+
+            // Video codec detection
+            var codec = videoStream.Codec?.ToLowerInvariant() ?? string.Empty;
+            if (codec is "h264" or "avc")
+            {
+                badges.Add(new BadgeInfo { Category = BadgeCategory.VideoCodec, BadgeKey = "h264", ResourceFileName = "badge-h264.svg" });
+            }
+            else if (codec is "hevc" or "h265")
+            {
+                badges.Add(new BadgeInfo { Category = BadgeCategory.VideoCodec, BadgeKey = "hevc", ResourceFileName = "badge-hevc.svg" });
+            }
+            else if (codec == "av1")
+            {
+                badges.Add(new BadgeInfo { Category = BadgeCategory.VideoCodec, BadgeKey = "av1", ResourceFileName = "badge-av1.svg" });
+            }
+            else if (codec == "vp9")
+            {
+                badges.Add(new BadgeInfo { Category = BadgeCategory.VideoCodec, BadgeKey = "vp9", ResourceFileName = "badge-vp9.svg" });
+            }
+        }
+
+        // Audio detection - prefer the default audio track
+        var allAudioStreams = streams.Where(s => s.Type == MediaStreamType.Audio).ToList();
+        if (allAudioStreams.Count > 0)
+        {
+            var defaultStream = allAudioStreams.FirstOrDefault(s => s.IsDefault) ?? allAudioStreams[0];
+            badges.AddRange(DetectAudio(new List<MediaStream> { defaultStream }));
+        }
+
+        // Language detection - always detect all, filtering by mode happens in ShouldShowBadge
+        badges.AddRange(DetectLanguages(streams.ToList()));
+
+        return badges;
     }
 
     private static readonly Dictionary<string, string> LangCodeToFlag = new(StringComparer.OrdinalIgnoreCase)
@@ -459,14 +514,18 @@ public class QualityDetectionService : IQualityDetectionService
     {
         try
         {
-            var mediaSources = video.GetMediaSources(false);
-            var mediaSource = mediaSources?.FirstOrDefault();
-            var videoStream = mediaSource?.MediaStreams?.FirstOrDefault(s => s.Type == MediaStreamType.Video);
-            if (videoStream == null) return VideoQuality.Unknown;
+            // Best quality across all versions of the item
+            var best = VideoQuality.Unknown;
+            foreach (var mediaSource in video.GetMediaSources(false) ?? new List<MediaSourceInfo>())
+            {
+                var videoStream = mediaSource.MediaStreams?.FirstOrDefault(s => s.Type == MediaStreamType.Video);
+                if (videoStream == null) continue;
 
-            var width = videoStream.Width ?? 0;
-            var height = videoStream.Height ?? 0;
-            return DetermineQuality(width, height);
+                var q = DetermineQuality(videoStream.Width ?? 0, videoStream.Height ?? 0);
+                if (q > best) best = q;
+            }
+
+            return best;
         }
         catch (Exception ex)
         {
