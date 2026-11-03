@@ -215,6 +215,7 @@ public partial class ImageOverlayMiddleware
             CodecPanel = ClonePanelWithReduction(source.CodecPanel, reduction),
             AudioPanel = ClonePanelWithReduction(source.AudioPanel, reduction),
             LanguagePanel = ClonePanelWithReduction(source.LanguagePanel, reduction),
+            AgeRatingPanel = ClonePanelWithReduction(source.AgeRatingPanel, reduction),
             ShowVostIndicator = source.ShowVostIndicator,
             VostBgColor = source.VostBgColor,
             VostTextColor = source.VostTextColor,

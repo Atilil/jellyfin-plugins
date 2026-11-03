@@ -131,6 +131,11 @@ public partial class JellyTagController : ControllerBase
             "5.1" => "badge-5_1.svg",
             "7.1" => "badge-7_1.svg",
             "stereo" => "badge-stereo.svg",
+            "fsk0" => "badge-fsk0.svg",
+            "fsk6" => "badge-fsk6.svg",
+            "fsk12" => "badge-fsk12.svg",
+            "fsk16" => "badge-fsk16.svg",
+            "fsk18" => "badge-fsk18.svg",
             _ => null
         };
 
@@ -420,6 +425,7 @@ public partial class JellyTagController : ControllerBase
                 return BadRequest("Invalid configuration file");
             }
 
+            imported.EnsurePanelsExist();
             plugin.UpdateConfiguration(imported);
             _cacheService.ClearCache();
             _qualityService.ClearBadgeCache();

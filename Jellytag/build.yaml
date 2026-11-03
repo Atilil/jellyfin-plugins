@@ -1,10 +1,10 @@
 name: "JellyTag"
 guid: "f4a2e8c1-9b3d-4f7a-b6c5-2d8e1a3f9b04"
-version: "1.0.0.0"
-targetAbi: "10.10.0.0"
+version: "2.1.0.0"
+targetAbi: "10.11.0.0"
 framework: "net9.0"
 owner: "JellyTag"
-overview: "Adds quality badges (4K, 1080p, etc.) to media posters and thumbnails."
+overview: "Adds quality badges (4K, 1080p, etc.) and age ratings (FSK) to media posters and thumbnails."
 description: |
   JellyTag automatically adds quality resolution badges to your media posters and thumbnails.
   Badges are visible on all clients including web, mobile, TV, and Kodi.
@@ -15,11 +15,20 @@ description: |
   - Configurable badge size
   - Image caching for performance
   - Support for 4K, 1080p, 720p, and SD badges
+  - Age rating badges: German FSK labels (0/6/12/16/18) from the item's content rating
 
 category: "General"
 artifacts:
   - "Jellyfin.Plugin.JellyTag.dll"
 changelog: |
+  ## v2.1.0.0
+  - New: Age rating (Altersfreigabe) badge panel with the official German FSK
+    labels (FSK 0 / 6 / 12 / 16 / 18), read from the item's content rating
+    (OfficialRating), inheriting from the series for episodes.
+  - Assets: official FSK label SVGs (current Dec 2008 design) sourced from
+    Wikimedia Commons (white/yellow/green/blue/red).
+  - Config: new "Age Rating Badges (FSK)" panel in the config page; old saved
+    configs are auto-normalised so the new panel always exists.
   ## v1.0.0.0
   - Initial release
   - Quality detection for 4K, 1080p, 720p, SD

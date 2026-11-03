@@ -8,7 +8,8 @@ JellyTag automatically overlays quality badges (resolution, HDR, codec, audio, l
 
 ## Features
 
-- **Multi-category badges**: Resolution, HDR, Video Codec, Audio, Language flags, and VOST indicator
+- **Multi-category badges**: Resolution, HDR, Video Codec, Audio, Language flags, VOST indicator, and **Age ratings (FSK)**
+- **Age ratings (Altersfreigabe)**: Overlays the official German FSK labels (FSK 0 / 6 / 12 / 16 / 18) read from each item's content rating (`OfficialRating`). Episodes without their own rating inherit the series rating. The label artwork is the current (since Dec 2008) official FSK design sourced from Wikimedia Commons.
 - **Universal client support**: Server-side rendering via HTTP middleware — works on all Jellyfin clients
 - **Per-image-type configuration**: Independent settings for posters and thumbnails (position, size, layout, style)
 - **Per-panel customization**: Each badge category has its own panel with position, layout, ordering, colors, and display mode (highest only or all)
@@ -52,7 +53,7 @@ Go to **Dashboard** → **Plugins** → **JellyTag** to access the configuration
 
 Each image type has independent panel settings. Thumbnails can optionally mirror poster settings with a size reduction.
 
-Each badge category (Resolution, HDR, Codec, Audio, Language) is configured as a **panel** with:
+Each badge category (Resolution, HDR, Codec, Audio, Language, **Age Rating**) is configured as a **panel** with:
 
 | Setting | Description |
 |---------|-------------|
@@ -75,6 +76,25 @@ You can replace any default badge with your own image or customize the text labe
 - **Via the API**: `POST /JellyTag/CustomBadge/{badgeKey}` to upload, `DELETE` to revert to default
 
 Custom badges are stored in the plugin data folder and survive updates.
+
+## Age Ratings (FSK)
+
+JellyTag overlays the official German FSK age-rating labels on your posters and thumbnails:
+
+| Badge | Label | Color | Matched rating strings (examples) |
+|-------|-------|-------|-----------------------------------|
+| `fsk0` | FSK 0 | white | `FSK 0`, `FSK o.A.`, `Freigegeben ohne Altersbeschränkung` |
+| `fsk6` | FSK 6 | yellow | `FSK 6`, `FSK ab 6`, `ab 6 Jahren` |
+| `fsk12` | FSK 12 | green | `FSK 12`, `FSK ab 12`, `ab 12 Jahren` |
+| `fsk16` | FSK 16 | blue | `FSK 16`, `FSK ab 16`, `ab 16 Jahren` |
+| `fsk18` | FSK 18 | red | `FSK 18`, `Keine Jugendfreigabe`, `Nicht freigegeben unter 18 Jahren` |
+
+- The rating is read from each item's content rating (`OfficialRating`). Episodes and seasons without their own rating inherit the rating from their series.
+- The label artwork is the current official FSK design (in use since 1 December 2008), sourced from [Wikimedia Commons](https://de.wikipedia.org/wiki/Freiwillige_Selbstkontrolle_der_Filmwirtschaft).
+- By default the FSK panel is enabled and placed at the **bottom-left** of posters/thumbnails, separate from the quality badges. Configure it under **Age Rating Badges (FSK)** in the config page.
+- Only the five official FSK levels (0/6/12/16/18) produce a label badge. Other content ratings (e.g. US MPAA) are ignored by this panel.
+
+To make sure your items carry an FSK rating, set the **Content rating** / **Parental rating** field in Jellyfin's metadata editor (or refresh metadata from a provider that returns German ratings, e.g. TMDB with a `de-DE` metadata locale).
 
 ## How It Works
 

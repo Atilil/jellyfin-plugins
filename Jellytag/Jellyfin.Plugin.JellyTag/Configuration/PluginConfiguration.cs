@@ -100,6 +100,7 @@ public class ImageTypeConfig
     public BadgePanelSettings CodecPanel { get; set; } = new();
     public BadgePanelSettings AudioPanel { get; set; } = new();
     public BadgePanelSettings LanguagePanel { get; set; } = new();
+    public BadgePanelSettings AgeRatingPanel { get; set; } = new();
 
     // VOST settings (attached to Language panel)
     public bool ShowVostIndicator { get; set; } = true;
@@ -345,6 +346,23 @@ public class PluginConfiguration : BasePluginConfiguration
         ShowSubtitleIndicator = null;
     }
 
+    /// <summary>
+    /// Ensures panels added in later versions (e.g. AgeRatingPanel) exist with
+    /// sensible defaults when loading a config that was saved by an older build.
+    /// </summary>
+    public void EnsurePanelsExist()
+    {
+        if (PosterConfig != null && PosterConfig.AgeRatingPanel == null)
+        {
+            PosterConfig.AgeRatingPanel = CreateDefaultPosterConfig().AgeRatingPanel;
+        }
+
+        if (ThumbnailConfig != null && ThumbnailConfig.AgeRatingPanel == null)
+        {
+            ThumbnailConfig.AgeRatingPanel = CreateDefaultThumbnailConfig().AgeRatingPanel;
+        }
+    }
+
     private static ImageTypeConfig CreateDefaultPosterConfig()
     {
         var config = new ImageTypeConfig { Enabled = true };
@@ -380,6 +398,14 @@ public class PluginConfiguration : BasePluginConfiguration
             ShowMode = BadgeDisplayMode.All,
             Style = BadgeStyle.Image,
             EnabledBadges = new List<string>()
+        };
+        config.AgeRatingPanel = new BadgePanelSettings
+        {
+            Enabled = true, Order = 5, Position = BadgePosition.BottomLeft,
+            Layout = BadgeLayout.Vertical, SizePercent = 18, MarginPercent = 2f, GapPercent = 10f,
+            ShowMode = BadgeDisplayMode.Highest,
+            Style = BadgeStyle.Image,
+            EnabledBadges = new List<string> { "fsk0", "fsk6", "fsk12", "fsk16", "fsk18" }
         };
 
         config.ShowVostIndicator = true;
@@ -426,6 +452,14 @@ public class PluginConfiguration : BasePluginConfiguration
             ShowMode = BadgeDisplayMode.All,
             Style = BadgeStyle.Image,
             EnabledBadges = new List<string>()
+        };
+        config.AgeRatingPanel = new BadgePanelSettings
+        {
+            Enabled = true, Order = 5, Position = BadgePosition.BottomLeft,
+            Layout = BadgeLayout.Vertical, SizePercent = 13, MarginPercent = 2.5f, GapPercent = 10f,
+            ShowMode = BadgeDisplayMode.Highest,
+            Style = BadgeStyle.Image,
+            EnabledBadges = new List<string> { "fsk0", "fsk6", "fsk12", "fsk16", "fsk18" }
         };
 
         config.ShowVostIndicator = true;

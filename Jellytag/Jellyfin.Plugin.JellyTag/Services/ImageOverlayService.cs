@@ -46,6 +46,8 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
         { "vostkor", "VOSTKR" }, { "vostzho", "VOSTZH" }, { "vostchi", "VOSTZH" },
         { "vostrus", "VOSTR" }, { "vostnld", "VOSTNL" }, { "vostdut", "VOSTNL" },
         { "h264", "H.264" }, { "hevc", "HEVC" }, { "av1", "AV1" }, { "vp9", "VP9" },
+        { "fsk0", "FSK 0" }, { "fsk6", "FSK 6" }, { "fsk12", "FSK 12" },
+        { "fsk16", "FSK 16" }, { "fsk18", "FSK 18" },
         { "ell", "GR" }, { "gre", "GR" }, { "ind", "ID" }, { "msa", "MS" },
         { "tgl", "TL" }, { "fil", "TL" }, { "hrv", "HR" }, { "srp", "SR" },
         { "bul", "BG" }, { "slk", "SK" }, { "slo", "SK" }, { "lit", "LT" },
@@ -77,6 +79,7 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             BadgeCategory.VideoCodec => imageConfig.CodecPanel,
             BadgeCategory.Audio => imageConfig.AudioPanel,
             BadgeCategory.Language or BadgeCategory.Subtitle => imageConfig.LanguagePanel,
+            BadgeCategory.AgeRating => imageConfig.AgeRatingPanel,
             _ => imageConfig.ResolutionPanel
         };
     }
@@ -275,7 +278,8 @@ public class ImageOverlayService : IImageOverlayService, IDisposable
             (imageConfig.HdrPanel, "HDR"),
             (imageConfig.CodecPanel, "Codec"),
             (imageConfig.AudioPanel, "Audio"),
-            (imageConfig.LanguagePanel, "Language")
+            (imageConfig.LanguagePanel, "Language"),
+            (imageConfig.AgeRatingPanel, "AgeRating")
         };
         panels.Sort((a, b) => a.Panel.Order.CompareTo(b.Panel.Order));
         return panels;
