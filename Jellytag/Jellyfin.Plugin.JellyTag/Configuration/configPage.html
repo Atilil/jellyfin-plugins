@@ -244,6 +244,11 @@
                 badges: [{id:'Atmos',key:'atmos',label:'Dolby Atmos'},{id:'DtsX',key:'dtsx',label:'DTS:X'},{id:'TrueHD',key:'truehd',label:'Dolby TrueHD'},{id:'DtsHdMa',key:'dtshdma',label:'DTS-HD MA'},{id:'Channel',key:'channel',label:'Channel Layout (7.1/5.1/Stereo)'}],
                 hasShowMode: true,
                 showModeOptions: [{v:'Highest',l:'Highest only'},{v:'All',l:'All'}]
+            },
+            Age: {
+                title: 'Age Rating Badges (FSK)',
+                badges: [{id:'Fsk0',key:'fsk0',label:'FSK 0'},{id:'Fsk6',key:'fsk6',label:'FSK 6'},{id:'Fsk12',key:'fsk12',label:'FSK 12'},{id:'Fsk16',key:'fsk16',label:'FSK 16'},{id:'Fsk18',key:'fsk18',label:'FSK 18'}],
+                hasShowMode: false
             }
         };
 
@@ -358,7 +363,7 @@
         }
 
         function generatePanels(prefix) {
-            return panelHTML(prefix, 'Res') + panelHTML(prefix, 'Hdr') + panelHTML(prefix, 'Codec') + panelHTML(prefix, 'Audio') + langPanelHTML(prefix);
+            return panelHTML(prefix, 'Res') + panelHTML(prefix, 'Hdr') + panelHTML(prefix, 'Codec') + panelHTML(prefix, 'Audio') + langPanelHTML(prefix) + panelHTML(prefix, 'Age');
         }
 
         // ===== Panel reordering =====
@@ -568,7 +573,7 @@
         }
 
         function setupAllToggles(prefix) {
-            ['Res', 'Hdr', 'Codec', 'Audio'].forEach(function(pid) {
+            ['Res', 'Hdr', 'Codec', 'Audio', 'Age'].forEach(function(pid) {
                 setupEnableToggle(prefix + pid);
                 setupStyleToggle(prefix + pid);
                 setupBadgeSelToggle(prefix + pid);
@@ -653,13 +658,15 @@
             loadPanelConfig(prefix, 'Codec', itc.CodecPanel);
             loadPanelConfig(prefix, 'Audio', itc.AudioPanel);
             loadLangConfig(prefix, itc.LanguagePanel, itc);
+            loadPanelConfig(prefix, 'Age', itc.AgeRatingPanel);
             // Sort panels by Order
             var orderMap = {
                 Res: (itc.ResolutionPanel || {}).Order || 0,
                 Hdr: (itc.HdrPanel || {}).Order || 0,
                 Codec: (itc.CodecPanel || {}).Order || 0,
                 Audio: (itc.AudioPanel || {}).Order || 0,
-                Lang: (itc.LanguagePanel || {}).Order || 0
+                Lang: (itc.LanguagePanel || {}).Order || 0,
+                Age: (itc.AgeRatingPanel || {}).Order || 0
             };
             var container = document.getElementById(prefix + 'Panels');
             if (container) sortPanelsByOrder(container, orderMap);
@@ -731,7 +738,7 @@
         function collectImageTypeConfig(prefix) {
             var k = prefix + 'Lang';
             var container = document.getElementById(prefix + 'Panels');
-            var order = container ? getPanelOrder(container) : {Res:0,Hdr:1,Codec:2,Audio:3,Lang:4};
+            var order = container ? getPanelOrder(container) : {Res:0,Hdr:1,Codec:2,Audio:3,Lang:4,Age:5};
             return {
                 Enabled: q(prefix + 'Enabled').checked,
                 ResolutionPanel: collectPanelConfig(prefix, 'Res', order.Res || 0),
@@ -739,6 +746,7 @@
                 CodecPanel: collectPanelConfig(prefix, 'Codec', order.Codec || 0),
                 AudioPanel: collectPanelConfig(prefix, 'Audio', order.Audio || 0),
                 LanguagePanel: collectLangConfig(prefix),
+                AgeRatingPanel: collectPanelConfig(prefix, 'Age', order.Age != null ? order.Age : 5),
                 ShowVostIndicator: q(k + 'Vost').checked,
                 VostBgColor: q(k + 'VostBgColor').value || null,
                 VostTextColor: q(k + 'VostTextColor').value || null,
@@ -835,7 +843,8 @@
             {key:'hdr10',label:'HDR10'},{key:'hdr10plus',label:'HDR10+'},{key:'dv',label:'Dolby Vision'},{key:'hlg',label:'HLG'},
             {key:'atmos',label:'Atmos'},{key:'dtsx',label:'DTS:X'},{key:'truehd',label:'TrueHD'},{key:'dtshdma',label:'DTS-HD MA'},
             {key:'5.1',label:'5.1'},{key:'7.1',label:'7.1'},{key:'stereo',label:'Stereo'},
-            {key:'h264',label:'H.264'},{key:'hevc',label:'HEVC'},{key:'av1',label:'AV1'},{key:'vp9',label:'VP9'}
+            {key:'h264',label:'H.264'},{key:'hevc',label:'HEVC'},{key:'av1',label:'AV1'},{key:'vp9',label:'VP9'},
+            {key:'fsk0',label:'FSK 0'},{key:'fsk6',label:'FSK 6'},{key:'fsk12',label:'FSK 12'},{key:'fsk16',label:'FSK 16'},{key:'fsk18',label:'FSK 18'}
         ];
 
         function loadBadgeGallery() {

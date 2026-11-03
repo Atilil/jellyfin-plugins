@@ -38,7 +38,12 @@ public enum BadgeCategory
     /// <summary>
     /// Subtitle indicator badge (VOSTFR, VOSTEN, etc.).
     /// </summary>
-    Subtitle
+    Subtitle,
+
+    /// <summary>
+    /// Age rating badge (e.g. German FSK 0/6/12/16/18).
+    /// </summary>
+    AgeRating
 }
 
 /// <summary>

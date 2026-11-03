@@ -28,8 +28,10 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
         Instance = this;
 
-        // Run legacy migration once at startup
+        // Run legacy migration once at startup, then ensure panels added in
+        // later versions (e.g. AgeRatingPanel) exist for older saved configs.
         Configuration.MigrateFromLegacy();
+        Configuration.EnsurePanelsExist();
     }
 
     /// <inheritdoc />

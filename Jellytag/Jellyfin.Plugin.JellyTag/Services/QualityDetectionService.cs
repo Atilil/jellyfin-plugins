@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text.RegularExpressions;
 using Jellyfin.Data.Enums;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
@@ -171,6 +172,14 @@ public class QualityDetectionService : IQualityDetectionService
             {
                 DetectHdrAndAudioBadges(bestVideo, badges);
             }
+
+            // Age rating for the parent item itself (Series/Season typically carry
+            // their own FSK rating). Fall back to the best child's rating if needed.
+            var ageBadge = DetectAgeRating(item) ?? (bestVideo != null ? DetectAgeRating(bestVideo) : null);
+            if (ageBadge != null)
+            {
+                badges.Add(ageBadge);
+            }
         }
 
         return badges;
@@ -263,6 +272,13 @@ public class QualityDetectionService : IQualityDetectionService
             {
                 var langBadges = DetectLanguages(allStreams.ToList());
                 badges.AddRange(langBadges);
+            }
+
+            // Age rating detection (FSK and other content ratings)
+            var ageBadge = DetectAgeRating(video);
+            if (ageBadge != null)
+            {
+                badges.Add(ageBadge);
             }
         }
         catch (Exception ex)
@@ -453,6 +469,89 @@ public class QualityDetectionService : IQualityDetectionService
             VideoQuality.SD => new BadgeInfo { Category = BadgeCategory.Resolution, BadgeKey = "sd", ResourceFileName = "badge-sd.svg" },
             _ => new BadgeInfo { Category = BadgeCategory.Resolution, BadgeKey = "unknown", ResourceFileName = string.Empty }
         };
+    }
+
+    /// <summary>
+    /// Maps an FSK age (0/6/12/16/18) to its badge key + embedded SVG resource.
+    /// Only the five official German FSK levels have a matching image badge.
+    /// </summary>
+    private static BadgeInfo? CreateFskBadge(int age)
+    {
+        return age switch
+        {
+            0 => new BadgeInfo { Category = BadgeCategory.AgeRating, BadgeKey = "fsk0", ResourceFileName = "badge-fsk0.svg" },
+            6 => new BadgeInfo { Category = BadgeCategory.AgeRating, BadgeKey = "fsk6", ResourceFileName = "badge-fsk6.svg" },
+            12 => new BadgeInfo { Category = BadgeCategory.AgeRating, BadgeKey = "fsk12", ResourceFileName = "badge-fsk12.svg" },
+            16 => new BadgeInfo { Category = BadgeCategory.AgeRating, BadgeKey = "fsk16", ResourceFileName = "badge-fsk16.svg" },
+            18 => new BadgeInfo { Category = BadgeCategory.AgeRating, BadgeKey = "fsk18", ResourceFileName = "badge-fsk18.svg" },
+            _ => null
+        };
+    }
+
+    /// <summary>
+    /// Detects an age-rating badge from an item's content rating. Recognises the
+    /// German FSK ratings in the common forms stored by Jellyfin metadata
+    /// providers ("FSK 12", "FSK12", "ab 12", "FSK ab 16", ...) and maps them to
+    /// the official FSK label badges. Uses <see cref="BaseItem.OfficialRatingForComparison"/>
+    /// so that episodes/seasons without their own rating inherit the series rating.
+    /// </summary>
+    private static BadgeInfo? DetectAgeRating(BaseItem item)
+    {
+        var rating = item.OfficialRatingForComparison;
+        if (string.IsNullOrWhiteSpace(rating))
+        {
+            return null;
+        }
+
+        var age = ParseFskAge(rating);
+        return age.HasValue ? CreateFskBadge(age.Value) : null;
+    }
+
+    /// <summary>
+    /// Parses a German FSK age (0/6/12/16/18) out of an arbitrary rating string.
+    /// Returns null when the string is not an FSK rating or the age is not one
+    /// of the five official levels.
+    /// </summary>
+    private static int? ParseFskAge(string rating)
+    {
+        var text = rating.Trim();
+
+        // Textual forms without a number
+        if (text.Contains("Keine Jugendfreigabe", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("nicht freigegeben unter 18", StringComparison.OrdinalIgnoreCase))
+        {
+            return 18;
+        }
+
+        if (text.Contains("ohne Alters", StringComparison.OrdinalIgnoreCase)
+            || text.Contains("o.A", StringComparison.OrdinalIgnoreCase))
+        {
+            return 0;
+        }
+
+        // Require a German/FSK marker so a bare foreign number (e.g. "13") is
+        // not misread as an FSK level.
+        var isFsk = text.Contains("FSK", StringComparison.OrdinalIgnoreCase)
+                    || text.StartsWith("ab ", StringComparison.OrdinalIgnoreCase)
+                    || text.Contains("Freigegeben", StringComparison.OrdinalIgnoreCase);
+
+        if (!isFsk)
+        {
+            return null;
+        }
+
+        // Numbered forms: "FSK 12", "FSK12", "ab 12 Jahren", "FSK ab 16"
+        var match = Regex.Match(text, @"(\d{1,2})");
+        if (match.Success && int.TryParse(match.Groups[1].Value, out var age))
+        {
+            return age switch
+            {
+                0 or 6 or 12 or 16 or 18 => age,
+                _ => (int?)null
+            };
+        }
+
+        return null;
     }
 
     private VideoQuality GetQualityFromVideo(Video video)
