@@ -84,7 +84,7 @@ public class FullSyncTask : IScheduledTask
 
         _logger.LogInformation("Starting full cross-library sync (optimized)");
 
-        var users = _userManager.Users
+        var users = _userManager.GetUsers()
             .Where(u => !config.ExcludedUserIds.Contains(u.Id.ToString()))
             .ToList();
 

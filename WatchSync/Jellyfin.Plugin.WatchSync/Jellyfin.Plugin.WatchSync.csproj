@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Jellyfin.Plugin.WatchSync</RootNamespace>
     <AssemblyName>Jellyfin.Plugin.WatchSync</AssemblyName>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -12,10 +12,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jellyfin.Controller" Version="10.11.*" />
-    <PackageReference Include="Jellyfin.Model" Version="10.11.*" />
-    <PackageReference Include="Jellyfin.Database.Implementations" Version="10.11.*" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.*" />
+    <PackageReference Include="Jellyfin.Controller" Version="12.*" />
+    <PackageReference Include="Jellyfin.Model" Version="12.*" />
+    <PackageReference Include="Jellyfin.Database.Implementations" Version="12.*" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.*" />
   </ItemGroup>
 
   <ItemGroup>

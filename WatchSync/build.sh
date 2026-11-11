@@ -20,7 +20,7 @@ DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 ~/.dotnet/dotnet build -c Release
 # Copy necessary files
 echo "Copying files..."
 cd ..
-cp "$PLUGIN_DIR/bin/Release/net9.0/Jellyfin.Plugin.WatchSync.dll" "$OUTPUT_DIR/"
+cp "$PLUGIN_DIR/bin/Release/net10.0/Jellyfin.Plugin.WatchSync.dll" "$OUTPUT_DIR/"
 
 # Create meta.json for the plugin
 cat > "$OUTPUT_DIR/meta.json" << 'EOF'
@@ -31,16 +31,16 @@ cat > "$OUTPUT_DIR/meta.json" << 'EOF'
     "description": "Automatically synchronizes watch history between libraries of different qualities (4K/HD). When a movie is watched in 4K, the HD version is also marked as watched (and vice versa).",
     "owner": "Atilili",
     "category": "General",
-    "version": "1.0.0.0",
-    "targetAbi": "10.11.0.0",
-    "timestamp": "2025-01-27T00:00:00Z"
+    "version": "1.0.1.0",
+    "targetAbi": "12.0.0.0",
+    "timestamp": "2026-11-11T00:00:00Z"
 }
 EOF
 
 # Create ZIP archive
 echo "Creating ZIP archive..."
 cd "$OUTPUT_DIR"
-zip -r "watchsync-1.0.0.0.zip" *.dll meta.json
+zip -r "watchsync-1.0.1.0.zip" *.dll meta.json
 cd ..
 
 echo ""
