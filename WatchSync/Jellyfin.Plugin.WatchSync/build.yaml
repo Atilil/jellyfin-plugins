@@ -1,9 +1,9 @@
 ---
 name: "WatchSync"
 guid: "aa4fe598-07fd-41b5-bf1d-65abab9980db"
-version: "1.0.0.0"
-targetAbi: "10.11.0.0"
-framework: "net9.0"
+version: "1.0.1.0"
+targetAbi: "12.0.0.0"
+framework: "net10.0"
 overview: "Sync watch history between libraries of different qualities (4K/HD)"
 description: |
   This plugin automatically synchronizes watch history between libraries
@@ -21,6 +21,9 @@ owner: "Atilili"
 artifacts:
   - "Jellyfin.Plugin.WatchSync.dll"
 changelog: |
+  ## v1.0.1.0
+  - Fix "WatchSync Full Synchronization" scheduled task crashing on Jellyfin 12.x: IUserManager.Users was replaced by GetUsers()
+  - Retarget to Jellyfin 12 (net10.0, Jellyfin.* 12.*)
   ## v1.0.0.0
   - Initial release
   - Automatic sync on PlaybackStopped

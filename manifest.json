@@ -9,6 +9,14 @@
     "imageUrl": "https://raw.githubusercontent.com/Atilil/jellyfin-plugins/main/WatchSync/Jellyfin.Plugin.WatchSync/WatchSync.png",
     "versions": [
       {
+        "version": "1.0.1.0",
+        "changelog": "Fix FullSync scheduled task crash on Jellyfin 12.x (IUserManager.Users replaced by GetUsers()); retarget to Jellyfin 12 / net10.0",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/Atilil/jellyfin-plugins/releases/download/watchsync-1.0.1.0/watchsync-1.0.1.0.zip",
+        "checksum": "2c5816c8553aec13448906ab364412f1",
+        "timestamp": "2026-11-11T00:00:00Z"
+      },
+      {
         "version": "1.0.0.0",
         "changelog": "Initial release with automatic sync and scheduled task",
         "targetAbi": "10.11.0.0",
