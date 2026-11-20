@@ -6,13 +6,13 @@
     "description": "Automatically synchronizes watch history between libraries of different qualities (4K/HD). When a movie is watched in 4K, the HD version is also marked as watched (and vice versa). Uses IMDB, TMDB and TVDB identifiers to match media between libraries.",
     "owner": "Atilili",
     "category": "General",
-    "imageUrl": "https://raw.githubusercontent.com/Atilil/jellyfin-plugins/main/WatchSync/Jellyfin.Plugin.WatchSync/WatchSync.png",
+    "imageUrl": "https://raw.githubusercontent.com/Atilil/watchsync/main/Jellyfin.Plugin.WatchSync/WatchSync.png",
     "versions": [
       {
         "version": "1.0.0.0",
         "changelog": "Initial release with automatic sync and scheduled task",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/Atilil/jellyfin-plugins/releases/download/watchsync-1.0.0.0/watchsync-1.0.0.0.zip",
+        "sourceUrl": "https://github.com/Atilil/watchsync/releases/download/watchsync-1.0.0.0/watchsync-1.0.0.0.zip",
         "checksum": "6B9BBE0078031FE51874511BF4692205",
         "timestamp": "2025-01-27T00:00:00Z"
       }
@@ -25,13 +25,13 @@
     "description": "JellyTag automatically overlays quality badges on your media posters and thumbnails. Supports resolution, HDR, video codec, audio, language flags, and VOST indicator. Badges are rendered server-side and visible on all Jellyfin clients. Features per-panel configuration, SVG and text badge styles, custom badge upload, live preview, and library filtering.",
     "owner": "Atilili",
     "category": "General",
-    "imageUrl": "https://raw.githubusercontent.com/Atilil/jellyfin-plugins/main/Jellytag/Jellyfin.Plugin.JellyTag/JellyTag.png",
+    "imageUrl": "https://raw.githubusercontent.com/Atilil/jellytag/main/Jellytag/Jellyfin.Plugin.JellyTag/JellyTag.png",
     "versions": [
       {
         "version": "2.0.2.0",
         "changelog": "Fix: exclude SkiaSharp native assets that caused plugin loading crash, pin Jellyfin packages to 10.11.0 for full 10.11.x compatibility",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/Atilil/jellyfin-plugins/releases/download/jellytag-2.0.2.0/jellytag-2.0.2.0.zip",
+        "sourceUrl": "https://github.com/Atilil/jellytag/releases/download/jellytag-2.0.2.0/jellytag-2.0.2.0.zip",
         "checksum": "36407dc2a752ad89c57c7d6c3d343433",
         "timestamp": "2026-02-02T00:00:00Z"
       },
@@ -39,7 +39,7 @@
         "version": "2.0.1.0",
         "changelog": "Fix: support Jellyfin base URL configuration, fix resolution detection thresholds",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/Atilil/jellyfin-plugins/releases/download/jellytag-2.0.1.0/jellytag-2.0.1.0.zip",
+        "sourceUrl": "https://github.com/Atilil/jellytag/releases/download/jellytag-2.0.1.0/jellytag-2.0.1.0.zip",
         "checksum": "0211c9e3bf66d80b1def6c05006e3fa2",
         "timestamp": "2026-02-02T00:00:00Z"
       },
@@ -47,7 +47,7 @@
         "version": "2.0.0.0",
         "changelog": "v2: Multi-category badges (resolution, HDR, codec, audio, language, VOST), per-panel config, SVG rendering with SkiaSharp, custom badge upload, live preview, library filtering, config export/import",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/Atilil/jellyfin-plugins/releases/download/jellytag-2.0.0.0/jellytag-2.0.0.0.zip",
+        "sourceUrl": "https://github.com/Atilil/jellytag/releases/download/jellytag-2.0.0.0/jellytag-2.0.0.0.zip",
         "checksum": "19e9d99c4848c413f7cf918754c67b03",
         "timestamp": "2026-02-02T00:00:00Z"
       },
@@ -55,7 +55,7 @@
         "version": "1.0.0.0",
         "changelog": "Initial release with quality detection, configurable badges, and image caching",
         "targetAbi": "10.11.0.0",
-        "sourceUrl": "https://github.com/Atilil/jellyfin-plugins/releases/download/jellytag-1.0.0.0/jellytag-1.0.0.0.zip",
+        "sourceUrl": "https://github.com/Atilil/jellytag/releases/download/jellytag-1.0.0.0/jellytag-1.0.0.0.zip",
         "checksum": "ef2835580a7a8ec6efda30e13a41534c",
         "timestamp": "2025-01-29T00:00:00Z"
       }
