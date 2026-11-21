@@ -49,6 +49,10 @@ def main(repo: str, tag: str) -> None:
     data = fetch(asset["browser_download_url"])
     checksum = hashlib.md5(data).hexdigest()
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
+        if "meta.json" not in archive.namelist():
+            # Releases built by hand before the release workflow carry no meta.json.
+            print(f"{repo} {tag}: no meta.json in {asset['name']}, skipped (add it by hand if needed)")
+            return
         meta = json.loads(archive.read("meta.json"))
 
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))

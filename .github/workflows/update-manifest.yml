@@ -1,0 +1,46 @@
+name: Update manifest
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Add the latest release of each plugin
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          for repo in Atilil/watchsync Atilil/jellytag; do
+            tag=$(gh release view -R "$repo" --json tagName -q .tagName)
+            python3 scripts/update-manifest.py "$repo" "$tag" | tee -a summary.txt
+          done
+
+      - name: Open or update the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet manifest.json; then
+            echo "Manifest already up to date"
+            exit 0
+          fi
+          branch=manifest/update
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C "$branch"
+          git commit -m "feat: add new plugin releases to the manifest" manifest.json
+          git push --force origin "$branch"
+          if ! gh pr view "$branch" >/dev/null 2>&1; then
+            gh pr create --head "$branch" \
+              --title "feat: add new plugin releases to the manifest" \
+              --body-file summary.txt
+          fi
