@@ -2,12 +2,20 @@
   {
     "guid": "aa4fe598-07fd-41b5-bf1d-65abab9980db",
     "name": "WatchSync",
-    "overview": "Sync watch history between libraries of different qualities (4K/HD)",
-    "description": "Automatically synchronizes watch history between libraries of different qualities (4K/HD). When a movie is watched in 4K, the HD version is also marked as watched (and vice versa). Uses IMDB, TMDB and TVDB identifiers to match media between libraries.",
+    "overview": "Sync watch history between copies of the same media (e.g. 4K and HD libraries)",
+    "description": "Keeps the watched state, resume position, play count and last played date in sync between copies of the same movie or episode stored in different libraries (for example a 1080p and a 4K library), in both directions.\n\nCopies are matched by identity, never by file path: TMDB or IMDb for movies; the series TVDB or IMDb id plus season and episode numbers for episodes. A scheduled task realigns all copies after the fact, e.g. after files were moved.",
     "owner": "Atilili",
     "category": "General",
     "imageUrl": "https://raw.githubusercontent.com/Atilil/watchsync/main/Jellyfin.Plugin.WatchSync/WatchSync.png",
     "versions": [
+      {
+        "version": "2.0.0.0",
+        "changelog": "- Jellyfin 12.x support (built for 12.4, .NET 10).\n- Fix the full sync task crashing on recent Jellyfin versions.\n- Much faster: copies are looked up by provider id instead of scanning the library.\n- Stricter matching: one shared id and no conflicting id; movies and episodes never mix.\n- Un-marking an item now resets the other copies too.\n- The full sync merges history without losing it, and only writes what changed.\n- External tools writing user data (e.g. CrossWatch) are synced live.\n- Removed settings: completion threshold and provider priority.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/Atilil/watchsync/releases/download/v2.0.0/watchsync-2.0.0.0.zip",
+        "checksum": "aec2c00220542c4fb10c27f8f3023a5c",
+        "timestamp": "2026-11-21T15:08:42Z"
+      },
       {
         "version": "1.0.0.0",
         "changelog": "Initial release with automatic sync and scheduled task",
