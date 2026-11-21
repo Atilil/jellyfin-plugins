@@ -9,6 +9,14 @@
     "imageUrl": "https://raw.githubusercontent.com/Atilil/watchsync/main/Jellyfin.Plugin.WatchSync/WatchSync.png",
     "versions": [
       {
+        "version": "2.0.1.0",
+        "changelog": "- Fix the other copy's item page still showing \"not watched\" after a sync,\n  until Jellyfin was restarted (the library view was already correct).",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/Atilil/watchsync/releases/download/v2.0.1/watchsync-2.0.1.0.zip",
+        "checksum": "93047a2b744d3db66cdfdba2a5fd52cb",
+        "timestamp": "2026-11-21T23:21:33Z"
+      },
+      {
         "version": "2.0.0.0",
         "changelog": "- Jellyfin 12.x support (built for 12.4, .NET 10).\n- Fix the full sync task crashing on recent Jellyfin versions.\n- Much faster: copies are looked up by provider id instead of scanning the library.\n- Stricter matching: one shared id and no conflicting id; movies and episodes never mix.\n- Un-marking an item now resets the other copies too.\n- The full sync merges history without losing it, and only writes what changed.\n- External tools writing user data (e.g. CrossWatch) are synced live.\n- Removed settings: completion threshold and provider priority.",
         "targetAbi": "12.0.0.0",
