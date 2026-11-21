@@ -39,7 +39,8 @@ jobs:
           git switch -C "$branch"
           git commit -m "feat: add new plugin releases to the manifest" manifest.json
           git push --force origin "$branch"
-          if ! gh pr view "$branch" >/dev/null 2>&1; then
+          # Only an open PR counts: `gh pr view BRANCH` also finds the merged ones.
+          if [[ $(gh pr list --head "$branch" --state open --json number --jq length) == 0 ]]; then
             gh pr create --head "$branch" \
               --title "feat: add new plugin releases to the manifest" \
               --body-file summary.txt
