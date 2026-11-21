@@ -30,11 +30,19 @@
     "guid": "f4a2e8c1-9b3d-4f7a-b6c5-2d8e1a3f9b04",
     "name": "JellyTag",
     "overview": "Overlays quality badges (resolution, HDR, codec, audio, language) on media posters and thumbnails",
-    "description": "JellyTag automatically overlays quality badges on your media posters and thumbnails. Supports resolution, HDR, video codec, audio, language flags, and VOST indicator. Badges are rendered server-side and visible on all Jellyfin clients. Features per-panel configuration, SVG and text badge styles, custom badge upload, live preview, and library filtering.",
+    "description": "JellyTag automatically overlays quality badges on your media posters and thumbnails: resolution, HDR and Dolby Vision, video codec, audio, language flags and VOST indicator. Badges are rendered server-side and visible on all Jellyfin clients.\n\nPer-panel configuration, SVG and text badge styles, custom badge upload, live preview and library filtering.",
     "owner": "Atilili",
     "category": "General",
     "imageUrl": "https://raw.githubusercontent.com/Atilil/jellytag/main/Jellytag/Jellyfin.Plugin.JellyTag/JellyTag.png",
     "versions": [
+      {
+        "version": "3.0.0.0",
+        "changelog": "- Jellyfin 12.x support (built for 12.4, .NET 10).\n- Fix 401 errors on configuration export and broken custom badge previews.\n- Plugin data no longer lives in Jellyfin's plugins folder, which could wipe\n  every plugin's settings on servers whose path contains an underscore (e.g. QNAP).\n- Narrow 1080p encodes (e.g. 4:3 at 1440x1080) and 4:3 720p are detected correctly.\n- Uses Jellyfin's own Svg.Skia: the package now ships a single DLL.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/Atilil/jellytag/releases/download/v3.0.0/jellytag-3.0.0.0.zip",
+        "checksum": "2eec3f87098714ba507dd1da3cd35070",
+        "timestamp": "2026-11-21T20:28:47Z"
+      },
       {
         "version": "2.0.2.0",
         "changelog": "Fix: exclude SkiaSharp native assets that caused plugin loading crash, pin Jellyfin packages to 10.11.0 for full 10.11.x compatibility",
