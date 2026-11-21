@@ -23,7 +23,9 @@ MANIFEST = Path(__file__).resolve().parent.parent / "manifest.json"
 
 
 def fetch(url: str) -> bytes:
-    request = urllib.request.Request(url, headers={"Accept": "application/vnd.github+json"})
+    request = urllib.request.Request(
+        url, headers={"Accept": "application/vnd.github+json"}
+    )
     token = os.environ.get("GITHUB_TOKEN")
     if token and url.startswith("https://api.github.com/"):
         request.add_header("Authorization", f"Bearer {token}")
@@ -37,7 +39,9 @@ def unwrap(text: str) -> str:
 
 
 def main(repo: str, tag: str) -> None:
-    release = json.loads(fetch(f"https://api.github.com/repos/{repo}/releases/tags/{tag}"))
+    release = json.loads(
+        fetch(f"https://api.github.com/repos/{repo}/releases/tags/{tag}")
+    )
     if release.get("draft"):
         sys.exit(f"{repo} {tag} is a draft: publish it first")
 
@@ -51,7 +55,9 @@ def main(repo: str, tag: str) -> None:
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         if "meta.json" not in archive.namelist():
             # Releases built by hand before the release workflow carry no meta.json.
-            print(f"{repo} {tag}: no meta.json in {asset['name']}, skipped (add it by hand if needed)")
+            print(
+                f"{repo} {tag}: no meta.json in {asset['name']}, skipped (add it by hand if needed)"
+            )
             return
         meta = json.loads(archive.read("meta.json"))
 
@@ -61,23 +67,32 @@ def main(repo: str, tag: str) -> None:
         sys.exit(f"no plugin with guid {meta['guid']} in {MANIFEST.name}")
 
     if any(v["version"] == meta["version"] for v in plugin["versions"]):
-        print(f"{plugin['name']} {meta['version']} already in {MANIFEST.name}, nothing to do")
+        print(
+            f"{plugin['name']} {meta['version']} already in {MANIFEST.name}, nothing to do"
+        )
         return
 
     # The catalog shows the plugin-level texts: keep them in line with the latest release.
     plugin["overview"] = meta["overview"]
     plugin["description"] = unwrap(meta["description"])
-    plugin["versions"].insert(0, {
-        "version": meta["version"],
-        "changelog": meta["changelog"].strip(),
-        "targetAbi": meta["targetAbi"],
-        "sourceUrl": asset["browser_download_url"],
-        "checksum": checksum,
-        "timestamp": meta["timestamp"],
-    })
+    plugin["versions"].insert(
+        0,
+        {
+            "version": meta["version"],
+            "changelog": meta["changelog"].strip(),
+            "targetAbi": meta["targetAbi"],
+            "sourceUrl": asset["browser_download_url"],
+            "checksum": checksum,
+            "timestamp": meta["timestamp"],
+        },
+    )
 
-    MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"added {plugin['name']} {meta['version']} (targetAbi {meta['targetAbi']}, md5 {checksum})")
+    MANIFEST.write_text(
+        json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    print(
+        f"added {plugin['name']} {meta['version']} (targetAbi {meta['targetAbi']}, md5 {checksum})"
+    )
 
 
 if __name__ == "__main__":
