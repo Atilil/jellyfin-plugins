@@ -44,6 +44,14 @@
     "imageUrl": "https://raw.githubusercontent.com/Atilil/jellytag/main/Jellytag/Jellyfin.Plugin.JellyTag/JellyTag.png",
     "versions": [
       {
+        "version": "3.2.0.0",
+        "changelog": "- Subtitles get their own panel: position, layout, colors, all languages or only\n  those without matching audio, labels as EN, CC EN or VOSTEN. Existing setups\n  keep their VOST look.\n- Language filters: show only some languages, or all except some; undefined (und)\n  tracks are hidden.\n- Optional Dolby Vision profile badge (DV P5, P7, P8.1...).\n- Reworked configuration page: compact panels, each customizing only its active\n  badges; languages are picked by name.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/Atilil/jellytag/releases/download/v3.2.0/jellytag-3.2.0.0.zip",
+        "checksum": "95135fc70c5ccd7276e86a979188a36e",
+        "timestamp": "2026-11-22T17:01:19Z"
+      },
+      {
         "version": "3.1.0.0",
         "changelog": "- Badges cover every version of a movie (e.g. 1080p and 4K files).\n- Language flags: the default audio track comes first, the others alphabetically;\n  15 new flags; flags can be replaced in the custom badge gallery.\n- Dolby Vision is shown with its HDR10/HDR10+/HLG base layer, Atmos with\n  TrueHD, DTS:X with DTS-HD MA (set the HDR or audio panel to \"All\" to see both).\n- French VFQ/VFF audio detection and an optional video length badge.\n- Intro videos added by other plugins no longer get badges.",
         "targetAbi": "12.0.0.0",
