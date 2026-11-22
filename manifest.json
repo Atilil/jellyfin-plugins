@@ -44,6 +44,14 @@
     "imageUrl": "https://raw.githubusercontent.com/Atilil/jellytag/main/Jellytag/Jellyfin.Plugin.JellyTag/JellyTag.png",
     "versions": [
       {
+        "version": "3.3.0.0",
+        "changelog": "- Optional rating badges: TMDB/IMDb and Rotten Tomatoes ratings stored by\n  Jellyfin, with a star and a tomato icon (replaceable).\n- Top center and bottom center positions; a panel can join the previous panel's\n  row; badge sizes up to 100%.\n- Switch to leave episode images without badges.\n- Fixes: a zero margin is kept, sizes above 50% are honoured, simpler video\n  length panel.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/Atilil/jellytag/releases/download/v3.3.0/jellytag-3.3.0.0.zip",
+        "checksum": "02688d96899c132c33fa3aa896dd1909",
+        "timestamp": "2026-11-22T21:14:46Z"
+      },
+      {
         "version": "3.2.0.0",
         "changelog": "- Subtitles get their own panel: position, layout, colors, all languages or only\n  those without matching audio, labels as EN, CC EN or VOSTEN. Existing setups\n  keep their VOST look.\n- Language filters: show only some languages, or all except some; undefined (und)\n  tracks are hidden.\n- Optional Dolby Vision profile badge (DV P5, P7, P8.1...).\n- Reworked configuration page: compact panels, each customizing only its active\n  badges; languages are picked by name.",
         "targetAbi": "12.0.0.0",
