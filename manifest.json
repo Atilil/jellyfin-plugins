@@ -44,6 +44,14 @@
     "imageUrl": "https://raw.githubusercontent.com/Atilil/jellytag/main/Jellytag/Jellyfin.Plugin.JellyTag/JellyTag.png",
     "versions": [
       {
+        "version": "3.1.0.0",
+        "changelog": "- Badges cover every version of a movie (e.g. 1080p and 4K files).\n- Language flags: the default audio track comes first, the others alphabetically;\n  15 new flags; flags can be replaced in the custom badge gallery.\n- Dolby Vision is shown with its HDR10/HDR10+/HLG base layer, Atmos with\n  TrueHD, DTS:X with DTS-HD MA (set the HDR or audio panel to \"All\" to see both).\n- French VFQ/VFF audio detection and an optional video length badge.\n- Intro videos added by other plugins no longer get badges.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/Atilil/jellytag/releases/download/v3.1.0/jellytag-3.1.0.0.zip",
+        "checksum": "e3f4c3e294c2a9cf3f24194918cf03f0",
+        "timestamp": "2026-11-22T14:28:05Z"
+      },
+      {
         "version": "3.0.0.0",
         "changelog": "- Jellyfin 12.x support (built for 12.4, .NET 10).\n- Fix 401 errors on configuration export and broken custom badge previews.\n- Plugin data no longer lives in Jellyfin's plugins folder, which could wipe\n  every plugin's settings on servers whose path contains an underscore (e.g. QNAP).\n- Narrow 1080p encodes (e.g. 4:3 at 1440x1080) and 4:3 720p are detected correctly.\n- Uses Jellyfin's own Svg.Skia: the package now ships a single DLL.",
         "targetAbi": "12.0.0.0",
