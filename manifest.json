@@ -44,6 +44,14 @@
     "imageUrl": "https://raw.githubusercontent.com/Atilil/jellytag/main/Jellytag/Jellyfin.Plugin.JellyTag/JellyTag.png",
     "versions": [
       {
+        "version": "3.3.1.0",
+        "changelog": "- Save no longer fails silently: an invalid setting turns red while typing, and\n  Save opens its section and points to it.\n- Clearer settings: units in the size, margin and gap labels, shorter\n  descriptions, gap up to 100%.\n- \"Join the previous panel's row\" is grayed out when it has no effect.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/Atilil/jellytag/releases/download/v3.3.1/jellytag-3.3.1.0.zip",
+        "checksum": "a3f70b939ecf02831c6233fae811c68a",
+        "timestamp": "2026-11-23T14:54:36Z"
+      },
+      {
         "version": "3.3.0.0",
         "changelog": "- Optional rating badges: TMDB/IMDb and Rotten Tomatoes ratings stored by\n  Jellyfin, with a star and a tomato icon (replaceable).\n- Top center and bottom center positions; a panel can join the previous panel's\n  row; badge sizes up to 100%.\n- Switch to leave episode images without badges.\n- Fixes: a zero margin is kept, sizes above 50% are honoured, simpler video\n  length panel.",
         "targetAbi": "12.0.0.0",
