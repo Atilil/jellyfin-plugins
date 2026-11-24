@@ -44,6 +44,14 @@
     "imageUrl": "https://raw.githubusercontent.com/Atilil/jellytag/main/Jellytag/Jellyfin.Plugin.JellyTag/JellyTag.png",
     "versions": [
       {
+        "version": "3.3.2.0",
+        "changelog": "- Audio \"Channel layout\" text colors now apply to the 7.1, 5.1 and stereo badges.\n- An image that cannot be decoded is served unchanged instead of failing.\n- The live preview no longer saves the settings or clears the cache on every change.",
+        "targetAbi": "12.0.0.0",
+        "sourceUrl": "https://github.com/Atilil/jellytag/releases/download/v3.3.2/jellytag-3.3.2.0.zip",
+        "checksum": "4df07ff2adae76b0573bc1010163a4ae",
+        "timestamp": "2026-11-24T01:07:38Z"
+      },
+      {
         "version": "3.3.1.0",
         "changelog": "- Save no longer fails silently: an invalid setting turns red while typing, and\n  Save opens its section and points to it.\n- Clearer settings: units in the size, margin and gap labels, shorter\n  descriptions, gap up to 100%.\n- \"Join the previous panel's row\" is grayed out when it has no effect.",
         "targetAbi": "12.0.0.0",
